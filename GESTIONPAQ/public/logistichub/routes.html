@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rutas | LogisticHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+  <link href="/logistichub/assets/css/styles.css" rel="stylesheet" />
+</head>
+<body data-page="routes" data-eyebrow="Rutas" data-title="Ruteo administrativo" data-description="Tabla operativa con almacen, distancia, tiempo, estado y asignaciones.">
+  <div data-page-content>
+    <section class="toolbar">
+      <div id="pageNotice"></div>
+      <div class="toolbar-group">
+        <a class="btn btn-success" href="/logistichub/route-form.html"><i class="fa-solid fa-plus"></i>Nueva ruta</a>
+      </div>
+    </section>
+    <section class="table-panel">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Almacen</th>
+              <th>Distancia KM</th>
+              <th>Tiempo</th>
+              <th>Estado</th>
+              <th>Vehiculo</th>
+              <th>Conductor</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="routesTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <script src="/logistichub/assets/js/shared/mock-data.js"></script>
+  <script src="/logistichub/assets/js/core.js"></script>
+  <script src="/logistichub/assets/js/shared/layout.js"></script>
+  <script src="/logistichub/assets/js/pages/routes.js"></script>
+</body>
+</html>

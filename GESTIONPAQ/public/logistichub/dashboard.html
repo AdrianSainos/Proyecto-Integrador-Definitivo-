@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | LogisticHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+  <link href="/logistichub/assets/css/styles.css" rel="stylesheet" />
+</head>
+<body data-page="dashboard" data-eyebrow="Centro de control" data-title="Operacion sincronizada" data-description="Envios, rutas, flota y conductores en una sola vista operativa.">
+  <div data-page-content>
+    <section class="page-actions">
+      <div>
+        <span class="status-pill"><i class="fa-solid fa-bolt"></i>Despacho automatizado</span>
+      </div>
+      <div class="toolbar-group">
+        <a class="btn btn-success" href="/logistichub/shipment-form.html"><i class="fa-solid fa-plus"></i>Nuevo envio</a>
+        <a class="btn btn-outline" href="/logistichub/routes.html">Ver rutas</a>
+        <a class="btn btn-primary" href="/logistichub/reports.html">Reportes</a>
+      </div>
+    </section>
+
+    <section id="roleExperience"></section>
+
+    <section id="dashboardStrip" class="dashboard-strip"></section>
+    <section id="dashboardKpis" class="kpi-grid"></section>
+
+    <section class="split-layout">
+      <div class="module-grid">
+        <article class="module-card">
+          <div class="card-head"><div><p class="small-label">Evolucion operativa</p><h2 class="card-title">Crecimiento diario</h2></div></div>
+          <div class="chart-wrap"><canvas id="operationsChart"></canvas></div>
+        </article>
+        <article class="module-card">
+          <div class="card-head"><div><p class="small-label">Estado de paquetes</p><h2 class="card-title">Distribucion actual</h2></div></div>
+          <div class="chart-wrap"><canvas id="statusChart"></canvas></div>
+        </article>
+        <article class="module-card">
+          <div class="card-head"><div><p class="small-label">Entregas por hora</p><h2 class="card-title">Curva de entregas</h2></div></div>
+          <div class="chart-wrap"><canvas id="hourlyChart"></canvas></div>
+        </article>
+        <article class="module-card">
+          <div class="card-head"><div><p class="small-label">Estado de rutas</p><h2 class="card-title">Capacidad en movimiento</h2></div></div>
+          <div class="chart-wrap"><canvas id="routeStateChart"></canvas></div>
+        </article>
+      </div>
+
+      <aside class="grid-cards">
+        <article class="exception-card">
+          <div class="card-head"><div><p class="small-label">Excepciones</p><h2 class="card-title">Panel lateral</h2></div></div>
+          <div id="exceptionsPanel" class="stack-list"></div>
+        </article>
+        <article class="data-card">
+          <div class="card-head"><div><p class="small-label">Pulso operativo</p><h2 class="card-title">Estado de hoy</h2></div></div>
+          <div id="pulsePanel" class="stack-list"></div>
+        </article>
+      </aside>
+    </section>
+
+    <section class="module-grid">
+      <article class="data-card">
+        <div class="card-head"><div><p class="small-label">Mejores conductores</p><h2 class="card-title">Desempeno destacado</h2></div></div>
+        <div id="topDrivers" class="stack-list"></div>
+      </article>
+      <article class="data-card">
+        <div class="card-head"><div><p class="small-label">Clientes con mayor demanda</p><h2 class="card-title">Carga prioritaria</h2></div></div>
+        <div id="topCustomers" class="stack-list"></div>
+      </article>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="/logistichub/assets/js/shared/mock-data.js"></script>
+  <script src="/logistichub/assets/js/core.js"></script>
+  <script src="/logistichub/assets/js/shared/layout.js"></script>
+  <script src="/logistichub/assets/js/pages/dashboard.js"></script>
+</body>
+</html>

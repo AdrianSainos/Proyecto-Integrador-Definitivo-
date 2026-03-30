@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet, View, Text, Pressable } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiRequest, STORAGE_KEYS } from './src/api';
+import { apiRequest, hydrateApiBase, STORAGE_KEYS } from './src/api';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { ShipmentsScreen } from './src/screens/ShipmentsScreen';
@@ -51,14 +51,26 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
+      await hydrateApiBase();
+
       const [token, rawUser] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.token),
         AsyncStorage.getItem(STORAGE_KEYS.user),
       ]);
 
+      let user = null;
+
+      if (rawUser) {
+        try {
+          user = JSON.parse(rawUser);
+        } catch (error) {
+          await AsyncStorage.multiRemove([STORAGE_KEYS.token, STORAGE_KEYS.user]);
+        }
+      }
+
       setSession({
         token,
-        user: rawUser ? JSON.parse(rawUser) : null,
+        user,
         hydrated: true,
       });
     })();

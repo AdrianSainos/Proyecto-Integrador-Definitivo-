@@ -11,7 +11,7 @@ window.LogisticHubCore.ready(() => {
     event.preventDefault();
 
     const payload = {
-      email: form.email.value.trim(),
+      login: form.login.value.trim(),
       password: form.password.value,
     };
 

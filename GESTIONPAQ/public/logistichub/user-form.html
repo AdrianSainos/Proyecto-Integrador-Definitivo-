@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Formulario de usuario | GESTIONPAQ</title>
+  <title>Registro de usuario | GESTIONPAQ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -11,16 +11,46 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link href="/logistichub/assets/css/styles.css" rel="stylesheet" />
 </head>
-<body data-page="settings" data-eyebrow="Administracion" data-title="Configurar usuario" data-description="Email, password, rol y estado con validacion funcional.">
+<body data-page="settings" data-eyebrow="Administracion" data-title="Registro de usuario" data-description="Credenciales, datos del personal, horario base y alta automatica de conductor cuando aplique.">
   <div data-page-content>
     <section class="toolbar"><div id="formNotice"></div><div class="toolbar-group"><button class="btn btn-outline btn-sm app-hidden" type="button" data-back-button>Volver</button></div></section>
     <form id="userForm">
       <section class="form-section">
         <div class="form-grid">
-          <div class="field"><label for="email">Email</label><input class="input" type="email" id="email" name="email" required /></div>
+          <div class="field"><label for="username">Usuario</label><input class="input" type="text" id="username" name="username" placeholder="alicia.ortega" required /></div>
+          <div class="field"><label for="email">Correo</label><input class="input" type="email" id="email" name="email" required /></div>
           <div class="field"><label for="role">Rol</label><select class="select" id="role" name="role" required><option value="admin">admin</option><option value="operator">operator</option><option value="supervisor">supervisor</option><option value="dispatcher">dispatcher</option><option value="driver">driver</option><option value="customer">customer</option></select></div>
-          <div class="field"><label for="password">Password</label><input class="input" type="password" id="password" name="password" /></div>
+          <div class="field"><label for="password">Contrasena</label><input class="input" type="password" id="password" name="password" /></div>
           <div class="field"><label for="active">Activo</label><select class="select" id="active" name="active"><option value="true">Si</option><option value="false">No</option></select></div>
+          <div class="field"><label for="employeeCode">Codigo interno</label><input class="input" type="text" id="employeeCode" name="employeeCode" placeholder="DRV-0012" /></div>
+        </div>
+      </section>
+      <section class="form-section">
+        <div class="section-heading">
+          <h2 class="section-title">Datos personales</h2>
+          <p class="section-copy">La persona queda vinculada al usuario para web, movil y reportes.</p>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label for="firstName">Nombre</label><input class="input" type="text" id="firstName" name="firstName" required /></div>
+          <div class="field"><label for="lastName">Apellido paterno</label><input class="input" type="text" id="lastName" name="lastName" required /></div>
+          <div class="field"><label for="secondLastName">Apellido materno</label><input class="input" type="text" id="secondLastName" name="secondLastName" /></div>
+          <div class="field"><label for="phone">Telefono</label><input class="input" type="text" id="phone" name="phone" /></div>
+          <div class="field"><label for="document">Documento</label><input class="input" type="text" id="document" name="document" /></div>
+          <div class="field"><label for="jobTitle">Puesto</label><input class="input" type="text" id="jobTitle" name="jobTitle" placeholder="Supervisor logistico" /></div>
+        </div>
+      </section>
+      <section class="form-section">
+        <div class="section-heading">
+          <h2 class="section-title">Horario base</h2>
+          <p class="section-copy">Para personal general se usa como jornada base; para conductores sirve como plantilla de turnos.</p>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label for="scheduleLabel">Turno</label><input class="input" type="text" id="scheduleLabel" name="scheduleLabel" placeholder="Mesa operativa" /></div>
+          <div class="field"><label for="workDays">Dias laborales</label><input class="input" type="text" id="workDays" name="workDays" placeholder="Lun-Sab" /></div>
+          <div class="field"><label for="shiftStart">Entrada</label><input class="input" type="time" id="shiftStart" name="shiftStart" /></div>
+          <div class="field"><label for="shiftEnd">Salida</label><input class="input" type="time" id="shiftEnd" name="shiftEnd" /></div>
+          <div class="field"><label for="createDriver">Crear perfil de conductor</label><select class="select" id="createDriver" name="createDriver"><option value="false">No</option><option value="true">Si</option></select></div>
+          <div class="field app-hidden" id="driverStatusField"><label for="driverStatus">Estado del conductor</label><select class="select" id="driverStatus" name="driverStatus"></select></div>
         </div>
       </section>
       <div class="form-footer"><button class="btn btn-success" type="submit">Guardar</button></div>

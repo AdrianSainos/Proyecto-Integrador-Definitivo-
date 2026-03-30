@@ -301,6 +301,94 @@
     element.innerHTML = `<div class="notice notice-${notice.type}">${notice.message}</div>`;
   }
 
+  function resolveActionValue(value, ...args) {
+    return typeof value === 'function' ? value(...args) : value;
+  }
+
+  async function runDeleteAction(button, options) {
+    const config = options || {};
+    const deleteId = button.dataset.deleteId;
+    const endpoint = resolveActionValue(config.endpoint, deleteId, button)
+      || (config.basePath ? `${config.basePath}/${deleteId}` : null);
+
+    if (!endpoint) {
+      throw new Error('No se pudo resolver el endpoint de eliminacion.');
+    }
+
+    const confirmMessage = resolveActionValue(
+      config.confirmMessage,
+      deleteId,
+      button
+    ) || 'Esta accion eliminara el registro seleccionado. ¿Deseas continuar?';
+
+    if (confirmMessage && !window.confirm(confirmMessage)) {
+      return false;
+    }
+
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.dataset.deleting = '1';
+    button.textContent = resolveActionValue(config.loadingText, deleteId, button) || 'Eliminando...';
+
+    try {
+      await apiRequest(endpoint, { method: 'DELETE' });
+
+      const successMessage = resolveActionValue(config.successMessage, deleteId, button);
+
+      if (successMessage) {
+        renderNotice(config.noticeTarget || '#pageNotice', { type: 'success', message: successMessage });
+      }
+
+      if (typeof config.onSuccess === 'function') {
+        await config.onSuccess(deleteId, button);
+      }
+
+      return true;
+    } catch (error) {
+      const errorMessage = resolveActionValue(config.errorMessage, deleteId, error, button)
+        || error.message
+        || 'No se pudo eliminar el registro.';
+
+      renderNotice(config.noticeTarget || '#pageNotice', { type: 'error', message: errorMessage });
+
+      if (typeof config.onError === 'function') {
+        config.onError(error, deleteId, button);
+      }
+
+      return false;
+    } finally {
+      button.disabled = false;
+      delete button.dataset.deleting;
+      button.textContent = originalText;
+    }
+  }
+
+  function bindDeleteButtons(target, options) {
+    const container = typeof target === 'string' ? document.querySelector(target) : target;
+
+    if (!container) {
+      return;
+    }
+
+    const config = options || {};
+    const selector = config.selector || '[data-delete-id]';
+
+    container.querySelectorAll(selector).forEach((button) => {
+      if (button.dataset.deleteBound === '1') {
+        return;
+      }
+
+      button.dataset.deleteBound = '1';
+      button.addEventListener('click', async () => {
+        if (button.dataset.deleting === '1') {
+          return;
+        }
+
+        await runDeleteAction(button, config);
+      });
+    });
+  }
+
   function initBackButtons() {
     const buttons = document.querySelectorAll('[data-back-button]');
 
@@ -403,6 +491,8 @@
     setNotice,
     consumeNotice,
     renderNotice,
+    bindDeleteButtons,
+    runDeleteAction,
     initBackButtons,
     queryParam,
     toCurrency,

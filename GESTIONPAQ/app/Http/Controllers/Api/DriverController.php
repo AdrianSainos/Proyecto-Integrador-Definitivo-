@@ -98,15 +98,62 @@ class DriverController extends Controller
 
     public function destroy(int $driver): JsonResponse
     {
-        DB::table('conductores')->where('id', $driver)->delete();
+        if (! DB::table('conductores')->where('id', $driver)->exists()) {
+            return response()->json(null, 204);
+        }
+
+        $hasRoutes = DB::table('rutas')->where('driver_id', $driver)->exists();
+        $hasAssignments = DB::table('asignaciones')
+            ->where('conductor_id', $driver)
+            ->orWhere('driver_id', $driver)
+            ->exists();
+
+        if ($hasRoutes || $hasAssignments) {
+            return ApiResponder::error('No se puede eliminar el conductor mientras tenga rutas o asignaciones asociadas. Reasignalo primero.', 422);
+        }
+
+        DB::transaction(function () use ($driver): void {
+            DB::table('turnos_conductor')->where('driver_id', $driver)->delete();
+            DB::table('conductores')->where('id', $driver)->delete();
+        });
 
         return response()->json(null, 204);
     }
 
     private function drivers()
     {
+        $select = [
+            'conductores.*',
+            DB::raw('COALESCE(conductores.name, CONCAT_WS(" ", personas.nombre, personas.apellido_paterno), CONCAT_WS(" ", personas.nombres, personas.apellidos)) as display_name'),
+            'personas.telefono',
+            'personas.email',
+            'estado_conductor.nombre as estado_nombre',
+            DB::raw('COALESCE(turnos_conductor.successful_deliveries, 0) as deliveries_today'),
+            'turnos_conductor.shift_date',
+            'turnos_conductor.start_time',
+            'turnos_conductor.end_time',
+            DB::raw('CONCAT_WS(" - ", turnos_conductor.start_time, turnos_conductor.end_time) as shift_window'),
+            DB::raw('COALESCE(route_totals.total_routes, 0) as total_routes'),
+            DB::raw('COALESCE(route_totals.active_routes, 0) as active_routes'),
+        ];
+
+        if (LogisticsSupport::supportsUsername()) {
+            $select[] = 'usuarios.username';
+        }
+
+        if (LogisticsSupport::supportsPersonnelSchedule()) {
+            $select = array_merge($select, [
+                'personas.job_title',
+                'personas.schedule_label',
+                'personas.work_days',
+                'personas.shift_start',
+                'personas.shift_end',
+            ]);
+        }
+
         return DB::table('conductores')
             ->leftJoin('personas', 'personas.id', '=', 'conductores.persona_id')
+            ->leftJoin('usuarios', 'usuarios.id', '=', 'personas.usuario_id')
             ->leftJoin('estado_conductor', 'estado_conductor.id', '=', 'conductores.estado_id')
             ->leftJoinSub(
                 DB::table('turnos_conductor')
@@ -119,13 +166,13 @@ class DriverController extends Controller
                 $join->on('turnos_conductor.driver_id', '=', 'conductores.id')
                     ->on('turnos_conductor.shift_date', '=', 'latest_shift.latest_shift_date');
             })
-            ->select([
-                'conductores.*',
-                DB::raw('COALESCE(conductores.name, CONCAT_WS(" ", personas.nombre, personas.apellido_paterno), CONCAT_WS(" ", personas.nombres, personas.apellidos)) as display_name'),
-                'personas.telefono',
-                'estado_conductor.nombre as estado_nombre',
-                DB::raw('COALESCE(turnos_conductor.successful_deliveries, 0) as deliveries_today'),
-                DB::raw('CONCAT_WS(" - ", turnos_conductor.start_time, turnos_conductor.end_time) as shift_window'),
-            ]);
+            ->leftJoinSub(
+                DB::table('rutas')
+                    ->selectRaw('driver_id, COUNT(*) as total_routes, SUM(CASE WHEN LOWER(COALESCE(status, estado, "")) LIKE "%ejec%" THEN 1 ELSE 0 END) as active_routes')
+                    ->groupBy('driver_id'),
+                'route_totals',
+                fn ($join) => $join->on('route_totals.driver_id', '=', 'conductores.id')
+            )
+            ->select($select);
     }
 }

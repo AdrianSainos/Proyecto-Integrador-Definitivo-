@@ -4,6 +4,7 @@
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
+    "api:lan": "php ..\\artisan serve --host 0.0.0.0 --port 8010",
     "start": "expo start",
     "start:lan": "expo start --host lan",
     "android": "expo start --android",

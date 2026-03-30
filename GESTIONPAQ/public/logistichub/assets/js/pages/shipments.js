@@ -75,12 +75,12 @@ window.LogisticHubCore.ready(async () => {
       `)
       .join('');
 
-    body.querySelectorAll('[data-delete-id]').forEach((button) => {
-      button.addEventListener('click', async () => {
-        await window.LogisticHubCore.apiRequest(`/shipments/${button.dataset.deleteId}`, { method: 'DELETE' });
-        window.LogisticHubCore.setNotice('success', 'Envio eliminado correctamente.');
-        loadShipments();
-      });
+    window.LogisticHubCore.bindDeleteButtons(body, {
+      basePath: '/shipments',
+      noticeTarget: '#pageNotice',
+      confirmMessage: 'Se eliminara el envio seleccionado junto con sus asignaciones y trazabilidad operativa. ¿Deseas continuar?',
+      successMessage: 'Envio eliminado correctamente.',
+      onSuccess: loadShipments,
     });
   }
 

@@ -54,7 +54,7 @@
             <div class="small-label">Perfil activo</div>
             <div>
               <div class="brand-name">${user.name}</div>
-              <div class="text-muted">${user.email}</div>
+              <div class="text-muted">${user.username ? `@${user.username} · ` : ''}${user.email}</div>
             </div>
             <span class="role-pill">${profile.label}</span>
           </div>
@@ -108,7 +108,7 @@
               <div class="avatar">${window.LogisticHubCore.initials(user.name)}</div>
               <div>
                 <div class="brand-name">${user.name}</div>
-                <div class="text-muted">${profile.label}</div>
+                <div class="text-muted">${user.username ? `@${user.username} · ` : ''}${profile.label}</div>
               </div>
             </div>
             <button class="btn btn-brand btn-sm logout-button" type="button" id="logoutButton">

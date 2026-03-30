@@ -27,12 +27,12 @@ window.LogisticHubCore.ready(async () => {
       </tr>
     `).join('');
 
-    body.querySelectorAll('[data-delete-id]').forEach((button) => {
-      button.addEventListener('click', async () => {
-        await window.LogisticHubCore.apiRequest(`/vehicles/${button.dataset.deleteId}`, { method: 'DELETE' });
-        window.LogisticHubCore.setNotice('success', 'Vehiculo eliminado correctamente.');
-        loadVehicles();
-      });
+    window.LogisticHubCore.bindDeleteButtons(body, {
+      basePath: '/vehicles',
+      noticeTarget: '#pageNotice',
+      confirmMessage: 'Se eliminara el vehiculo seleccionado. Si aun esta ligado a rutas, asignaciones o mantenimientos, la operacion sera rechazada. ¿Deseas continuar?',
+      successMessage: 'Vehiculo eliminado correctamente.',
+      onSuccess: loadVehicles,
     });
   }
 

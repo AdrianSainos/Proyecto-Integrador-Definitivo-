@@ -10,9 +10,84 @@ use Illuminate\Support\Str;
 
 class LogisticsSupport
 {
+    public static function supportsUsername(): bool
+    {
+        return Schema::hasColumn('usuarios', 'username');
+    }
+
+    public static function supportsPersonnelSchedule(): bool
+    {
+        return Schema::hasColumn('personas', 'job_title');
+    }
+
     public static function apiUser(Request $request): object
     {
         return $request->attributes->get('apiUser');
+    }
+
+    public static function normalizeUsername(?string $value): string
+    {
+        $normalized = Str::of((string) $value)
+            ->lower()
+            ->ascii()
+            ->replaceMatches('/[^a-z0-9._-]+/', '.')
+            ->replaceMatches('/[.]{2,}/', '.')
+            ->trim('.-_')
+            ->value();
+
+        return $normalized !== '' ? $normalized : 'usuario';
+    }
+
+    public static function uniqueUsername(string $preferred, ?int $ignoreUserId = null): string
+    {
+        $base = self::normalizeUsername($preferred);
+
+        if (! self::supportsUsername()) {
+            return $base;
+        }
+
+        $candidate = $base;
+        $suffix = 1;
+
+        while (DB::table('usuarios')
+            ->when($ignoreUserId, fn (Builder $query) => $query->where('id', '!=', $ignoreUserId))
+            ->where('username', $candidate)
+            ->exists()) {
+            $candidate = $base.'.'.$suffix;
+            $suffix++;
+        }
+
+        return $candidate;
+    }
+
+    public static function scheduleSummary(?string $label, ?string $workDays, ?string $shiftStart, ?string $shiftEnd): ?string
+    {
+        $parts = array_values(array_filter([$label, $workDays]));
+        $hours = trim(implode(' - ', array_filter([$shiftStart, $shiftEnd])));
+
+        if ($hours !== '') {
+            $parts[] = $hours;
+        }
+
+        $summary = trim(implode(' | ', $parts));
+
+        return $summary !== '' ? $summary : null;
+    }
+
+    public static function personSchedulePayload(object $row): array
+    {
+        $label = self::pickString($row, ['schedule_label']);
+        $workDays = self::pickString($row, ['work_days']);
+        $shiftStart = self::shortTime(self::pickString($row, ['shift_start']));
+        $shiftEnd = self::shortTime(self::pickString($row, ['shift_end']));
+
+        return [
+            'label' => $label,
+            'workDays' => $workDays,
+            'start' => $shiftStart,
+            'end' => $shiftEnd,
+            'summary' => self::scheduleSummary($label, $workDays, $shiftStart, $shiftEnd),
+        ];
     }
 
     public static function userDisplayName(object $user): string
@@ -28,17 +103,34 @@ class LogisticsSupport
 
         $legacy = trim((string) ($user->nombres ?? '').' '.(string) ($user->apellidos ?? ''));
 
-        return $legacy !== '' ? $legacy : (string) $user->email;
+        if ($legacy !== '') {
+            return $legacy;
+        }
+
+        $username = self::pickString($user, ['username']);
+
+        return $username ?: (string) $user->email;
     }
 
     public static function userPayload(object $user): array
     {
+        $schedule = self::personSchedulePayload($user);
+
         return [
             'id' => (int) $user->id,
+            'personId' => self::pickInt($user, ['persona_id', 'person_id']),
+            'username' => self::supportsUsername() ? self::pickString($user, ['username']) : null,
             'email' => $user->email,
             'role' => $user->role_name ?? 'operator',
             'name' => self::userDisplayName($user),
             'active' => (bool) ($user->activo ?? 1),
+            'jobTitle' => self::pickString($user, ['job_title']),
+            'employeeCode' => self::pickString($user, ['employee_code']),
+            'schedule' => $schedule['summary'],
+            'scheduleLabel' => $schedule['label'],
+            'workDays' => $schedule['workDays'],
+            'shiftStart' => $schedule['start'],
+            'shiftEnd' => $schedule['end'],
         ];
     }
 
@@ -456,15 +548,33 @@ class LogisticsSupport
 
     public static function driverPayload(object $driver): array
     {
+        $baseSchedule = self::personSchedulePayload($driver);
+        $shiftDate = self::pickString($driver, ['shift_date']);
+        $shiftStart = self::shortTime(self::pickString($driver, ['start_time']));
+        $shiftEnd = self::shortTime(self::pickString($driver, ['end_time']));
+        $shiftSummary = self::scheduleSummary($shiftDate ? 'Turno '.$shiftDate : null, null, $shiftStart, $shiftEnd)
+            ?: self::pickString($driver, ['shift_window'])
+            ?: 'Sin turno';
+
         return [
             'id' => (int) $driver->id,
             'personId' => (int) ($driver->persona_id ?? 0),
             'name' => self::pickString($driver, ['display_name']) ?: 'Sin conductor',
+            'username' => self::pickString($driver, ['username']),
+            'email' => self::pickString($driver, ['email']),
             'phone' => self::pickString($driver, ['phone', 'telefono']),
             'status' => self::pickString($driver, ['estado_nombre', 'status']) ?: 'Disponible',
             'active' => (bool) ($driver->activo ?? 1),
+            'jobTitle' => self::pickString($driver, ['job_title']) ?: 'Conductor',
             'deliveriesToday' => (int) ($driver->deliveries_today ?? 0),
-            'shift' => self::pickString($driver, ['shift_window']) ?: 'Sin turno',
+            'routeCount' => (int) ($driver->total_routes ?? 0),
+            'activeRouteCount' => (int) ($driver->active_routes ?? 0),
+            'shift' => $shiftSummary,
+            'shiftDate' => $shiftDate,
+            'shiftStart' => $shiftStart,
+            'shiftEnd' => $shiftEnd,
+            'baseSchedule' => $baseSchedule['summary'] ?: 'Sin horario base',
+            'workDays' => $baseSchedule['workDays'],
         ];
     }
 
@@ -536,6 +646,15 @@ class LogisticsSupport
         $value = self::pickValue($row, $fields);
 
         return $value === null ? null : (string) $value;
+    }
+
+    public static function shortTime(?string $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return substr((string) $value, 0, 5);
     }
 
     public static function pickValue(object $row, array $fields): mixed

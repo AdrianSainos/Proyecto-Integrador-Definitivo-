@@ -1,0 +1,2 @@
+STATUS=422
+{"message":"The password field is required.","errors":{"password":["The password field is required."]}}

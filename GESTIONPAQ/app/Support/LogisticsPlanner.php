@@ -532,7 +532,7 @@ class LogisticsPlanner
             return self::rejectedCandidate('La ruta sale demasiado tarde para una prioridad alta.', $remainingCapacity, $remainingPackageSlots, $corridorDistanceKm);
         }
 
-        if ($vehicleFuelRangeKm > 0 && $estimatedMissionDistanceKm > 0 && $vehicleFuelRangeKm < ($estimatedMissionDistanceKm * 1.1)) {
+        if (! $requestedDate->isFuture() && $vehicleFuelRangeKm > 0 && $estimatedMissionDistanceKm > 0 && $vehicleFuelRangeKm < ($estimatedMissionDistanceKm * 1.1)) {
             return self::rejectedCandidate('La autonomia de la unidad es ajustada para la ruta estimada.', $remainingCapacity, $remainingPackageSlots, $corridorDistanceKm);
         }
 
@@ -655,7 +655,7 @@ class LogisticsPlanner
             'waypoints' => json_encode($waypoints, JSON_UNESCAPED_SLASHES),
         ];
 
-        $allowWithoutShift = $requestedDate->isFuture() && (LogisticsSupport::normalizePriority($shipment['priority'] ?? null) ?: 'standard') === 'standard';
+        $allowWithoutShift = $requestedDate->isFuture();
         $driverRecommendation = self::resolveDriverCandidate($routeStub, $requestedDate, $driverPool, $allowWithoutShift);
         $evaluation = self::evaluateCandidate($routeStub, $shipment, $requestedDate, $driverRecommendation);
 
@@ -771,7 +771,7 @@ class LogisticsPlanner
         $fuelRangeKm = $fuelConsumption > 0 ? ($currentFuel / $fuelConsumption) : 0.0;
         $requiredDistance = max(12, $distanceKm * 1.35);
 
-        if ($fuelRangeKm > 0 && $fuelRangeKm < ($requiredDistance * 1.05)) {
+        if (! $requestedDate->isFuture() && $fuelRangeKm > 0 && $fuelRangeKm < ($requiredDistance * 1.05)) {
             return null;
         }
 
@@ -871,7 +871,7 @@ class LogisticsPlanner
         $shiftStart = $hasShift ? self::timeOnDate($requestedDate, $driver->start_time ?? null) : null;
         $shiftEnd = $hasShift ? self::timeOnDate($requestedDate, $driver->end_time ?? null) : null;
 
-        if ($shiftStart && $shiftEnd && $routeEnd->gt($shiftEnd->copy()->addMinutes(30))) {
+        if (! $allowWithoutShift && $shiftStart && $shiftEnd && $routeEnd->gt($shiftEnd->copy()->addMinutes(30))) {
             return false;
         }
 
@@ -1051,13 +1051,13 @@ class LogisticsPlanner
             return $driver;
         }
 
-        if (! $requestedDate->isFuture()) {
+        if ($requestedDate->isPast()) {
             return $driver;
         }
 
         $daysAhead = now()->startOfDay()->diffInDays($requestedDate->copy()->startOfDay(), false);
 
-        if ($daysAhead > self::PLANNING_HORIZON_DAYS) {
+        if ($daysAhead < 0 || $daysAhead > self::PLANNING_HORIZON_DAYS) {
             return $driver;
         }
 
@@ -1244,8 +1244,14 @@ class LogisticsPlanner
             ->where('vehicle_id', $vehicleId)
             ->whereRaw('LOWER(COALESCE(status, estado, "")) not in (?, ?)', ['completada', 'cancelada'])
             ->where(function ($query) use ($requestedDate): void {
-                $query->whereDate('scheduled_date', $requestedDate->toDateString())
-                    ->orWhereRaw('LOWER(COALESCE(status, estado, "")) like ?', ['%ejec%']);
+                $query->whereDate('scheduled_date', $requestedDate->toDateString());
+
+                if (! $requestedDate->isFuture()) {
+                    $query->orWhere(function ($active) use ($requestedDate): void {
+                        $active->whereDate('scheduled_date', '<=', $requestedDate->toDateString())
+                            ->whereRaw('LOWER(COALESCE(status, estado, "")) like ?', ['%ejec%']);
+                    });
+                }
             })
             ->exists();
     }

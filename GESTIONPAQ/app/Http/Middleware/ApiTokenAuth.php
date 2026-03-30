@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Support\LogisticsSupport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,18 +24,7 @@ class ApiTokenAuth
             ->leftJoin('personas', 'personas.usuario_id', '=', 'usuarios.id')
             ->where('usuarios.api_token', $token)
             ->where('usuarios.activo', 1)
-            ->select([
-                'usuarios.id',
-                'usuarios.email',
-                'usuarios.rol_id',
-                'usuarios.activo',
-                'roles.nombre as role_name',
-                'personas.id as persona_id',
-                'personas.nombre',
-                'personas.apellido_paterno',
-                'personas.nombres',
-                'personas.apellidos',
-            ])
+            ->select($this->userSelectColumns())
             ->first();
 
         if (! $user) {
@@ -44,5 +34,40 @@ class ApiTokenAuth
         $request->attributes->set('apiUser', $user);
 
         return $next($request);
+    }
+
+    private function userSelectColumns(): array
+    {
+        $columns = [
+            'usuarios.id',
+            'usuarios.email',
+            'usuarios.rol_id',
+            'usuarios.activo',
+            'roles.nombre as role_name',
+            'personas.id as persona_id',
+            'personas.nombre',
+            'personas.apellido_paterno',
+            'personas.nombres',
+            'personas.apellidos',
+            'personas.documento',
+            'personas.telefono',
+        ];
+
+        if (LogisticsSupport::supportsUsername()) {
+            $columns[] = 'usuarios.username';
+        }
+
+        if (LogisticsSupport::supportsPersonnelSchedule()) {
+            $columns = array_merge($columns, [
+                'personas.employee_code',
+                'personas.job_title',
+                'personas.schedule_label',
+                'personas.work_days',
+                'personas.shift_start',
+                'personas.shift_end',
+            ]);
+        }
+
+        return $columns;
     }
 }

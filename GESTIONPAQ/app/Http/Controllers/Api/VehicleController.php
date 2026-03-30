@@ -113,7 +113,45 @@ class VehicleController extends Controller
 
     public function destroy(int $vehicle): JsonResponse
     {
-        DB::table('vehiculos')->where('id', $vehicle)->delete();
+        if (! DB::table('vehiculos')->where('id', $vehicle)->exists()) {
+            return response()->json(null, 204);
+        }
+
+        $blockers = [];
+
+        if (DB::table('rutas')->where('vehicle_id', $vehicle)->exists()) {
+            $blockers[] = 'rutas';
+        }
+
+        if (DB::table('asignaciones')
+            ->where('vehiculo_id', $vehicle)
+            ->orWhere('vehicle_id', $vehicle)
+            ->exists()) {
+            $blockers[] = 'asignaciones';
+        }
+
+        if (DB::table('mantenimiento')
+            ->where('vehiculo_id', $vehicle)
+            ->orWhere('vehicle_id', $vehicle)
+            ->exists()) {
+            $blockers[] = 'mantenimientos';
+        }
+
+        if (DB::table('conductores')->where('current_vehicle_id', $vehicle)->exists()) {
+            $blockers[] = 'conductores';
+        }
+
+        if (! empty($blockers)) {
+            return ApiResponder::error('No se puede eliminar el vehiculo porque aun tiene referencias en '.implode(', ', $blockers).'. Libera esas relaciones primero.', 422);
+        }
+
+        DB::transaction(function () use ($vehicle): void {
+            DB::table('conductores')->where('current_vehicle_id', $vehicle)->update([
+                'current_vehicle_id' => null,
+                'updated_at' => now(),
+            ]);
+            DB::table('vehiculos')->where('id', $vehicle)->delete();
+        });
 
         return response()->json(null, 204);
     }

@@ -65,7 +65,12 @@
           <div class="field"><label for="scheduledDate">Fecha programada</label><input class="input" type="date" id="scheduledDate" name="scheduledDate" required /></div>
           <div class="field"><label for="packageType">Tipo de paquete</label><select class="select" id="packageType" name="packageType" required></select></div>
           <div class="field"><label for="priority">Prioridad</label><select class="select" id="priority" name="priority" required></select></div>
-          <div class="field"><label for="initialStatus">Estado inicial</label><select class="select" id="initialStatus" name="initialStatus" required></select></div>
+          <div class="field"><label for="initialStatus">Estado inicial</label><select class="select" id="initialStatus" name="initialStatus" required></select><div class="form-help" id="statusDescription">Selecciona un estado para ver su descripcion.</div></div>
+          <div id="operationalStatusBadge" class="field" style="display:none">
+            <label>Estado actual (operacional)</label>
+            <div class="badge badge-info" id="currentStatusBadge" style="display:inline-block;font-size:0.9rem;padding:6px 14px;"></div>
+            <div class="form-help">Este estado es controlado automaticamente por el sistema segun la ruta y el conductor.</div>
+          </div>
           <div class="field"><label for="declaredValue">Valor declarado</label><input class="input" type="number" step="0.01" id="declaredValue" name="declaredValue" /></div>
           <div class="field-wide"><label for="description">Descripcion</label><textarea class="textarea" id="description" name="description"></textarea></div>
         </section>
@@ -81,11 +86,7 @@
             <div class="field">
               <label for="destinationAddressId">Enviar a</label>
               <select class="select" id="destinationAddressId" name="destinationAddressId"></select>
-              <div class="form-help">Este desplegable muestra opciones guardadas del destinatario.</div>
-            </div>
-            <div class="field">
-              <label for="coordinatesNotice">Coordenadas</label>
-              <input class="input" id="coordinatesNotice" value="Selecciona una direccion o captura manual." readonly />
+              <div class="form-help">Este desplegable muestra direcciones guardadas del destinatario. Si la direccion tiene ubicacion registrada, el sistema la usa automaticamente para planificar sin mostrar coordenadas aqui.</div>
             </div>
             <div class="field-wide">
               <label for="destinationAddress">Direccion</label>
@@ -101,6 +102,41 @@
       <div class="form-footer">
         <button class="btn btn-success" type="submit">Guardar</button>
       </div>
+
+      <section id="assignmentInfoSection" class="form-section" style="display:none;grid-column:1/-1;margin-top:1rem;">
+        <div class="form-section-header">
+          <div>
+            <h2 class="card-title"><i class="fas fa-truck-moving"></i> Asignacion actual</h2>
+            <p class="form-help">Informacion de la ruta, conductor y vehiculo asignados por el sistema.</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Ruta</label>
+            <input class="input" id="assignedRoute" readonly />
+          </div>
+          <div class="field">
+            <label>Estado de la ruta</label>
+            <input class="input" id="assignedRouteStatus" readonly />
+          </div>
+          <div class="field">
+            <label>Conductor</label>
+            <input class="input" id="assignedDriver" readonly />
+          </div>
+          <div class="field">
+            <label>Vehiculo (placa)</label>
+            <input class="input" id="assignedVehicle" readonly />
+          </div>
+          <div class="field">
+            <label>Almacen de origen</label>
+            <input class="input" id="assignedWarehouse" readonly />
+          </div>
+          <div class="field">
+            <label>Fecha prometida</label>
+            <input class="input" id="assignedPromisedDate" readonly />
+          </div>
+        </div>
+      </section>
     </form>
   </div>
   <script src="/logistichub/assets/js/core.js"></script>

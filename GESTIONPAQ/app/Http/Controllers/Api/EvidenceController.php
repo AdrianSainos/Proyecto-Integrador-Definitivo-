@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Support\ApiResponder;
 use App\Support\LogisticsPlanner;
 use App\Support\LogisticsSupport;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -106,7 +107,9 @@ class EvidenceController extends Controller
             return ApiResponder::error('No puedes registrar evidencia para un envio asignado a otro conductor.', 403);
         }
 
-        $deliveryTimestamp = $payload['deliveryTimestamp'] ?? now();
+        $deliveryTimestamp = isset($payload['deliveryTimestamp'])
+            ? Carbon::parse($payload['deliveryTimestamp'])
+            : now();
         $photoPath = ! empty($payload['photoDataUrl']) ? $this->storeImageFromDataUrl($payload['photoDataUrl'], 'photos', 'delivery') : null;
         $signaturePath = ! empty($payload['signatureText']) ? $this->storeSignatureSvg($payload['signatureText']) : null;
         $status = $payload['status'] ?? 'delivered';
@@ -154,13 +157,20 @@ class EvidenceController extends Controller
             ]);
         }
 
+        $trackingLocation = LogisticsSupport::pickString($shipmentRecord, [
+            'recipient_city',
+            'destino_ciudad',
+            'recipient_address',
+            'destino_referencia',
+        ]) ?: 'Ultima milla';
+
         LogisticsSupport::recordTrackingEvent(
             $shipment,
             $delivered ? 'Entrega' : 'Evidencia',
             $delivered
                 ? 'Entrega confirmada para '.$payload['recipientName'].'.'
                 : 'Se registro evidencia operativa para '.$payload['recipientName'].'.',
-            $shipmentRecord->destinationCity ?: $shipmentRecord->destinationAddress ?: 'Ultima milla',
+            $trackingLocation,
             $delivered ? 'Entregado' : ($shipmentRecord->status ?? 'En ruta'),
             $payload['gpsLatitude'] ?? null,
             $payload['gpsLongitude'] ?? null,

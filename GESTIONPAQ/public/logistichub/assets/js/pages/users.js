@@ -11,7 +11,15 @@ window.LogisticHubCore.ready(async () => {
     body.innerHTML = items.map((item) => `
       <tr>
         <td>${item.id}</td>
-        <td>${item.email}</td>
+        <td>
+          <strong>${item.username ? `@${item.username}` : '--'}</strong>
+          <div class="text-muted">${item.email}</div>
+        </td>
+        <td>
+          <strong>${item.name}</strong>
+          <div class="text-muted">${item.jobTitle || 'Sin puesto'}</div>
+        </td>
+        <td>${item.schedule || '--'}</td>
         <td>${item.role}</td>
         <td>${item.active ? 'Si' : 'No'}</td>
         <td>
@@ -23,12 +31,12 @@ window.LogisticHubCore.ready(async () => {
       </tr>
     `).join('');
 
-    body.querySelectorAll('[data-delete-id]').forEach((button) => {
-      button.addEventListener('click', async () => {
-        await window.LogisticHubCore.apiRequest(`/users/${button.dataset.deleteId}`, { method: 'DELETE' });
-        window.LogisticHubCore.setNotice('success', 'Usuario eliminado correctamente.');
-        loadUsers();
-      });
+    window.LogisticHubCore.bindDeleteButtons(body, {
+      basePath: '/users',
+      noticeTarget: '#pageNotice',
+      confirmMessage: 'Se eliminara el usuario seleccionado. ¿Deseas continuar?',
+      successMessage: 'Usuario eliminado correctamente.',
+      onSuccess: loadUsers,
     });
   }
 

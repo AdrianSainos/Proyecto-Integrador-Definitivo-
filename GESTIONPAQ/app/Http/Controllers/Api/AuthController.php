@@ -9,28 +9,37 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     public function login(Request $request): JsonResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'login' => ['nullable', 'string', 'max:150'],
+            'email' => ['nullable', 'string', 'max:150'],
             'password' => ['required', 'string'],
         ]);
+
+        $login = trim((string) ($credentials['login'] ?? $credentials['email'] ?? ''));
+
+        if ($login === '') {
+            throw ValidationException::withMessages([
+                'login' => 'Debes indicar correo o usuario.',
+            ]);
+        }
 
         $user = DB::table('usuarios')
             ->leftJoin('roles', 'roles.id', '=', 'usuarios.rol_id')
             ->leftJoin('personas', 'personas.usuario_id', '=', 'usuarios.id')
-            ->where('usuarios.email', $credentials['email'])
-            ->select([
-                'usuarios.*',
-                'roles.nombre as role_name',
-                'personas.nombre',
-                'personas.apellido_paterno',
-                'personas.nombres',
-                'personas.apellidos',
-            ])
+            ->where(function ($query) use ($login): void {
+                $query->where('usuarios.email', $login);
+
+                if (LogisticsSupport::supportsUsername()) {
+                    $query->orWhere('usuarios.username', $login);
+                }
+            })
+            ->select($this->userSelectColumns())
             ->first();
 
         if (! $user || ! $this->passwordMatches($credentials['password'], (string) $user->password)) {
@@ -79,5 +88,33 @@ class AuthController extends Controller
     private function passwordMatches(string $plain, string $stored): bool
     {
         return Hash::check($plain, $stored) || hash_equals($stored, $plain);
+    }
+
+    private function userSelectColumns(): array
+    {
+        $columns = [
+            'usuarios.*',
+            'roles.nombre as role_name',
+            'personas.id as persona_id',
+            'personas.nombre',
+            'personas.apellido_paterno',
+            'personas.nombres',
+            'personas.apellidos',
+            'personas.documento',
+            'personas.telefono',
+        ];
+
+        if (LogisticsSupport::supportsPersonnelSchedule()) {
+            $columns = array_merge($columns, [
+                'personas.employee_code',
+                'personas.job_title',
+                'personas.schedule_label',
+                'personas.work_days',
+                'personas.shift_start',
+                'personas.shift_end',
+            ]);
+        }
+
+        return $columns;
     }
 }

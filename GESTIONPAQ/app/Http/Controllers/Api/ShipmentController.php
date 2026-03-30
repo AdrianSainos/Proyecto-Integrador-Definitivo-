@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ShipmentController extends Controller
 {
@@ -40,10 +41,24 @@ class ShipmentController extends Controller
     {
         $customers = app(CustomerController::class)->index()->getData(true);
 
+        $allStatuses = DB::table('estado_paquete')->orderBy('nombre')->pluck('nombre')->all();
+        $editableStatuses = ['Pendiente', 'Planificado'];
+        $operationalStatuses = array_values(array_diff($allStatuses, $editableStatuses));
+
         return ApiResponder::success([
             'customers' => $customers,
             'packageTypes' => DB::table('tipo_paquete')->orderBy('nombre')->pluck('nombre')->all(),
-            'statuses' => DB::table('estado_paquete')->orderBy('nombre')->pluck('nombre')->all(),
+            'statuses' => $allStatuses,
+            'editableStatuses' => $editableStatuses,
+            'operationalStatuses' => $operationalStatuses,
+            'statusDescriptions' => [
+                'Pendiente' => 'El envio fue registrado pero aun no tiene ruta ni recursos asignados.',
+                'Planificado' => 'El envio tiene una fecha programada a futuro y sera asignado automaticamente.',
+                'Registrado' => 'El envio esta vinculado a una ruta pero aun sin conductor ni vehiculo confirmados.',
+                'Asignado' => 'El envio tiene ruta, conductor y vehiculo confirmados, listo para salir.',
+                'En ruta' => 'El envio esta en camino con un conductor activo.',
+                'Entregado' => 'El envio fue entregado al destinatario. Estado final.',
+            ],
             'priorities' => [
                 ['value' => 'standard', 'label' => 'Estandar'],
                 ['value' => 'high', 'label' => 'Alta'],
@@ -63,7 +78,9 @@ class ShipmentController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $payload = LogisticsPlanner::prepareShipmentContext($this->validated($request, false));
+        $validated = $this->validated($request, false);
+        $this->ensureDistinctParticipants($validated);
+        $payload = LogisticsPlanner::prepareShipmentContext($validated);
 
         return DB::transaction(function () use ($payload) {
             $shipmentId = DB::table('paquetes')->insertGetId($this->packageRecord($payload));
@@ -82,10 +99,33 @@ class ShipmentController extends Controller
         $current = LogisticsSupport::shipmentPayload(
             LogisticsSupport::shipmentBaseQuery()->where('paquetes.id', $shipment)->first()
         ) ?? [];
-        $payload = LogisticsPlanner::prepareShipmentContext(array_merge($current, $this->validated($request, true)));
 
-        return DB::transaction(function () use ($payload, $shipment) {
+        $currentStatus = $current['status'] ?? '';
+        $isDelivered = strtolower($currentStatus) === 'entregado';
+
+        $validated = $this->validated($request, true);
+
+        if ($isDelivered && ! empty($validated['initialStatus']) && strtolower($validated['initialStatus']) !== 'entregado') {
+            return ApiResponder::error('No es posible cambiar el estado de un envio ya entregado.', 422);
+        }
+
+        $mergedPayload = array_merge($current, $validated);
+        $this->ensureDistinctParticipants($mergedPayload);
+        $payload = LogisticsPlanner::prepareShipmentContext($mergedPayload);
+
+        return DB::transaction(function () use ($payload, $shipment, $isDelivered) {
             DB::table('paquetes')->where('id', $shipment)->update($this->packageRecord($payload, true));
+
+            if ($isDelivered) {
+                $item = LogisticsSupport::shipmentBaseQuery()->where('paquetes.id', $shipment)->first();
+
+                return ApiResponder::success([
+                    'item' => LogisticsSupport::shipmentPayload($item),
+                    'message' => 'Envio actualizado. El estado Entregado se conserva.',
+                    'recommendation' => null,
+                ]);
+            }
+
             $response = $this->afterWrite($shipment, $payload, true);
 
             return ApiResponder::success($response);
@@ -94,8 +134,50 @@ class ShipmentController extends Controller
 
     public function destroy(int $shipment): JsonResponse
     {
-        DB::table('asignaciones')->where('package_id', $shipment)->delete();
-        DB::table('paquetes')->where('id', $shipment)->delete();
+        if (! DB::table('paquetes')->where('id', $shipment)->exists()) {
+            return response()->json(null, 204);
+        }
+
+        DB::transaction(function () use ($shipment): void {
+            $assignments = DB::table('asignaciones')
+                ->where('package_id', $shipment)
+                ->get(['id', 'ruta_id', 'route_id']);
+
+            $assignmentIds = $assignments
+                ->pluck('id')
+                ->filter(fn ($id) => (int) $id > 0)
+                ->values()
+                ->all();
+
+            $routeIds = $assignments
+                ->map(fn ($assignment) => (int) ($assignment->ruta_id ?: $assignment->route_id ?: 0))
+                ->filter(fn ($id) => $id > 0)
+                ->unique()
+                ->values()
+                ->all();
+
+            DB::table('ruta_paradas')->where('package_id', $shipment)->delete();
+
+            DB::table('evidencias')
+                ->where('package_id', $shipment)
+                ->when(
+                    ! empty($assignmentIds),
+                    fn ($query) => $query->orWhereIn('asignacion_id', $assignmentIds)
+                )
+                ->delete();
+
+            DB::table('tracking')
+                ->where('package_id', $shipment)
+                ->orWhere('paquete_id', $shipment)
+                ->delete();
+
+            DB::table('asignaciones')->where('package_id', $shipment)->delete();
+            DB::table('paquetes')->where('id', $shipment)->delete();
+
+            foreach ($routeIds as $routeId) {
+                LogisticsPlanner::syncRouteMetrics($routeId);
+            }
+        });
 
         return response()->json(null, 204);
     }
@@ -452,6 +534,18 @@ class ShipmentController extends Controller
             return Carbon::parse($value);
         } catch (\Throwable) {
             return null;
+        }
+    }
+
+    private function ensureDistinctParticipants(array $payload): void
+    {
+        $senderId = isset($payload['senderId']) ? (int) $payload['senderId'] : 0;
+        $recipientId = isset($payload['recipientId']) ? (int) $payload['recipientId'] : 0;
+
+        if ($senderId > 0 && $senderId === $recipientId) {
+            throw ValidationException::withMessages([
+                'recipientId' => 'El destinatario debe ser diferente del remitente.',
+            ]);
         }
     }
 }

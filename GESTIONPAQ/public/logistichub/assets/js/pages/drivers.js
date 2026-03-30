@@ -14,19 +14,30 @@ window.LogisticHubCore.ready(async () => {
     body.innerHTML = items.map((item) => `
       <tr>
         <td>${item.id}</td>
-        <td>${item.name}</td>
-        <td>${item.phone || '--'}</td>
+        <td>
+          <strong>${item.name}</strong>
+          <div class="text-muted">${item.phone || item.jobTitle || '--'}</div>
+        </td>
+        <td>
+          <strong>${item.username ? `@${item.username}` : '--'}</strong>
+          <div class="text-muted">${item.email || '--'}</div>
+        </td>
         <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${item.status}</span></td>
+        <td>
+          <strong>${item.shift}</strong>
+          <div class="text-muted">${item.baseSchedule || '--'}</div>
+        </td>
+        <td>${item.routeCount} total / ${item.activeRouteCount} activas</td>
         <td><div class="table-actions">${canManage ? `<a class="btn btn-outline btn-sm" href="/logistichub/driver-form.html?id=${item.id}">Editar</a><button class="btn btn-danger btn-sm" data-delete-id="${item.id}">Eliminar</button>` : '<span class="text-muted">Solo lectura</span>'}</div></td>
       </tr>
     `).join('');
 
-    body.querySelectorAll('[data-delete-id]').forEach((button) => {
-      button.addEventListener('click', async () => {
-        await window.LogisticHubCore.apiRequest(`/drivers/${button.dataset.deleteId}`, { method: 'DELETE' });
-        window.LogisticHubCore.setNotice('success', 'Conductor eliminado correctamente.');
-        loadDrivers();
-      });
+    window.LogisticHubCore.bindDeleteButtons(body, {
+      basePath: '/drivers',
+      noticeTarget: '#pageNotice',
+      confirmMessage: 'Se eliminara el conductor seleccionado. Si aun tiene rutas o asignaciones, la operacion sera rechazada. ¿Deseas continuar?',
+      successMessage: 'Conductor eliminado correctamente.',
+      onSuccess: loadDrivers,
     });
   }
 

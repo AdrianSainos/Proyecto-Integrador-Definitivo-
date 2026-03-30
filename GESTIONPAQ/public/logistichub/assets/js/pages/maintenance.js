@@ -33,12 +33,12 @@ window.LogisticHubCore.ready(async () => {
       </tr>
     `).join('');
 
-    body.querySelectorAll('[data-delete-id]').forEach((button) => {
-      button.addEventListener('click', async () => {
-        await window.LogisticHubCore.apiRequest(`/maintenance/${button.dataset.deleteId}`, { method: 'DELETE' });
-        window.LogisticHubCore.setNotice('success', 'Evento de mantenimiento eliminado correctamente.');
-        loadMaintenance();
-      });
+    window.LogisticHubCore.bindDeleteButtons(body, {
+      basePath: '/maintenance',
+      noticeTarget: '#pageNotice',
+      confirmMessage: 'Se eliminara el evento de mantenimiento seleccionado. ¿Deseas continuar?',
+      successMessage: 'Evento de mantenimiento eliminado correctamente.',
+      onSuccess: loadMaintenance,
     });
   }
 

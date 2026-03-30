@@ -1,6 +1,11 @@
 import { NativeModules, Platform } from 'react-native';
 
 const DEFAULT_PORTS = [8010, 8021, 8000];
+const DEFAULT_API_PATHS = [
+  '/api',
+  '/GESTIONPAQ/public/api',
+  '/Proyecto-Integrador-Definitivo-/GESTIONPAQ/public/api',
+];
 
 function normalizeApiBase(value) {
   const base = String(value || '').trim();
@@ -14,6 +19,10 @@ function normalizeApiBase(value) {
   }
 
   return `http://${base.replace(/\/$/, '')}`;
+}
+
+function ensureApiPath(base) {
+  return base.endsWith('/api') ? base : `${base}/api`;
 }
 
 function hostFromScriptUrl() {
@@ -36,7 +45,14 @@ function envApiBases() {
     .split(',')
     .map((entry) => normalizeApiBase(entry))
     .filter(Boolean)
-    .map((entry) => (entry.endsWith('/api') ? entry : `${entry}/api`));
+    .map((entry) => ensureApiPath(entry));
+}
+
+function buildHostBase(host, path, port = null) {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const portSegment = port ? `:${port}` : '';
+
+  return `http://${host}${portSegment}${normalizedPath}`;
 }
 
 function basesFromHost(host, ports = DEFAULT_PORTS) {
@@ -44,7 +60,10 @@ function basesFromHost(host, ports = DEFAULT_PORTS) {
     return [];
   }
 
-  return ports.map((port) => `http://${host}:${port}/api`);
+  return [
+    ...ports.map((port) => buildHostBase(host, '/api', port)),
+    ...DEFAULT_API_PATHS.map((path) => buildHostBase(host, path)),
+  ];
 }
 
 function unique(values) {
@@ -71,10 +90,13 @@ function resolveApiBases() {
   candidates.push(...basesFromHost(devHost));
 
   if (Platform.OS === 'android') {
-    candidates.push(...DEFAULT_PORTS.map((port) => `http://10.0.2.2:${port}/api`));
+    candidates.push(...basesFromHost('10.0.2.2'));
   }
 
-  candidates.push(...DEFAULT_PORTS.map((port) => `http://127.0.0.1:${port}/api`));
+  candidates.push(
+    ...DEFAULT_PORTS.map((port) => buildHostBase('127.0.0.1', '/api', port)),
+    ...DEFAULT_API_PATHS.map((path) => buildHostBase('127.0.0.1', path)),
+  );
 
   return unique(candidates);
 }

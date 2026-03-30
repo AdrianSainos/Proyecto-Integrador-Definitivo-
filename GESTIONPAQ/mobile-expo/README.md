@@ -22,8 +22,9 @@ Cliente movil en React Native con Expo para la operacion de GESTIONPAQ.
 
 1. Instala Node.js 18 o superior.
 2. En esta carpeta ejecuta `npm install`.
-3. Define `EXPO_PUBLIC_API_BASE` o `EXPO_PUBLIC_API_BASES` apuntando al backend accesible por red local.
-4. Ejecuta `npm run start:lan`.
+3. Inicia el backend con `npm run api:lan` o levanta Apache/XAMPP si sirves Laravel desde `public`.
+4. Define `EXPO_PUBLIC_API_BASE` o `EXPO_PUBLIC_API_BASES` apuntando al backend accesible por red local si quieres forzar una base concreta.
+5. Ejecuta `npm run start:lan`.
 
 ## Prueba desde telefono en la misma red
 
@@ -61,6 +62,14 @@ La app movil ahora puede intentar varias bases API en este orden si la principal
 - `http://192.168.10.229:8010/api`
 - `http://192.168.1.81:8021/api`
 - `http://192.168.10.229:8021/api`
+
+Ademas, desde esta revision tambien detecta automaticamente estas variantes sobre la IP del bundler Expo cuando existen:
+
+- `http://<tu-ip>/api`
+- `http://<tu-ip>/GESTIONPAQ/public/api`
+- `http://<tu-ip>/Proyecto-Integrador-Definitivo-/GESTIONPAQ/public/api`
+
+La app valida cada base candidata con un `POST /auth/login` de prueba antes de usarla y guarda la ultima base correcta para no depender de una IP fija en cada arranque.
 
 ## Nota
 

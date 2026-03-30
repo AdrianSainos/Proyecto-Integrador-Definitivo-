@@ -22,20 +22,92 @@
   fillSelect('#originWarehouseId', options.warehouses, 'Asignacion automatica', (item) => ({ value: item.id, label: `${item.name} - ${item.city}` }));
   fillSelect('#packageType', options.packageTypes, 'Selecciona tipo', (item) => ({ value: item, label: item }));
   fillSelect('#priority', options.priorities, 'Selecciona prioridad', (item) => ({ value: item.value, label: item.label }));
-  fillSelect('#initialStatus', options.statuses, 'Selecciona estado', (item) => ({ value: item, label: item }));
+  fillSelect('#initialStatus', options.editableStatuses || options.statuses, 'Selecciona estado', (item) => ({ value: item, label: item }));
+
+  const statusDescriptions = options.statusDescriptions || {};
+  const statusDescriptionEl = document.querySelector('#statusDescription');
+  const operationalBadge = document.querySelector('#operationalStatusBadge');
+  const currentStatusBadge = document.querySelector('#currentStatusBadge');
+  const assignmentSection = document.querySelector('#assignmentInfoSection');
+  const editableSet = new Set(options.editableStatuses || options.statuses);
+
+  document.querySelector('#initialStatus').addEventListener('change', () => {
+    const val = document.querySelector('#initialStatus').value;
+    statusDescriptionEl.textContent = statusDescriptions[val] || 'Selecciona un estado para ver su descripcion.';
+  });
 
   const destinationSelect = document.querySelector('#destinationAddressId');
-  const coordinatesNotice = document.querySelector('#coordinatesNotice');
+  const manualDestinationHelp = document.querySelector('#manualDestinationHelp');
 
-  function loadRecipientAddresses(customerId) {
+  function setDestinationHelp(message) {
+    if (manualDestinationHelp) {
+      manualDestinationHelp.textContent = message;
+    }
+  }
+
+  function fillDestinationFields(address) {
+    form.destinationAddress.value = address.address || '';
+    form.destinationCity.value = address.city || '';
+    form.destinationState.value = address.state || '';
+    form.destinationPostalCode.value = address.postalCode || '';
+  }
+
+  function clearDestinationFields() {
+    destinationSelect.value = '';
+    fillDestinationFields({ address: '', city: '', state: '', postalCode: '' });
+  }
+
+  function validateDistinctParticipants(changedField) {
+    if (!form.senderId.value || !form.recipientId.value) {
+      return true;
+    }
+
+    if (String(form.senderId.value) !== String(form.recipientId.value)) {
+      return true;
+    }
+
+    if (changedField === 'recipient') {
+      form.recipientId.value = '';
+      loadRecipientAddresses('');
+    } else if (changedField === 'sender') {
+      form.senderId.value = '';
+    }
+
+    window.LogisticHubCore.renderNotice(noticeTarget, {
+      type: 'error',
+      message: 'El destinatario debe ser diferente del remitente.',
+    });
+
+    return false;
+  }
+
+  function loadRecipientAddresses(customerId, selectedAddressId = '') {
     const customer = options.customers.find((item) => Number(item.id) === Number(customerId));
     const addresses = customer ? customer.addresses : [];
 
     destinationSelect.innerHTML = '<option value="">Selecciona una direccion guardada</option>' + addresses.map((address) => `<option value="${address.id}">${address.label} - ${address.address}, ${address.city}</option>`).join('');
 
-    if (!addresses.length) {
-      coordinatesNotice.value = 'Sin coordenadas guardadas.';
+    const hasSelectedAddress = Number(selectedAddressId) > 0 && addresses.some((address) => Number(address.id) === Number(selectedAddressId));
+
+    if (hasSelectedAddress) {
+      destinationSelect.value = String(selectedAddressId);
+      applyAddress(customerId, selectedAddressId);
+      return;
     }
+
+    clearDestinationFields();
+
+    if (!customerId) {
+      setDestinationHelp('Selecciona un destinatario para ver sus direcciones guardadas o captura el destino manualmente.');
+      return;
+    }
+
+    if (!addresses.length) {
+      setDestinationHelp('Este destinatario no tiene direcciones guardadas. Completa el destino manualmente.');
+      return;
+    }
+
+    setDestinationHelp('Selecciona una direccion guardada o completa la direccion manualmente.');
   }
 
   function applyAddress(customerId, addressId) {
@@ -43,19 +115,36 @@
     const address = customer ? customer.addresses.find((item) => Number(item.id) === Number(addressId)) : null;
 
     if (!address) {
-      coordinatesNotice.value = 'Usa una direccion del desplegable o captura manualmente.';
+      destinationSelect.value = '';
+      setDestinationHelp('Selecciona una direccion guardada o completa la direccion manualmente.');
+      return false;
+    }
+
+    fillDestinationFields(address);
+    setDestinationHelp('Direccion guardada cargada automaticamente para este destinatario.');
+
+    return true;
+  }
+
+  form.senderId.addEventListener('change', () => {
+    validateDistinctParticipants('sender');
+  });
+  form.recipientId.addEventListener('change', () => {
+    if (!validateDistinctParticipants('recipient')) {
       return;
     }
 
-    form.destinationAddress.value = address.address || '';
-    form.destinationCity.value = address.city || '';
-    form.destinationState.value = address.state || '';
-    form.destinationPostalCode.value = address.postalCode || '';
-    coordinatesNotice.value = address.latitude && address.longitude ? `Coordenadas guardadas: ${address.latitude}, ${address.longitude}` : 'Direccion guardada sin coordenadas.';
-  }
+    loadRecipientAddresses(form.recipientId.value);
+  });
+  destinationSelect.addEventListener('change', () => {
+    if (!destinationSelect.value) {
+      clearDestinationFields();
+      setDestinationHelp('Selecciona una direccion guardada o completa la direccion manualmente.');
+      return;
+    }
 
-  form.recipientId.addEventListener('change', () => loadRecipientAddresses(form.recipientId.value));
-  destinationSelect.addEventListener('change', () => applyAddress(form.recipientId.value, destinationSelect.value));
+    applyAddress(form.recipientId.value, destinationSelect.value);
+  });
   form.originWarehouseId.addEventListener('change', () => {
     const warehouse = options.warehouses.find((item) => Number(item.id) === Number(form.originWarehouseId.value));
     if (warehouse) {
@@ -68,7 +157,7 @@
     form.tracking.value = shipment.tracking || '';
     form.senderId.value = shipment.senderId || '';
     form.recipientId.value = shipment.recipientId || '';
-    loadRecipientAddresses(shipment.recipientId);
+    loadRecipientAddresses(shipment.recipientId, shipment.destinationAddressId);
     form.originWarehouseId.value = shipment.originWarehouseId || '';
     form.originAddress.value = shipment.originAddress || '';
     form.weightKg.value = shipment.weightKg || '';
@@ -77,15 +166,50 @@
     form.scheduledDate.value = shipment.scheduledDate || '';
     form.packageType.value = shipment.packageType || '';
     form.priority.value = shipment.priority || '';
-    form.initialStatus.value = shipment.status || '';
     form.declaredValue.value = shipment.declaredValue || '';
     form.description.value = shipment.description || '';
-    destinationSelect.value = shipment.destinationAddressId || '';
-    form.destinationAddress.value = shipment.destinationAddress || '';
-    form.destinationCity.value = shipment.destinationCity || '';
-    form.destinationState.value = shipment.destinationState || '';
-    form.destinationPostalCode.value = shipment.destinationPostalCode || '';
-    applyAddress(shipment.recipientId, shipment.destinationAddressId);
+
+    const hasSavedDestination = Number(shipment.destinationAddressId) > 0
+      && Array.from(destinationSelect.options).some((option) => Number(option.value) === Number(shipment.destinationAddressId));
+
+    if (!hasSavedDestination) {
+      fillDestinationFields({
+        address: shipment.destinationAddress || '',
+        city: shipment.destinationCity || '',
+        state: shipment.destinationState || '',
+        postalCode: shipment.destinationPostalCode || '',
+      });
+      setDestinationHelp('Destino actual cargado desde el envio. Puedes cambiarlo por una direccion guardada o editarlo manualmente.');
+    }
+
+    const currentStatus = shipment.status || 'Pendiente';
+
+    if (editableSet.has(currentStatus)) {
+      form.initialStatus.value = currentStatus;
+    } else {
+      form.initialStatus.value = '';
+      operationalBadge.style.display = '';
+      currentStatusBadge.textContent = currentStatus;
+      currentStatusBadge.title = statusDescriptions[currentStatus] || '';
+    }
+
+    statusDescriptionEl.textContent = statusDescriptions[currentStatus] || '';
+
+    if (currentStatus.toLowerCase() === 'entregado') {
+      form.initialStatus.disabled = true;
+      statusDescriptionEl.textContent = 'Estado final: el envio ya fue entregado. No se puede cambiar el estado.';
+    }
+
+    const hasAssignment = shipment.routeCode && shipment.routeCode !== 'Pendiente';
+    if (hasAssignment && assignmentSection) {
+      assignmentSection.style.display = '';
+      document.querySelector('#assignedRoute').value = shipment.routeCode || 'Sin ruta';
+      document.querySelector('#assignedRouteStatus').value = shipment.routeStatus || 'Sin estado';
+      document.querySelector('#assignedDriver').value = shipment.driverName || 'Pendiente';
+      document.querySelector('#assignedVehicle').value = shipment.vehiclePlate || 'Pendiente';
+      document.querySelector('#assignedWarehouse').value = shipment.warehouseName || 'Sin almacen';
+      document.querySelector('#assignedPromisedDate').value = shipment.promisedDate || shipment.scheduledDate || 'Sin fecha';
+    }
   }
 
   form.addEventListener('submit', async (event) => {
@@ -93,6 +217,11 @@
 
     if (!form.senderId.value || !form.recipientId.value) {
       window.LogisticHubCore.renderNotice(noticeTarget, { type: 'error', message: 'Debes seleccionar remitente y destinatario.' });
+      return;
+    }
+
+    if (String(form.senderId.value) === String(form.recipientId.value)) {
+      window.LogisticHubCore.renderNotice(noticeTarget, { type: 'error', message: 'El destinatario debe ser diferente del remitente.' });
       return;
     }
 
@@ -108,7 +237,7 @@
       scheduledDate: form.scheduledDate.value,
       packageType: form.packageType.value,
       priority: form.priority.value,
-      initialStatus: form.initialStatus.value,
+      initialStatus: form.initialStatus.value || (currentStatusBadge ? currentStatusBadge.textContent : '') || 'Pendiente',
       declaredValue: form.declaredValue.value,
       description: form.description.value.trim(),
       destinationAddressId: destinationSelect.value,

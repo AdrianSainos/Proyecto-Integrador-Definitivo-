@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Support\ApiResponder;
 use App\Support\LogisticsPlanner;
 use App\Support\LogisticsSupport;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -149,8 +150,81 @@ class RouteController extends Controller
             ->select(['id', 'driver_id'])
             ->first();
 
-        DB::table('asignaciones')->where('ruta_id', $route)->orWhere('route_id', $route)->delete();
-        DB::table('rutas')->where('id', $route)->delete();
+        if (! $current) {
+            return response()->json(null, 204);
+        }
+
+        DB::transaction(function () use ($route): void {
+            $assignments = $this->routeAssignmentsQuery($route)->get(['id', 'package_id']);
+            $assignmentIds = $assignments
+                ->pluck('id')
+                ->filter(fn ($id) => (int) $id > 0)
+                ->values()
+                ->all();
+            $packageIds = $assignments
+                ->pluck('package_id')
+                ->filter(fn ($id) => (int) $id > 0)
+                ->unique()
+                ->values()
+                ->all();
+            $packages = ! empty($packageIds)
+                ? DB::table('paquetes')->whereIn('id', $packageIds)->get(['id', 'scheduled_date', 'status', 'estado'])
+                : collect();
+
+            if (! empty($assignmentIds)) {
+                DB::table('evidencias')
+                    ->whereIn('asignacion_id', $assignmentIds)
+                    ->update([
+                        'asignacion_id' => null,
+                        'route_id' => null,
+                        'updated_at' => now(),
+                    ]);
+            }
+
+            DB::table('evidencias')
+                ->where('route_id', $route)
+                ->update([
+                    'route_id' => null,
+                    'updated_at' => now(),
+                ]);
+
+            DB::table('ruta_paradas')
+                ->where(function ($query) use ($route): void {
+                    $query->where('ruta_id', $route)
+                        ->orWhere('route_id', $route);
+                })
+                ->delete();
+
+            $this->routeAssignmentsQuery($route)->delete();
+
+            foreach ($packages as $package) {
+                if ($this->shipmentWasDelivered($package)) {
+                    continue;
+                }
+
+                $status = $this->shipmentStatusAfterRouteRemoval($package->scheduled_date ?? null);
+
+                DB::table('paquetes')->where('id', $package->id)->update([
+                    'estado_id' => LogisticsSupport::packageStatusIdFor($status),
+                    'estado' => $status,
+                    'status' => $status,
+                    'assigned_at' => null,
+                    'promised_date' => $package->scheduled_date ?? null,
+                    'eta_at' => null,
+                    'updated_at' => now(),
+                ]);
+
+                LogisticsSupport::recordTrackingEvent(
+                    (int) $package->id,
+                    'Replanificacion',
+                    'La ruta asignada fue eliminada. El envio vuelve a estado '.$status.'.',
+                    'Mesa de despacho',
+                    $status,
+                );
+            }
+
+            DB::table('rutas')->where('id', $route)->delete();
+        });
 
         if ($current && (int) ($current->driver_id ?? 0) > 0) {
             $this->refreshDriverOperationalState((int) $current->driver_id);
@@ -285,5 +359,33 @@ class RouteController extends Controller
         $fromPersona = DB::table('conductores')->where('persona_id', $driverId)->value('id');
 
         return $fromPersona ? (int) $fromPersona : null;
+    }
+
+    private function routeAssignmentsQuery(int $route)
+    {
+        return DB::table('asignaciones')->where(function ($query) use ($route): void {
+            $query->where('ruta_id', $route)
+                ->orWhere('route_id', $route);
+        });
+    }
+
+    private function shipmentWasDelivered(object $package): bool
+    {
+        $status = strtolower((string) ($package->status ?? $package->estado ?? ''));
+
+        return str_contains($status, 'entreg');
+    }
+
+    private function shipmentStatusAfterRouteRemoval(?string $scheduledDate): string
+    {
+        if (! $scheduledDate) {
+            return 'Pendiente';
+        }
+
+        try {
+            return Carbon::parse($scheduledDate)->isFuture() ? 'Planificado' : 'Pendiente';
+        } catch (\Throwable) {
+            return 'Pendiente';
+        }
     }
 }

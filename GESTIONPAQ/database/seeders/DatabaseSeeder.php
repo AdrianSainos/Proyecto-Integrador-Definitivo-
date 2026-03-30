@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             LogisticsAdminSeeder::class,
             LogisticsDemoSeeder::class,
             LogisticsNationalCoverageSeeder::class,
+            LogisticsWorkforceSeeder::class,
         ]);
     }
 }

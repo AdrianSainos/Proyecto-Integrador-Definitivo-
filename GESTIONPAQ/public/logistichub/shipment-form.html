@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Formulario de envio | LogisticHub</title>
+  <title>Formulario de envio | GESTIONPAQ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -30,7 +30,8 @@
           </div>
           <div class="field">
             <label for="tracking">Codigo tracking</label>
-            <input class="input" id="tracking" name="tracking" required />
+            <input class="input" id="tracking" name="tracking" placeholder="Se genera automaticamente al guardar" readonly />
+            <div class="form-help">El sistema asigna el tracking automaticamente al crear el envio.</div>
           </div>
           <div class="field">
             <label for="senderId">Remitente</label>
@@ -102,9 +103,9 @@
       </div>
     </form>
   </div>
-  <script src="/logistichub/assets/js/shared/mock-data.js"></script>
   <script src="/logistichub/assets/js/core.js"></script>
   <script src="/logistichub/assets/js/shared/layout.js"></script>
   <script src="/logistichub/assets/js/pages/shipment-form.js"></script>
 </body>
 </html>
+

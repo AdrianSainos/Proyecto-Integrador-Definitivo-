@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="200" viewBox="0 0 720 200">
+  <rect width="720" height="200" rx="20" fill="#fffef8" />
+  <path d="M88 132c26-32 38-48 58-48 18 0 16 40 30 40 18 0 30-56 52-56 18 0 14 48 28 48 16 0 28-34 46-34 16 0 20 28 36 28 18 0 26-22 40-22 18 0 22 30 38 30 12 0 28-14 48-42" fill="none" stroke="#173f35" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="88" y="170" font-size="18" font-family="Arial, sans-serif" fill="#4c5f5a">Firma demo GESTIONPAQ</text>
+</svg>

@@ -62,9 +62,20 @@ textarea {
 
 .wrapper {
   display: flex;
+  align-items: flex-start;
   min-height: 100vh;
   gap: 24px;
   padding: 24px;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(10, 21, 35, 0.42);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
 }
 
 .sidebar {
@@ -81,7 +92,32 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  min-height: calc(100vh - 48px);
+  height: calc(100vh - 48px);
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+}
+
+.sidebar-scroll {
+  display: grid;
+  gap: 24px;
+  min-height: 0;
+  padding-right: 6px;
+  margin-right: -6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .sidebar-card {
@@ -178,6 +214,7 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 20px;
   padding: 22px 24px;
   border: 1px solid var(--line);
@@ -192,6 +229,23 @@ textarea {
   display: flex;
   align-items: center;
   gap: 18px;
+}
+
+.topbar-left {
+  flex: 1 1 460px;
+  min-width: 0;
+}
+
+.topbar-left > div {
+  min-width: 0;
+}
+
+.topbar-right {
+  flex: 1 1 360px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  min-width: 0;
+  margin-left: auto;
 }
 
 .eyebrow {
@@ -215,18 +269,22 @@ textarea {
 .page-description {
   margin: 8px 0 0;
   color: var(--ink-2);
+  max-width: 66ch;
 }
 
 .search-box,
 .user-summary,
-.topbar-actions {
+.topbar-actions,
+.topbar-account {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 .search-box {
-  min-width: min(100%, 320px);
+  flex: 1 1 250px;
+  min-width: 220px;
+  max-width: 320px;
   padding: 10px 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -239,6 +297,39 @@ textarea {
   background: transparent;
   outline: none;
   color: var(--ink-1);
+}
+
+.topbar-account {
+  flex: 0 1 auto;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.user-summary {
+  min-width: 0;
+  max-width: 280px;
+  padding: 8px 12px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.user-summary > div:last-child {
+  min-width: 0;
+}
+
+.user-summary .brand-name,
+.user-summary .text-muted {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .avatar {
@@ -590,6 +681,27 @@ textarea {
   min-height: 280px;
 }
 
+.chart-summary {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.chart-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(26, 38, 62, 0.08);
+  color: var(--ink-2);
+  font-size: 0.92rem;
+}
+
+.chart-summary-row strong {
+  color: var(--ink-1);
+}
+
 .stack-list,
 .timeline-list,
 .legend-list {
@@ -613,6 +725,29 @@ textarea {
 .list-row:last-child {
   border-bottom: 0;
   padding-bottom: 0;
+}
+
+.evidence-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.evidence-entry {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(26, 38, 62, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.evidence-thumb {
+  width: 84px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid rgba(26, 38, 62, 0.12);
 }
 
 .table-panel {
@@ -917,6 +1052,11 @@ tbody tr:hover {
   .topbar-right {
     justify-content: space-between;
     flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .topbar-account {
+    margin-left: auto;
   }
 }
 
@@ -932,11 +1072,21 @@ tbody tr:hover {
     z-index: 30;
     transform: translateX(-120%);
     transition: transform 0.3s ease;
-    min-height: calc(100vh - 32px);
+    height: calc(100vh - 32px);
+    max-height: calc(100vh - 32px);
   }
 
   body.sidebar-open .sidebar {
     transform: translateX(0);
+  }
+
+  body.sidebar-open {
+    overflow: hidden;
+  }
+
+  body.sidebar-open .sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .drawer-toggle {
@@ -979,6 +1129,7 @@ tbody tr:hover {
   .persona-panel,
   .role-hero,
   .role-hero-actions,
+  .topbar-account,
   .topbar-right,
   .topbar-left {
     flex-direction: column;
@@ -987,6 +1138,11 @@ tbody tr:hover {
 
   .search-box {
     min-width: 100%;
+    max-width: none;
+  }
+
+  .user-summary {
+    max-width: none;
   }
 
   .btn,

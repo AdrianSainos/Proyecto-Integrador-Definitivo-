@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reportes | LogisticHub</title>
+  <title>Reportes | GESTIONPAQ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -16,13 +16,20 @@
     <section class="toolbar">
       <div>
         <h2 class="card-title">Resumen del periodo</h2>
-        <p class="card-subtitle">Rango actual: hoy</p>
+        <p class="card-subtitle" id="reportsRangeCaption">Rango actual: hoy</p>
       </div>
       <div class="toolbar-group">
+        <label class="small-label" for="reportsRangeSelect">Rango</label>
+        <select class="select" id="reportsRangeSelect">
+          <option value="today" selected>Hoy</option>
+          <option value="week">Ultimos 7 dias</option>
+          <option value="month">Ultimos 30 dias</option>
+        </select>
         <button class="btn btn-outline" type="button" id="exportCsvButton">Exportar CSV</button>
         <button class="btn btn-primary" type="button" id="exportPdfButton">Exportar PDF</button>
       </div>
     </section>
+    <div id="reportsNotice"></div>
     <section id="reportsCards" class="report-grid"></section>
     <section class="table-panel">
       <div class="table-header">
@@ -42,7 +49,6 @@
       </div>
     </section>
   </div>
-  <script src="/logistichub/assets/js/shared/mock-data.js"></script>
   <script src="/logistichub/assets/js/core.js"></script>
   <script src="/logistichub/assets/js/shared/layout.js"></script>
   <script src="/logistichub/assets/js/pages/reports.js"></script>

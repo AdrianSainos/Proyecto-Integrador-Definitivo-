@@ -74,11 +74,10 @@
   function config() {
     const runtime = window.LOGISTICHUB_CONFIG || {};
     const storedBase = window.localStorage.getItem('logistichub.apiBase');
-    const storedUseMocks = window.localStorage.getItem('logistichub.useMocks');
 
     return {
       API_BASE: runtime.API_BASE || storedBase || '/api',
-      USE_MOCKS: typeof runtime.USE_MOCKS === 'boolean' ? runtime.USE_MOCKS : storedUseMocks === 'true',
+      USE_MOCKS: typeof runtime.USE_MOCKS === 'boolean' ? runtime.USE_MOCKS : false,
     };
   }
 
@@ -211,13 +210,46 @@
 
       return payload;
     } catch (error) {
-      if (config().USE_MOCKS && window.LogisticHubMockApi) {
-        const mocked = await window.LogisticHubMockApi.request(endpoint, fetchOptions);
-        return mocked.data;
-      }
-
       throw error;
     }
+  }
+
+  async function downloadFile(endpoint, fileName) {
+    const headers = {};
+    const token = getToken();
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await window.fetch(buildUrl(endpoint), { method: 'GET', headers });
+
+    if (response.status === 401) {
+      clearToken();
+      clearUser();
+      window.location.href = '/logistichub/login.html';
+      throw new Error('Sesion expirada');
+    }
+
+    if (!response.ok) {
+      const payload = await parseResponse(response);
+      const message = payload && typeof payload === 'object' ? payload.message || payload.error : null;
+      throw new Error(message || 'No se pudo descargar el archivo.');
+    }
+
+    const blob = await response.blob();
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const matched = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/i);
+    const resolvedName = matched ? matched[1].replace(/['"]/g, '') : fileName;
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+
+    anchor.href = url;
+    anchor.download = resolvedName || fileName || 'archivo';
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(url);
   }
 
   function logout() {
@@ -318,7 +350,11 @@
       return 'status-pill';
     }
 
-    if (normalized.includes('pend') || normalized.includes('prepar')) {
+    if (normalized.includes('pend') || normalized.includes('prepar') || normalized.includes('planific')) {
+      return 'badge-soft';
+    }
+
+    if (normalized.includes('asign')) {
       return 'badge-soft';
     }
 
@@ -357,6 +393,7 @@
     setUser,
     clearUser,
     apiRequest,
+    downloadFile,
     logout,
     protectPage,
     getRoleProfile,

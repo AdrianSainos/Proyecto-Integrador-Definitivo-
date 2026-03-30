@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Support\ApiResponder;
+use App\Support\LogisticsPlanner;
 use App\Support\LogisticsSupport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -51,6 +52,8 @@ class RouteController extends Controller
             'vehicleId' => ['nullable', 'integer'],
             'driverId' => ['nullable', 'integer'],
         ]);
+        $payload['driverId'] = $this->normalizeDriverReference($payload['driverId'] ?? null);
+        $statusId = DB::table('estado_ruta')->where('nombre', $payload['status'])->value('id');
 
         $id = DB::table('rutas')->insertGetId([
             'codigo' => sprintf('RUTA-%04d', (int) (DB::table('rutas')->max('id') + 1)),
@@ -63,11 +66,15 @@ class RouteController extends Controller
             'estimated_time_minutes' => $payload['timeMinutes'],
             'vehicle_id' => $payload['vehicleId'] ?: null,
             'driver_id' => $payload['driverId'] ?: null,
+            'estado_id' => $statusId,
             'status' => $payload['status'],
             'estado' => $payload['status'],
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        $this->syncRouteOperationalData($id);
+        LogisticsPlanner::syncRouteMetrics($id);
 
         return ApiResponder::success([
             'item' => LogisticsSupport::routePayload(LogisticsSupport::routeBaseQuery()->where('rutas.id', $id)->first()),
@@ -85,6 +92,13 @@ class RouteController extends Controller
             'vehicleId' => ['nullable', 'integer'],
             'driverId' => ['nullable', 'integer'],
         ]);
+        if (array_key_exists('driverId', $payload)) {
+            $payload['driverId'] = $this->normalizeDriverReference($payload['driverId']);
+        }
+        $current = DB::table('rutas')
+            ->where('id', $route)
+            ->select(['id', 'driver_id', 'vehicle_id', 'status', 'estado'])
+            ->first();
 
         $update = ['updated_at' => now()];
 
@@ -115,9 +129,12 @@ class RouteController extends Controller
         if (array_key_exists('status', $payload)) {
             $update['status'] = $payload['status'];
             $update['estado'] = $payload['status'];
+            $update['estado_id'] = DB::table('estado_ruta')->where('nombre', $payload['status'])->value('id');
         }
 
         DB::table('rutas')->where('id', $route)->update($update);
+        $this->syncRouteOperationalData($route, $current);
+        LogisticsPlanner::syncRouteMetrics($route);
 
         return ApiResponder::success([
             'item' => LogisticsSupport::routePayload(LogisticsSupport::routeBaseQuery()->where('rutas.id', $route)->first()),
@@ -127,9 +144,146 @@ class RouteController extends Controller
 
     public function destroy(int $route): JsonResponse
     {
+        $current = DB::table('rutas')
+            ->where('id', $route)
+            ->select(['id', 'driver_id'])
+            ->first();
+
         DB::table('asignaciones')->where('ruta_id', $route)->orWhere('route_id', $route)->delete();
         DB::table('rutas')->where('id', $route)->delete();
 
+        if ($current && (int) ($current->driver_id ?? 0) > 0) {
+            $this->refreshDriverOperationalState((int) $current->driver_id);
+        }
+
         return response()->json(null, 204);
+    }
+
+    private function syncRouteOperationalData(int $routeId, ?object $previousRoute = null): void
+    {
+        $route = DB::table('rutas')
+            ->where('id', $routeId)
+            ->select(['id', 'driver_id', 'vehicle_id', 'status', 'estado'])
+            ->first();
+
+        if (! $route) {
+            return;
+        }
+
+        DB::table('asignaciones')
+            ->where(function ($query) use ($routeId): void {
+                $query->where('ruta_id', $routeId)
+                    ->orWhere('route_id', $routeId);
+            })
+            ->update([
+                'conductor_id' => $route->driver_id ?: null,
+                'driver_id' => $route->driver_id ?: null,
+                'vehiculo_id' => $route->vehicle_id ?: null,
+                'vehicle_id' => $route->vehicle_id ?: null,
+                'updated_at' => now(),
+            ]);
+
+        if ((int) ($route->driver_id ?? 0) > 0) {
+            $this->syncDriverOperationalState(
+                (int) $route->driver_id,
+                $route->vehicle_id ? (int) $route->vehicle_id : null,
+                $route->status ?? $route->estado
+            );
+        }
+
+        $previousDriverId = (int) ($previousRoute->driver_id ?? 0);
+        $currentDriverId = (int) ($route->driver_id ?? 0);
+
+        if ($previousDriverId > 0 && $previousDriverId !== $currentDriverId) {
+            $this->refreshDriverOperationalState($previousDriverId);
+        }
+    }
+
+    private function syncDriverOperationalState(int $driverId, ?int $vehicleId, ?string $routeStatus): void
+    {
+        $status = $this->driverStatusForRoute($routeStatus);
+        $statusId = DB::table('estado_conductor')->where('nombre', $status)->value('id');
+        $updates = [
+            'status' => $status,
+            'updated_at' => now(),
+        ];
+
+        if ($statusId) {
+            $updates['estado_id'] = $statusId;
+        }
+
+        if ($vehicleId) {
+            $updates['current_vehicle_id'] = $vehicleId;
+        }
+
+        DB::table('conductores')->where('id', $driverId)->update($updates);
+    }
+
+    private function refreshDriverOperationalState(int $driverId): void
+    {
+        $activeRoute = DB::table('rutas')
+            ->where('driver_id', $driverId)
+            ->whereRaw('LOWER(COALESCE(status, estado, "")) not in (?, ?)', ['completada', 'cancelada'])
+            ->orderByRaw('CASE WHEN LOWER(COALESCE(status, estado, "")) like ? THEN 0 ELSE 1 END', ['%ejec%'])
+            ->orderByDesc('scheduled_date')
+            ->orderByDesc('id')
+            ->select(['vehicle_id', 'status', 'estado'])
+            ->first();
+
+        if ($activeRoute) {
+            $this->syncDriverOperationalState(
+                $driverId,
+                $activeRoute->vehicle_id ? (int) $activeRoute->vehicle_id : null,
+                $activeRoute->status ?? $activeRoute->estado
+            );
+
+            return;
+        }
+
+        $statusId = DB::table('estado_conductor')->where('nombre', 'Disponible')->value('id');
+        $updates = [
+            'status' => 'Disponible',
+            'updated_at' => now(),
+        ];
+
+        if ($statusId) {
+            $updates['estado_id'] = $statusId;
+        }
+
+        DB::table('conductores')->where('id', $driverId)->update($updates);
+    }
+
+    private function driverStatusForRoute(?string $routeStatus): string
+    {
+        $status = strtolower((string) $routeStatus);
+
+        if (str_contains($status, 'ejec')) {
+            return 'En ruta';
+        }
+
+        if (str_contains($status, 'prepar')) {
+            return 'Activo';
+        }
+
+        return 'Disponible';
+    }
+
+    private function normalizeDriverReference(mixed $driverReference): ?int
+    {
+        $driverId = (int) $driverReference;
+
+        if ($driverId <= 0) {
+            return null;
+        }
+
+        $direct = DB::table('conductores')->where('id', $driverId)->value('id');
+
+        if ($direct) {
+            return (int) $direct;
+        }
+
+        $fromPersona = DB::table('conductores')->where('persona_id', $driverId)->value('id');
+
+        return $fromPersona ? (int) $fromPersona : null;
     }
 }

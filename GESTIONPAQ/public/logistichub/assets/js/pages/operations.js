@@ -10,31 +10,31 @@ window.LogisticHubCore.ready(async () => {
       eyebrow: 'Vista de coordinacion',
       title: 'Operaciones y cola de salida',
       description: 'Control de carga lista para despacho, saturacion de unidades y lectura de cumplimiento operativo.',
-      message: 'Vista integral de la mesa operativa con capacidad para detectar cuellos de botella y reasignar prioridad.',
+      message: 'Estado actual de la cola, la capacidad y los despachos activos.',
     },
     operator: {
       eyebrow: 'Mesa operativa',
       title: 'Despacho del turno actual',
       description: 'Prioriza pendientes, confirma capacidad y monitorea el flujo de salida del dia.',
-      message: 'Esta vista concentra la cola de trabajo que debes atender primero para mantener continuidad operativa.',
+      message: 'Pendientes, asignaciones y continuidad del turno.',
     },
     dispatcher: {
       eyebrow: 'Coordinacion de salida',
       title: 'Asignaciones pendientes y cobertura',
       description: 'Relacion directa entre paquete, ruta, unidad y conductor para reaccionar en tiempo real.',
-      message: 'Tu foco esta en cerrar huecos de asignacion antes de que la ruta pierda ventana de salida.',
+      message: 'Cobertura de rutas y asignaciones pendientes del periodo.',
     },
     customer: {
       eyebrow: 'Portal de cliente',
       title: 'Movimientos visibles de tus solicitudes',
       description: 'Seguimiento de envios con lectura de estado y asignacion asociada cuando exista.',
-      message: 'La cola mostrada queda limitada a la informacion visible para tu cuenta y mantiene el mismo nivel visual del panel principal.',
+      message: 'Resumen visible de tus solicitudes y su estado actual.',
     },
   }[user.role] || {
     eyebrow: profile.dashboardEyebrow,
     title: profile.dashboardTitle,
     description: profile.dashboardDescription,
-    message: 'Vista contextualizada segun el rol autenticado.',
+    message: 'Estado operativo visible para tu perfil.',
   };
 
   window.LogisticHubCore.applyShellIntro(persona);

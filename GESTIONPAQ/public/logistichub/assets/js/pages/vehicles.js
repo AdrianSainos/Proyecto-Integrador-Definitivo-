@@ -16,9 +16,11 @@ window.LogisticHubCore.ready(async () => {
         <td>${item.type}</td>
         <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${item.status}</span></td>
         <td>${item.capacity}</td>
+        <td>${item.maintenance ? '<span class="role-pill">Activo</span>' : '<span class="status-pill">Sin eventos</span>'}</td>
         <td>
           <div class="table-actions">
             <a class="btn btn-outline btn-sm" href="/logistichub/vehicle-form.html?id=${item.id}">Editar</a>
+            <a class="btn btn-outline btn-sm" href="/logistichub/maintenance.html?vehicleId=${item.id}">Mantenimiento</a>
             <button class="btn btn-danger btn-sm" data-delete-id="${item.id}">Eliminar</button>
           </div>
         </td>

@@ -30,6 +30,8 @@ class LogisticsCatalogSeeder extends Seeder
             ['id' => 2, 'nombre' => 'Registrado'],
             ['id' => 3, 'nombre' => 'En ruta'],
             ['id' => 4, 'nombre' => 'Entregado'],
+            ['id' => 5, 'nombre' => 'Planificado'],
+            ['id' => 6, 'nombre' => 'Asignado'],
         ], ['id'], ['nombre']);
 
         DB::table('tipo_vehiculo')->upsert([
@@ -56,6 +58,13 @@ class LogisticsCatalogSeeder extends Seeder
             ['id' => 2, 'nombre' => 'En ejecucion'],
             ['id' => 3, 'nombre' => 'Completada'],
             ['id' => 4, 'nombre' => 'Cancelada'],
+        ], ['id'], ['nombre']);
+
+        DB::table('tipo_mantenimiento')->upsert([
+            ['id' => 1, 'nombre' => 'Preventivo'],
+            ['id' => 2, 'nombre' => 'Correctivo'],
+            ['id' => 3, 'nombre' => 'Inspeccion'],
+            ['id' => 4, 'nombre' => 'Llantas'],
         ], ['id'], ['nombre']);
     }
 }

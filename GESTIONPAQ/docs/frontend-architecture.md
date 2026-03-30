@@ -1,4 +1,4 @@
-# LogisticHub Frontend Architecture
+# GESTIONPAQ Frontend Architecture
 
 ## Estado actual comprobado
 
@@ -7,6 +7,8 @@
 - `php artisan db:show` no es confiable en este servidor porque intenta consultar `performance_schema.session_status`.
 - La capa API REST ya esta implementada en `routes/api.php` y controladores `App\Http\Controllers\Api\*`.
 - La base queda preparada para sembrar solo catalogos y un usuario admin inicial.
+- El modulo de reportes ya exporta CSV y PDF reales desde la API.
+- Existe un cliente movil Expo scaffolded en `mobile-expo/` consumiendo la misma API.
 
 ## Decision de arquitectura
 
@@ -65,6 +67,23 @@ public/logistichub/
         settings.js
         reports.js
         tracking.js
+mobile-expo/
+  App.js
+  app.json
+  package.json
+  src/
+    api.js
+    config.js
+    theme.js
+    components/
+      Ui.js
+    screens/
+      LoginScreen.js
+      HomeScreen.js
+      ShipmentsScreen.js
+      RoutesScreen.js
+      TrackingScreen.js
+      ProfileScreen.js
 ```
 
 ## Principios del frontend
@@ -177,6 +196,8 @@ Responsabilidades:
 ### Reportes
 
 - `GET /reports?type=daily&range=today`
+- `GET /reports/export/csv?range=today`
+- `GET /reports/export/pdf?range=today`
 
 ### Tracking
 
@@ -237,9 +258,24 @@ Cuando exista la API real, el frontend actual solo necesitara:
 3. Devolver JSON normalizado o permitir que el frontend traduzca campos heredados.
 4. Dejar a Laravel fuera del renderizado visual.
 
+## Cliente movil Expo
+
+El cliente movil vive en `mobile-expo/` y consume la misma API desacoplada.
+
+Pantallas iniciales:
+
+- Login contra `POST /api/auth/login`
+- Inicio con resumen movil usando `GET /api/dashboard`
+- Envios usando `GET /api/shipments`
+- Rutas usando `GET /api/routes`
+- Rastreo usando `GET /api/tracking/{trackingCode}`
+- Perfil y cierre de sesion
+
+Para ejecutarlo se requiere Node.js 18+ y ajustar `mobile-expo/src/config.js` con la IP o dominio del backend.
+
 ## Credenciales iniciales del backend
 
-- Email: `admin@logistichub.local`
+- Email: `admin@gestionpaq.local`
 - Password: `admin123`
 
 Estas credenciales funcionan como bootstrap minimo del sistema. Los datos operativos deben venir de tu base real.

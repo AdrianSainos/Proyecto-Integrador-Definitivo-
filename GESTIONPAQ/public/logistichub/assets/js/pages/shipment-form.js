@@ -1,4 +1,4 @@
-window.LogisticHubCore.ready(async () => {
+﻿window.LogisticHubCore.ready(async () => {
   if (!window.LogisticHubCore.protectPage(['admin', 'operator', 'supervisor', 'dispatcher'])) {
     return;
   }
@@ -19,9 +19,9 @@ window.LogisticHubCore.ready(async () => {
 
   fillSelect('#senderId', options.customers, 'Selecciona remitente');
   fillSelect('#recipientId', options.customers, 'Selecciona destinatario');
-  fillSelect('#originWarehouseId', options.warehouses, 'Asignacion automatica', (item) => ({ value: item.id, label: `${item.name} · ${item.city}` }));
+  fillSelect('#originWarehouseId', options.warehouses, 'Asignacion automatica', (item) => ({ value: item.id, label: `${item.name} - ${item.city}` }));
   fillSelect('#packageType', options.packageTypes, 'Selecciona tipo', (item) => ({ value: item, label: item }));
-  fillSelect('#priority', options.priorities, 'Selecciona prioridad', (item) => ({ value: item, label: item }));
+  fillSelect('#priority', options.priorities, 'Selecciona prioridad', (item) => ({ value: item.value, label: item.label }));
   fillSelect('#initialStatus', options.statuses, 'Selecciona estado', (item) => ({ value: item, label: item }));
 
   const destinationSelect = document.querySelector('#destinationAddressId');
@@ -31,7 +31,7 @@ window.LogisticHubCore.ready(async () => {
     const customer = options.customers.find((item) => Number(item.id) === Number(customerId));
     const addresses = customer ? customer.addresses : [];
 
-    destinationSelect.innerHTML = '<option value="">Selecciona una direccion guardada</option>' + addresses.map((address) => `<option value="${address.id}">${address.label} · ${address.address}, ${address.city}</option>`).join('');
+    destinationSelect.innerHTML = '<option value="">Selecciona una direccion guardada</option>' + addresses.map((address) => `<option value="${address.id}">${address.label} - ${address.address}, ${address.city}</option>`).join('');
 
     if (!addresses.length) {
       coordinatesNotice.value = 'Sin coordenadas guardadas.';
@@ -123,7 +123,12 @@ window.LogisticHubCore.ready(async () => {
       data: payload,
     });
 
-    window.LogisticHubCore.setNotice('success', response.message || 'Envio guardado correctamente.');
+    const recommendation = response.recommendation && response.recommendation.route
+      ? ` Ruta sugerida: ${response.recommendation.route.code} (${response.recommendation.score} pts).`
+      : '';
+
+    window.LogisticHubCore.setNotice('success', `${response.message || 'Envio guardado correctamente.'}${recommendation}`.trim());
     window.location.href = '/logistichub/shipments.html';
   });
 });
+

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\LogisticsAnalytics;
 use App\Support\ApiResponder;
 use App\Support\LogisticsSupport;
 use Illuminate\Http\JsonResponse;
@@ -15,6 +16,7 @@ class DashboardController extends Controller
     {
         $user = LogisticsSupport::apiUser($request);
         $role = LogisticsSupport::roleName($user);
+        $window = LogisticsAnalytics::dashboardWindow($request->query('range'));
         $shipments = LogisticsSupport::shipmentBaseQueryFor($request)->get()->map(fn ($item) => LogisticsSupport::shipmentPayload($item));
 
         $routes = LogisticsSupport::routeBaseQueryFor($request)->get()->map(fn ($item) => LogisticsSupport::routePayload($item));
@@ -78,11 +80,29 @@ class DashboardController extends Controller
             $customers = $customers->whereIn('id', $visibleCustomerIds)->values();
         }
 
+        $shipmentsWindow = LogisticsAnalytics::filterByRange($shipments, [LogisticsAnalytics::class, 'shipmentMoment'], $window['start'], $window['end']);
+        $routesWindow = LogisticsAnalytics::filterByRange($routes, [LogisticsAnalytics::class, 'routeMoment'], $window['start'], $window['end']);
+        $eventsWindow = LogisticsAnalytics::filterByRange(LogisticsAnalytics::trackingEventsForShipments($shipments), [LogisticsAnalytics::class, 'eventMoment'], $window['start'], $window['end']);
+
         $pending = $shipments->where('status', 'Pendiente')->count();
+        $planned = $shipments->filter(fn ($item) => str_contains(strtolower((string) $item['status']), 'planific'))->count();
+        $assigned = $shipments->filter(fn ($item) => str_contains(strtolower((string) $item['status']), 'asign') || (string) $item['status'] === 'Registrado')->count();
         $inRoute = $shipments->where('status', 'En ruta')->count();
         $delivered = $shipments->filter(fn ($item) => str_contains(strtolower($item['status']), 'entreg'))->count();
+        $slaRate = LogisticsAnalytics::onTimeRate($shipmentsWindow);
+        $capacityRate = LogisticsAnalytics::capacityUseRate($routes, $vehicles);
+        $weightCommitted = round((float) $shipmentsWindow->sum('weightKg'), 1);
+        $routeEfficiency = round((float) $routesWindow->avg('optimizationScore'), 1);
+        $operationalEvolution = LogisticsAnalytics::operationalEvolution($shipmentsWindow, $window);
+        $deliveriesByHour = LogisticsAnalytics::deliveriesByHour($shipmentsWindow, $eventsWindow);
 
         return ApiResponder::success([
+            'range' => [
+                'key' => $window['key'],
+                'label' => $window['label'],
+                'from' => $window['start']->toDateString(),
+                'to' => $window['end']->toDateString(),
+            ],
             'kpis' => [
                 ['title' => 'Paquetes Totales', 'value' => $shipments->count(), 'detail' => 'Volumen operativo total'],
                 ['title' => 'Rutas', 'value' => $routes->count(), 'detail' => 'Planeadas y en ejecucion'],
@@ -97,23 +117,39 @@ class DashboardController extends Controller
             ],
             'strip' => [
                 ['title' => 'Despachos activos', 'value' => $routes->where('status', 'En ejecucion')->count(), 'subtitle' => 'Ventanas sincronizadas', 'className' => 'accent-soft'],
-                ['title' => 'Nivel SLA', 'value' => $shipments->count() ? '96.0%' : '0%', 'subtitle' => 'Lectura operativa', 'className' => 'brand-soft'],
-                ['title' => 'Despacho automatizado', 'value' => 'Reglas REST', 'subtitle' => 'API lista para frontend', 'className' => 'dark-gradient'],
-                ['title' => 'Capacidad usada', 'value' => $vehicles->count() ? '68%' : '0%', 'subtitle' => 'Flota + rutas', 'className' => ''],
+                ['title' => 'Nivel SLA', 'value' => LogisticsAnalytics::formatPercent($slaRate), 'subtitle' => 'Cumplimiento dentro del rango', 'className' => 'brand-soft'],
+                ['title' => 'Peso comprometido', 'value' => $weightCommitted ? $weightCommitted.' kg' : '0 kg', 'subtitle' => 'Carga visible del periodo', 'className' => 'dark-gradient'],
+                ['title' => 'Capacidad usada', 'value' => LogisticsAnalytics::formatPercent($capacityRate), 'subtitle' => $routeEfficiency ? 'Optimizacion '.$routeEfficiency.' pts' : 'Sin rutas evaluadas', 'className' => ''],
             ],
             'charts' => [
-                'operationalEvolution' => [8, 12, 14, 16, 18, 17, 20],
-                'packageStatus' => [$pending, $inRoute, $delivered, max($shipments->count() - ($pending + $inRoute + $delivered), 0)],
-                'deliveriesByHour' => [1, 2, 3, 5, 7, 4, 2],
+                'operationalEvolution' => $operationalEvolution,
+                'packageStatus' => [
+                    'labels' => ['Pendientes', 'Planificados', 'Asignados', 'En ruta', 'Entregados', 'Otros'],
+                    'data' => [
+                        $pending,
+                        $planned,
+                        $assigned,
+                        $inRoute,
+                        $delivered,
+                        max($shipments->count() - ($pending + $planned + $assigned + $inRoute + $delivered), 0),
+                    ],
+                ],
+                'deliveriesByHour' => $deliveriesByHour,
                 'routeState' => [
-                    $routes->where('status', 'Preparacion')->count(),
-                    $routes->where('status', 'En ejecucion')->count(),
-                    $routes->where('status', 'Completada')->count(),
-                    $routes->where('status', 'Cancelada')->count(),
+                    'labels' => ['Preparacion', 'En ejecucion', 'Completadas', 'Canceladas'],
+                    'data' => [
+                        $routes->where('status', 'Preparacion')->count(),
+                        $routes->where('status', 'En ejecucion')->count(),
+                        $routes->where('status', 'Completada')->count(),
+                        $routes->where('status', 'Cancelada')->count(),
+                    ],
                 ],
             ],
             'exceptions' => [
-                'pendingDeparture' => $shipments->where('status', 'Pendiente')->take(3)->values(),
+                'pendingDeparture' => $shipments
+                    ->filter(fn ($item) => in_array((string) $item['status'], ['Pendiente', 'Registrado', 'Planificado', 'Asignado'], true))
+                    ->take(3)
+                    ->values(),
                 'maintenanceUnits' => $vehicles->where('maintenance', true)->take(3)->values(),
                 'outOfShiftDrivers' => $drivers->filter(fn ($item) => str_contains(strtolower($item['status']), 'fuera'))->take(3)->values(),
                 'activeRoutes' => $routes->filter(fn ($item) => in_array($item['status'], ['En ejecucion', 'Preparacion'], true))->take(4)->values(),

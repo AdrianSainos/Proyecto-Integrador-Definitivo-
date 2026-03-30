@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard | LogisticHub</title>
+  <title>Dashboard | GESTIONPAQ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -26,6 +26,20 @@
 
     <section id="roleExperience"></section>
 
+    <section class="toolbar">
+      <div>
+        <h2 class="card-title">Lectura analitica</h2>
+        <p class="card-subtitle" id="dashboardRangeCaption">Cargando rango actual...</p>
+      </div>
+      <div class="toolbar-group">
+        <label class="small-label" for="dashboardRangeSelect">Rango</label>
+        <select class="select" id="dashboardRangeSelect">
+          <option value="today">Hoy</option>
+          <option value="week" selected>Ultimos 7 dias</option>
+        </select>
+      </div>
+    </section>
+
     <section id="dashboardStrip" class="dashboard-strip"></section>
     <section id="dashboardKpis" class="kpi-grid"></section>
 
@@ -34,18 +48,22 @@
         <article class="module-card">
           <div class="card-head"><div><p class="small-label">Evolucion operativa</p><h2 class="card-title">Crecimiento diario</h2></div></div>
           <div class="chart-wrap"><canvas id="operationsChart"></canvas></div>
+          <div id="operationsChartSummary" class="chart-summary"></div>
         </article>
         <article class="module-card">
           <div class="card-head"><div><p class="small-label">Estado de paquetes</p><h2 class="card-title">Distribucion actual</h2></div></div>
           <div class="chart-wrap"><canvas id="statusChart"></canvas></div>
+          <div id="statusChartSummary" class="chart-summary"></div>
         </article>
         <article class="module-card">
           <div class="card-head"><div><p class="small-label">Entregas por hora</p><h2 class="card-title">Curva de entregas</h2></div></div>
           <div class="chart-wrap"><canvas id="hourlyChart"></canvas></div>
+          <div id="hourlyChartSummary" class="chart-summary"></div>
         </article>
         <article class="module-card">
           <div class="card-head"><div><p class="small-label">Estado de rutas</p><h2 class="card-title">Capacidad en movimiento</h2></div></div>
           <div class="chart-wrap"><canvas id="routeStateChart"></canvas></div>
+          <div id="routeStateChartSummary" class="chart-summary"></div>
         </article>
       </div>
 
@@ -73,9 +91,9 @@
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <script src="/logistichub/assets/js/shared/mock-data.js"></script>
   <script src="/logistichub/assets/js/core.js"></script>
   <script src="/logistichub/assets/js/shared/layout.js"></script>
   <script src="/logistichub/assets/js/pages/dashboard.js"></script>
 </body>
 </html>
+

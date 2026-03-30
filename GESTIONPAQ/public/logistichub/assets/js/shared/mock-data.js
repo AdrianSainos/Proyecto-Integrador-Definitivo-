@@ -18,9 +18,12 @@
   function seedStore() {
     return {
       users: [
-        { id: 1, email: 'admin@logistichub.local', password: 'admin123', role: 'admin', active: true, name: 'Alicia Ortega' },
-        { id: 2, email: 'supervisor@logistichub.local', password: 'super123', role: 'supervisor', active: true, name: 'Bruno Salas' },
-        { id: 3, email: 'dispatcher@logistichub.local', password: 'dispatch123', role: 'dispatcher', active: true, name: 'Camila Soto' },
+        { id: 1, email: 'admin@gestionpaq.local', password: 'admin123', role: 'admin', active: true, name: 'Alicia Ortega' },
+        { id: 2, email: 'operator@gestionpaq.local', password: 'oper123', role: 'operator', active: true, name: 'Olga Operaciones' },
+        { id: 3, email: 'supervisor@gestionpaq.local', password: 'super123', role: 'supervisor', active: true, name: 'Sofia Supervision' },
+        { id: 4, email: 'dispatcher@gestionpaq.local', password: 'dispatch123', role: 'dispatcher', active: true, name: 'Diego Despacho' },
+        { id: 5, email: 'driver@gestionpaq.local', password: 'driver123', role: 'driver', active: true, name: 'Daniel Ruta' },
+        { id: 6, email: 'customer@gestionpaq.local', password: 'client123', role: 'customer', active: true, name: 'Carla Cliente' },
       ],
       customers: [
         {
@@ -79,7 +82,7 @@
       shipments: [
         {
           id: 1,
-          tracking: 'CF-240001',
+          tracking: 'GPQ-240001',
           senderId: 1,
           recipientId: 2,
           originWarehouseId: 1,
@@ -108,7 +111,7 @@
         },
         {
           id: 2,
-          tracking: 'CF-240002',
+          tracking: 'GPQ-240002',
           senderId: 3,
           recipientId: 1,
           originWarehouseId: 2,
@@ -135,7 +138,7 @@
         },
         {
           id: 3,
-          tracking: 'CF-240003',
+          tracking: 'GPQ-240003',
           senderId: 2,
           recipientId: 3,
           originWarehouseId: 1,
@@ -162,8 +165,8 @@
         },
       ],
       settings: {
-        companyName: 'CompraFacil Logistica',
-        supportEmail: 'soporte@comprafacil.mx',
+        companyName: 'GESTIONPAQ',
+        supportEmail: 'soporte@gestionpaq.mx',
         supportPhone: '555-000-4455',
         dispatchStartTime: '06:00',
         defaultLeadDays: 2,
@@ -206,16 +209,47 @@
     return store.drivers.find((item) => item.id === Number(id));
   }
 
+  function enrichRoute(store, route) {
+    if (!route) {
+      return null;
+    }
+
+    const warehouseId = route.warehouseId ? Number(route.warehouseId) : null;
+    const vehicleId = route.vehicleId ? Number(route.vehicleId) : null;
+    const driverId = route.driverId ? Number(route.driverId) : null;
+    const warehouse = store.warehouses.find((item) => item.id === warehouseId);
+    const vehicle = getVehicle(store, vehicleId);
+    const driver = getDriver(store, driverId);
+
+    return {
+      ...route,
+      warehouseId,
+      warehouseName: warehouse ? warehouse.name : route.warehouseName || 'Sin almacen',
+      distanceKm: Number(route.distanceKm || 0),
+      timeMinutes: Number(route.timeMinutes || 0),
+      vehicleId,
+      vehiclePlate: vehicle ? vehicle.plate : 'Pendiente',
+      driverId,
+      driverName: driver ? driver.name : 'Pendiente',
+      optimizationScore: Number(route.optimizationScore || 0),
+    };
+  }
+
   function enrichShipment(store, shipment) {
     const sender = getCustomer(store, shipment.senderId);
     const recipient = getCustomer(store, shipment.recipientId);
-    const route = getRoute(store, shipment.routeId);
-    const vehicle = getVehicle(store, shipment.vehicleId);
-    const driver = getDriver(store, shipment.driverId);
+    const route = enrichRoute(store, getRoute(store, shipment.routeId));
+    const resolvedVehicleId = route ? route.vehicleId : shipment.vehicleId;
+    const resolvedDriverId = route ? route.driverId : shipment.driverId;
+    const vehicle = getVehicle(store, resolvedVehicleId);
+    const driver = getDriver(store, resolvedDriverId);
     const warehouse = store.warehouses.find((item) => item.id === Number(shipment.originWarehouseId));
 
     return {
       ...shipment,
+      routeId: shipment.routeId ? Number(shipment.routeId) : null,
+      vehicleId: resolvedVehicleId ? Number(resolvedVehicleId) : null,
+      driverId: resolvedDriverId ? Number(resolvedDriverId) : null,
       senderName: sender ? sender.name : 'Sin remitente',
       recipientName: recipient ? recipient.name : 'Sin destinatario',
       customerName: sender ? sender.name : 'Sin cliente',
@@ -405,12 +439,14 @@
       return null;
     }
 
+    const enrichedShipment = enrichShipment(store, shipment);
+
     return {
-      shipment: enrichShipment(store, shipment),
+      shipment: enrichedShipment,
       events: [
         { id: 1, type: 'Registro', description: 'Envio registrado en plataforma', location: shipment.originAddress, timestamp: shipment.createdAt },
         { id: 2, type: 'Asignacion', description: `Asignado a ${getRoute(store, shipment.routeId)?.code || 'ruta pendiente'}`, location: 'Mesa de despacho', timestamp: new Date(today.getTime() - 3600 * 1000 * 4).toISOString() },
-        { id: 3, type: 'Transito', description: `Unidad ${getVehicle(store, shipment.vehicleId)?.plate || 'sin asignar'} en movimiento`, location: shipment.destinationCity, timestamp: new Date(today.getTime() - 3600 * 1000 * 2).toISOString() },
+        { id: 3, type: 'Transito', description: `Unidad ${enrichedShipment.vehiclePlate || 'sin asignar'} en movimiento`, location: shipment.destinationCity, timestamp: new Date(today.getTime() - 3600 * 1000 * 2).toISOString() },
       ],
     };
   }
@@ -536,36 +572,36 @@
       }
 
       if (path === '/routes' && method === 'GET') {
+        store.routes = store.routes.map((item) => enrichRoute(store, item));
+        saveStore(store);
         return jsonResponse(store.routes);
       }
 
       if (/^\/routes\/\d+$/.test(path) && method === 'GET') {
         const id = path.split('/').pop();
-        return jsonResponse(store.routes.find((item) => Number(item.id) === Number(id)));
+        const route = store.routes.find((item) => Number(item.id) === Number(id));
+        return jsonResponse(enrichRoute(store, route));
       }
 
       if (path === '/routes' && method === 'POST') {
-        const warehouse = store.warehouses.find((item) => item.id === Number(payload.warehouseId));
-        const created = mutateEntity(store, 'routes', {
+        const created = mutateEntity(store, 'routes', enrichRoute(store, {
           code: `RUTA-${String(Date.now()).slice(-4)}`,
           warehouseId: Number(payload.warehouseId),
-          warehouseName: warehouse ? warehouse.name : 'Sin almacen',
           distanceKm: Number(payload.distanceKm || 0),
           timeMinutes: Number(payload.timeMinutes || 0),
           status: payload.status,
           vehicleId: payload.vehicleId ? Number(payload.vehicleId) : null,
-          vehiclePlate: getVehicle(store, payload.vehicleId)?.plate || 'Pendiente',
           driverId: payload.driverId ? Number(payload.driverId) : null,
-          driverName: getDriver(store, payload.driverId)?.name || 'Pendiente',
           optimizationScore: 90,
-        });
+        }));
         saveStore(store);
         return jsonResponse({ item: created, message: 'Ruta guardada correctamente.' }, 201);
       }
 
       if (/^\/routes\/\d+$/.test(path) && method === 'PUT') {
         const id = path.split('/').pop();
-        const updated = mutateEntity(store, 'routes', { ...payload }, id);
+        const current = store.routes.find((item) => Number(item.id) === Number(id)) || {};
+        const updated = mutateEntity(store, 'routes', enrichRoute(store, { ...current, ...payload, id: Number(id) }), id);
         saveStore(store);
         return jsonResponse({ item: updated, message: 'Ruta actualizada correctamente.' });
       }

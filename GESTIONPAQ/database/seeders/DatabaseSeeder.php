@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             LogisticsCatalogSeeder::class,
             LogisticsAdminSeeder::class,
+            LogisticsDemoSeeder::class,
+            LogisticsNationalCoverageSeeder::class,
         ]);
     }
 }

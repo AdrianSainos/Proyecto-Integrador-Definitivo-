@@ -1,4 +1,4 @@
-window.LogisticHubCore.ready(async () => {
+﻿window.LogisticHubCore.ready(async () => {
   if (!window.LogisticHubCore.protectPage(['admin', 'operator', 'supervisor', 'dispatcher', 'customer'])) {
     return;
   }
@@ -52,10 +52,24 @@ window.LogisticHubCore.ready(async () => {
           <div>
             <div class="card-title">${event.type}</div>
             <div>${event.description}</div>
-            <div class="text-muted">${event.location} · ${window.LogisticHubCore.toDate(event.timestamp)}</div>
+            <div class="text-muted">${event.location} - ${window.LogisticHubCore.toDate(event.timestamp)}</div>
           </div>
         </div>
       `).join('');
+
+      document.querySelector('#trackingEvidence').innerHTML = response.evidences && response.evidences.length
+        ? response.evidences.map((item) => `
+          <article class="evidence-entry">
+            <div class="stack-item"><span>Receptor</span><strong>${item.recipientName}</strong></div>
+            <div class="stack-item"><span>Entrega</span><strong>${window.LogisticHubCore.toDate(item.deliveryTimestamp)}</strong></div>
+            <div class="stack-item"><span>Conductor</span><strong>${item.driverName || 'Sin conductor'}</strong></div>
+            <div class="stack-item"><span>Estado</span><strong>${item.status}</strong></div>
+            ${item.photoUrl ? `<a class="btn btn-outline btn-sm" href="${item.photoUrl}" target="_blank" rel="noreferrer">Abrir foto</a>` : '<div class="text-muted">Sin foto registrada</div>'}
+            ${item.signatureUrl ? `<a class="btn btn-outline btn-sm" href="${item.signatureUrl}" target="_blank" rel="noreferrer">Abrir firma</a>` : item.signatureText ? `<div class="text-muted">Firma: ${item.signatureText}</div>` : '<div class="text-muted">Sin firma registrada</div>'}
+            ${item.notes ? `<div class="text-muted">${item.notes}</div>` : ''}
+          </article>
+        `).join('')
+        : '<div class="stack-item"><span>Evidencia</span><strong>Sin pruebas registradas</strong></div>';
 
       document.querySelector('#trackingNotice').innerHTML = '';
     } catch (error) {

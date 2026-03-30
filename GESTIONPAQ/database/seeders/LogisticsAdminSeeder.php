@@ -10,30 +10,59 @@ class LogisticsAdminSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('usuarios')->updateOrInsert(
-            ['email' => 'admin@logistichub.local'],
-            [
+        $roleId = (int) (DB::table('roles')->where('nombre', 'admin')->value('id') ?: 1);
+        $user = DB::table('usuarios')
+            ->whereIn('email', ['admin@gestionpaq.local', 'admin@logistichub.local'])
+            ->first();
+
+        if ($user) {
+            DB::table('usuarios')->where('id', $user->id)->update([
+                'email' => 'admin@gestionpaq.local',
                 'password' => Hash::make('admin123'),
-                'rol_id' => 1,
+                'rol_id' => $roleId,
                 'activo' => 1,
                 'api_token' => null,
                 'last_login_at' => null,
-            ]
-        );
+            ]);
 
-        $adminUserId = (int) DB::table('usuarios')->where('email', 'admin@logistichub.local')->value('id');
-
-        DB::table('personas')->updateOrInsert(
-            ['usuario_id' => $adminUserId],
-            [
-                'nombre' => 'Alicia',
-                'apellido_paterno' => 'Ortega',
-                'telefono' => '5550000101',
-                'email' => 'admin@logistichub.local',
+            $adminUserId = (int) $user->id;
+        } else {
+            $adminUserId = (int) DB::table('usuarios')->insertGetId([
+                'email' => 'admin@gestionpaq.local',
+                'password' => Hash::make('admin123'),
+                'rol_id' => $roleId,
                 'activo' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
+                'api_token' => null,
+                'last_login_at' => null,
+            ]);
+        }
+
+        $person = DB::table('personas')
+            ->where('usuario_id', $adminUserId)
+            ->orWhereIn('email', ['admin@gestionpaq.local', 'admin@logistichub.local'])
+            ->first();
+
+        $payload = [
+            'usuario_id' => $adminUserId,
+            'nombre' => 'Alicia',
+            'apellido_paterno' => 'Ortega',
+            'apellido_materno' => 'Mena',
+            'nombres' => 'Alicia',
+            'apellidos' => 'Ortega Mena',
+            'telefono' => '5550000101',
+            'documento' => 'ADM-GPQ-001',
+            'email' => 'admin@gestionpaq.local',
+            'activo' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        if ($person) {
+            DB::table('personas')->where('id', $person->id)->update($payload);
+
+            return;
+        }
+
+        DB::table('personas')->insert($payload);
     }
 }

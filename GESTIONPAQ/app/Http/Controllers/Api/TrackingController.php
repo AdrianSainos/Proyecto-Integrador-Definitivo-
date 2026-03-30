@@ -31,7 +31,7 @@ class TrackingController extends Controller
                 $query->where('tracking.paquete_id', $shipment->id)
                     ->orWhere('tracking.package_id', $shipment->id);
             })
-            ->orderBy('tracking.fecha')
+            ->orderByRaw('COALESCE(tracking.timestamp_event, tracking.fecha, tracking.created_at)')
             ->get([
                 'tracking.id',
                 'tracking.event_type',
@@ -50,9 +50,17 @@ class TrackingController extends Controller
             ])
             ->values();
 
+        $evidences = LogisticsSupport::evidenceBaseQuery()
+            ->where('evidencias.package_id', $shipment->id)
+            ->orderByDesc('evidencias.delivery_timestamp')
+            ->get()
+            ->map(fn ($item) => LogisticsSupport::evidencePayload($item, $request))
+            ->values();
+
         return ApiResponder::success([
             'shipment' => LogisticsSupport::shipmentPayload($shipment),
             'events' => $events->all(),
+            'evidences' => $evidences->all(),
         ]);
     }
 }

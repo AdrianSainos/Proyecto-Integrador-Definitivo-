@@ -5,12 +5,13 @@ window.LogisticHubCore.ready(async () => {
 
   const user = window.LogisticHubCore.getUser();
   const profile = window.LogisticHubCore.getRoleProfile(user.role);
+  const rangeSelect = document.querySelector('#dashboardRangeSelect');
   const roleExperience = {
     admin: {
       eyebrow: 'Direccion ejecutiva',
-      title: 'Plataforma operativa integral',
-      description: 'Supervision de servicio, capacidad y configuracion desde una sola cabina.',
-      intro: 'Tu vista conserva amplitud total y concentra los indicadores mas utiles para toma de decision ejecutiva.',
+      title: 'Tablero ejecutivo',
+      description: 'Supervision de servicio, capacidad y cumplimiento del periodo.',
+      intro: 'Indicadores ejecutivos, cobertura y servicio en una sola vista.',
       actions: [
         { label: 'Nuevo envio', href: '/logistichub/shipment-form.html', tone: 'success', icon: 'fa-solid fa-plus' },
         { label: 'Ver rutas', href: '/logistichub/routes.html', tone: 'outline', icon: 'fa-solid fa-route' },
@@ -22,7 +23,7 @@ window.LogisticHubCore.ready(async () => {
       eyebrow: 'Operacion central',
       title: 'Flujo diario bajo control',
       description: 'Priorizacion de salidas, incidencias y carga pendiente para el turno actual.',
-      intro: 'La experiencia del operador enfatiza continuidad de despacho, seguimiento y volumen pendiente.',
+      intro: 'Pendientes, despacho y continuidad del turno actual.',
       actions: [
         { label: 'Ir a operaciones', href: '/logistichub/operations.html', tone: 'primary', icon: 'fa-solid fa-wave-square' },
         { label: 'Nuevo envio', href: '/logistichub/shipment-form.html', tone: 'success', icon: 'fa-solid fa-plus' },
@@ -34,7 +35,7 @@ window.LogisticHubCore.ready(async () => {
       eyebrow: 'Capa de supervision',
       title: 'Rendimiento y excepciones',
       description: 'Lectura de cumplimiento, desbalance operativo y calidad de ejecucion.',
-      intro: 'La interfaz del supervisor prioriza brechas de SLA, desbalance entre equipos y trazabilidad de cumplimiento.',
+      intro: 'Brechas de SLA, balance operativo y seguimiento de cumplimiento.',
       actions: [
         { label: 'Abrir reportes', href: '/logistichub/reports.html', tone: 'primary', icon: 'fa-solid fa-chart-line' },
         { label: 'Revisar clientes', href: '/logistichub/customers.html', tone: 'outline', icon: 'fa-solid fa-users-line' },
@@ -46,7 +47,7 @@ window.LogisticHubCore.ready(async () => {
       eyebrow: 'Cabina de despacho',
       title: 'Capacidad en movimiento',
       description: 'Asignaciones, rutas activas y cobertura de salida con foco en ejecucion.',
-      intro: 'La vista del despachador mantiene el acabado premium, pero la jerarquia ahora favorece rutas, unidades y conductores.',
+      intro: 'Rutas, unidades y cobertura de salida en tiempo real.',
       actions: [
         { label: 'Gestionar rutas', href: '/logistichub/routes.html', tone: 'primary', icon: 'fa-solid fa-route' },
         { label: 'Ver flota', href: '/logistichub/vehicles.html', tone: 'outline', icon: 'fa-solid fa-truck-fast' },
@@ -58,7 +59,7 @@ window.LogisticHubCore.ready(async () => {
       eyebrow: 'Operacion de ultima milla',
       title: 'Tu jornada en ruta',
       description: 'Entregas asignadas, secuencia de eventos y visibilidad de progreso personal.',
-      intro: 'En conductor, el tablero se compacta hacia lo que realmente mueve tu jornada: ruta asignada, progreso y entregas visibles.',
+      intro: 'Ruta asignada, progreso y entregas visibles del turno.',
       actions: [
         { label: 'Abrir rutas', href: '/logistichub/routes.html', tone: 'primary', icon: 'fa-solid fa-route' },
         { label: 'Ver rastreo', href: '/logistichub/tracking.html', tone: 'outline', icon: 'fa-solid fa-location-crosshairs' },
@@ -69,7 +70,7 @@ window.LogisticHubCore.ready(async () => {
       eyebrow: 'Portal de cliente',
       title: 'Seguimiento con contexto',
       description: 'Vista clara del estado de tus envios, hitos y trazabilidad reciente.',
-      intro: 'No es un admin recortado: la experiencia cliente ahora enfoca seguimiento, confianza y lectura clara del estado de tus envios.',
+      intro: 'Estado, hitos y trazabilidad reciente de tus envios.',
       actions: [
         { label: 'Rastrear envio', href: '/logistichub/tracking.html', tone: 'primary', icon: 'fa-solid fa-location-crosshairs' },
         { label: 'Ver tus envios', href: '/logistichub/shipments.html', tone: 'outline', icon: 'fa-solid fa-boxes-stacked' },
@@ -101,97 +102,151 @@ window.LogisticHubCore.ready(async () => {
   if (pageActions) {
     pageActions.classList.add('app-hidden');
   }
+  const colors = ['#007bff', '#17a2b8', '#4f8f5b', '#f4a300', '#dc3545', '#6f42c1'];
 
-  const data = await window.LogisticHubCore.apiRequest('/dashboard');
-
-  const exceptionGroups = user.role === 'customer'
-    ? [
-        { title: 'Envios por despachar', items: data.exceptions.pendingDeparture.map((item) => item.tracking) },
-        { title: 'Rutas vinculadas', items: data.exceptions.activeRoutes.map((item) => item.code) },
-        { title: 'Actualizaciones recientes', items: data.leaderboards.customers.map((item) => item.name) },
-      ]
-    : user.role === 'driver'
-      ? [
-          { title: 'Asignaciones activas', items: data.exceptions.activeRoutes.map((item) => item.code) },
-          { title: 'Entregas pendientes', items: data.exceptions.pendingDeparture.map((item) => item.tracking) },
-          { title: 'Soporte de unidad', items: data.exceptions.maintenanceUnits.map((item) => item.plate) },
-        ]
-      : [
-          { title: 'Envios pendientes de salida', items: data.exceptions.pendingDeparture.map((item) => item.tracking) },
-          { title: 'Unidades con mantenimiento activo', items: data.exceptions.maintenanceUnits.map((item) => item.plate) },
-          { title: 'Conductores fuera de turno', items: data.exceptions.outOfShiftDrivers.map((item) => item.name) },
-          { title: 'Rutas en ejecucion o preparacion', items: data.exceptions.activeRoutes.map((item) => item.code) },
-        ];
-
-  document.querySelector('#dashboardStrip').innerHTML = data.strip
-    .map((item) => `
-      <article class="strip-card ${item.className}">
-        <div class="strip-label">${item.title}</div>
-        <div class="strip-value">${item.value}</div>
-        <div class="text-muted">${item.subtitle}</div>
-      </article>
-    `)
-    .join('');
-
-  document.querySelector('#dashboardKpis').innerHTML = data.kpis
-    .map((item, index) => `
-      <article class="kpi-card slide-in-up" style="animation-delay:${index * 70}ms;">
-        <div class="kpi-top">
-          <div>
-            <p class="kpi-title">${item.title}</p>
-            <div class="kpi-value">${item.value}</div>
-          </div>
-          <div class="kpi-icon"><i class="fa-solid fa-chart-column"></i></div>
-        </div>
-        <div class="kpi-note">${item.detail}</div>
-      </article>
-    `)
-    .join('');
-
-  document.querySelector('#exceptionsPanel').innerHTML = exceptionGroups
-    .map((group) => `
-      <div class="stack-item">
-        <div>
-          <div class="card-title">${group.title}</div>
-          <div class="text-muted">${group.items.length ? group.items.join(', ') : 'Sin incidencias.'}</div>
-        </div>
-      </div>
-    `)
-    .join('');
-
-  document.querySelector('#pulsePanel').innerHTML = `
-    <div class="stack-item"><span>Rutas completadas</span><strong>${data.pulse.completedRoutes}</strong></div>
-    <div class="stack-item"><span>Vehiculos en uso</span><strong>${data.pulse.vehiclesInUse}</strong></div>
-    <div class="stack-item"><span>Conductores activos</span><strong>${data.pulse.activeDrivers}</strong></div>
-  `;
-
-  document.querySelector('#topDrivers').innerHTML = data.leaderboards.drivers
-    .map((driver) => `<div class="stack-item"><div><div class="card-title">${driver.name}</div><div class="text-muted">${driver.shift}</div></div><strong>${driver.deliveriesToday} entregas</strong></div>`)
-    .join('');
-
-  document.querySelector('#topCustomers').innerHTML = data.leaderboards.customers
-    .map((customer) => `<div class="stack-item"><div><div class="card-title">${customer.name}</div><div class="text-muted">${customer.email}</div></div><strong>${customer.serviceLevel}</strong></div>`)
-    .join('');
-
-  const colors = ['#007bff', '#17a2b8', '#6f42c1', '#dc3545', '#28a745', '#ffc107'];
-
-  new Chart(document.querySelector('#operationsChart'), {
+  const operationsChart = new Chart(document.querySelector('#operationsChart'), {
     type: 'bar',
-    data: { labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'], datasets: [{ label: 'Movimientos', data: data.charts.operationalEvolution, backgroundColor: colors[0] }] },
+    data: { labels: [], datasets: [{ label: 'Movimientos', data: [], backgroundColor: colors[0] }] },
   });
 
-  new Chart(document.querySelector('#statusChart'), {
+  const statusChart = new Chart(document.querySelector('#statusChart'), {
     type: 'doughnut',
-    data: { labels: ['Pendientes', 'En ruta', 'Entregados', 'Otros'], datasets: [{ data: data.charts.packageStatus, backgroundColor: colors.slice(0, 4) }] },
+    data: { labels: [], datasets: [{ data: [], backgroundColor: colors.slice(0, 6) }] },
   });
 
-  new Chart(document.querySelector('#hourlyChart'), {
+  const hourlyChart = new Chart(document.querySelector('#hourlyChart'), {
     type: 'line',
-    data: { labels: ['08', '09', '10', '11', '12', '13', '14'], datasets: [{ label: 'Entregas', data: data.charts.deliveriesByHour, borderColor: colors[4], backgroundColor: 'rgba(40,167,69,0.16)', fill: true }] },
+    data: { labels: [], datasets: [{ label: 'Entregas', data: [], borderColor: colors[4], backgroundColor: 'rgba(40,167,69,0.16)', fill: true }] },
   });
 
-  new Chart(document.querySelector('#routeStateChart'), {
+  const routeStateChart = new Chart(document.querySelector('#routeStateChart'), {
     type: 'bar',
-    data: { labels: ['Preparacion', 'En ejecucion', 'Completadas', 'Canceladas'], datasets: [{ label: 'Rutas', data: data.charts.routeState, backgroundColor: colors.slice(1, 5) }] },
+    data: { labels: [], datasets: [{ label: 'Rutas', data: [], backgroundColor: colors.slice(1, 5) }] },
   });
+
+  function renderChartSummary(target, labels, values, includePercent = true) {
+    const element = document.querySelector(target);
+
+    if (!element) {
+      return;
+    }
+
+    const safeValues = Array.isArray(values) ? values.map((value) => Number(value || 0)) : [];
+    const total = safeValues.reduce((sum, value) => sum + value, 0);
+
+    element.innerHTML = (labels || []).map((label, index) => {
+      const value = safeValues[index] || 0;
+      const percent = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+      const detail = includePercent ? `${value} (${percent}%)` : `${value}`;
+
+      return `
+        <div class="chart-summary-row">
+          <span>${label}</span>
+          <strong>${detail}</strong>
+        </div>
+      `;
+    }).join('') || '<div class="text-muted">Sin datos para el rango actual.</div>';
+  }
+
+  async function renderDashboard() {
+    const selectedRange = rangeSelect ? rangeSelect.value : 'week';
+    const data = await window.LogisticHubCore.apiRequest(`/dashboard?range=${encodeURIComponent(selectedRange)}`);
+
+    document.querySelector('#dashboardRangeCaption').textContent = `Rango activo: ${data.range.label}`;
+
+    const exceptionGroups = user.role === 'customer'
+      ? [
+          { title: 'Envios por despachar', items: data.exceptions.pendingDeparture.map((item) => item.tracking) },
+          { title: 'Rutas vinculadas', items: data.exceptions.activeRoutes.map((item) => item.code) },
+          { title: 'Actualizaciones recientes', items: data.leaderboards.customers.map((item) => item.name) },
+        ]
+      : user.role === 'driver'
+        ? [
+            { title: 'Asignaciones activas', items: data.exceptions.activeRoutes.map((item) => item.code) },
+            { title: 'Entregas pendientes', items: data.exceptions.pendingDeparture.map((item) => item.tracking) },
+            { title: 'Soporte de unidad', items: data.exceptions.maintenanceUnits.map((item) => item.plate) },
+          ]
+        : [
+            { title: 'Envios pendientes de salida', items: data.exceptions.pendingDeparture.map((item) => item.tracking) },
+            { title: 'Unidades con mantenimiento activo', items: data.exceptions.maintenanceUnits.map((item) => item.plate) },
+            { title: 'Conductores fuera de turno', items: data.exceptions.outOfShiftDrivers.map((item) => item.name) },
+            { title: 'Rutas en ejecucion o preparacion', items: data.exceptions.activeRoutes.map((item) => item.code) },
+          ];
+
+    document.querySelector('#dashboardStrip').innerHTML = data.strip
+      .map((item) => `
+        <article class="strip-card ${item.className}">
+          <div class="strip-label">${item.title}</div>
+          <div class="strip-value">${item.value}</div>
+          <div class="text-muted">${item.subtitle}</div>
+        </article>
+      `)
+      .join('');
+
+    document.querySelector('#dashboardKpis').innerHTML = data.kpis
+      .map((item, index) => `
+        <article class="kpi-card slide-in-up" style="animation-delay:${index * 70}ms;">
+          <div class="kpi-top">
+            <div>
+              <p class="kpi-title">${item.title}</p>
+              <div class="kpi-value">${item.value}</div>
+            </div>
+            <div class="kpi-icon"><i class="fa-solid fa-chart-column"></i></div>
+          </div>
+          <div class="kpi-note">${item.detail}</div>
+        </article>
+      `)
+      .join('');
+
+    document.querySelector('#exceptionsPanel').innerHTML = exceptionGroups
+      .map((group) => `
+        <div class="stack-item">
+          <div>
+            <div class="card-title">${group.title}</div>
+            <div class="text-muted">${group.items.length ? group.items.join(', ') : 'Sin incidencias.'}</div>
+          </div>
+        </div>
+      `)
+      .join('');
+
+    document.querySelector('#pulsePanel').innerHTML = `
+      <div class="stack-item"><span>Rutas completadas</span><strong>${data.pulse.completedRoutes}</strong></div>
+      <div class="stack-item"><span>Vehiculos en uso</span><strong>${data.pulse.vehiclesInUse}</strong></div>
+      <div class="stack-item"><span>Conductores activos</span><strong>${data.pulse.activeDrivers}</strong></div>
+    `;
+
+    document.querySelector('#topDrivers').innerHTML = data.leaderboards.drivers
+      .map((driver) => `<div class="stack-item"><div><div class="card-title">${driver.name}</div><div class="text-muted">${driver.shift}</div></div><strong>${driver.deliveriesToday} entregas</strong></div>`)
+      .join('');
+
+    document.querySelector('#topCustomers').innerHTML = data.leaderboards.customers
+      .map((customer) => `<div class="stack-item"><div><div class="card-title">${customer.name}</div><div class="text-muted">${customer.email}</div></div><strong>${customer.serviceLevel}</strong></div>`)
+      .join('');
+
+    operationsChart.data.labels = data.charts.operationalEvolution.labels;
+    operationsChart.data.datasets[0].data = data.charts.operationalEvolution.data;
+    operationsChart.update();
+    renderChartSummary('#operationsChartSummary', data.charts.operationalEvolution.labels, data.charts.operationalEvolution.data);
+
+    statusChart.data.labels = data.charts.packageStatus.labels;
+    statusChart.data.datasets[0].data = data.charts.packageStatus.data;
+    statusChart.update();
+    renderChartSummary('#statusChartSummary', data.charts.packageStatus.labels, data.charts.packageStatus.data);
+
+    hourlyChart.data.labels = data.charts.deliveriesByHour.labels;
+    hourlyChart.data.datasets[0].data = data.charts.deliveriesByHour.data;
+    hourlyChart.update();
+    renderChartSummary('#hourlyChartSummary', data.charts.deliveriesByHour.labels, data.charts.deliveriesByHour.data);
+
+    routeStateChart.data.labels = data.charts.routeState.labels;
+    routeStateChart.data.datasets[0].data = data.charts.routeState.data;
+    routeStateChart.update();
+    renderChartSummary('#routeStateChartSummary', data.charts.routeState.labels, data.charts.routeState.data);
+  }
+
+  if (rangeSelect) {
+    rangeSelect.addEventListener('change', renderDashboard);
+  }
+
+  renderDashboard();
 });

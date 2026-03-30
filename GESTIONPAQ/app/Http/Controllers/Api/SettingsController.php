@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\DB;
 class SettingsController extends Controller
 {
     private array $defaults = [
-        'companyName' => '',
-        'supportEmail' => '',
-        'supportPhone' => '',
-        'dispatchStartTime' => '06:00',
+        'companyName' => 'GESTIONPAQ',
+        'supportEmail' => 'soporte@gestionpaq.mx',
+        'supportPhone' => '555-000-4455',
+        'dispatchStartTime' => '06:30',
         'defaultLeadDays' => 2,
         'maxDeliveryAttempts' => 3,
         'requirePhoto' => true,

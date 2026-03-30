@@ -17,6 +17,8 @@ window.LogisticHubCore.ready(async () => {
         <td>${item.warehouseName}</td>
         <td>${item.distanceKm}</td>
         <td>${item.timeMinutes} min</td>
+        <td>${item.assignedWeightKg || 0} kg / ${item.vehicleCapacityKg || 0} kg</td>
+        <td>${item.optimizationScore || 0} pts</td>
         <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${item.status}</span></td>
         <td>${item.vehiclePlate || 'Pendiente'}</td>
         <td>${item.driverName || 'Pendiente'}</td>

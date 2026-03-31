@@ -5,27 +5,29 @@ window.LogisticHubCore.ready(async () => {
 
   window.LogisticHubCore.renderNotice('#pageNotice', window.LogisticHubCore.consumeNotice());
 
+  function roleLabel(role) {
+    return window.LogisticHubCore.getRoleProfile(role).label;
+  }
+
   async function loadUsers() {
     const items = await window.LogisticHubCore.apiRequest('/users');
     const body = document.querySelector('#usersTableBody');
-    const ROLE_LABELS = { admin: 'Administrador', operator: 'Operador', supervisor: 'Supervisor', dispatcher: 'Despachador', driver: 'Conductor', customer: 'Cliente' };
     body.innerHTML = items.map((item) => `
       <tr>
-        <td>${item.id}</td>
         <td>
-          <strong>${item.username ? `@${item.username}` : '--'}</strong>
-          <div class="text-muted">${item.email}</div>
+          <strong>${item.username ? `@${item.username}` : item.email || '--'}</strong>
+          <div class="text-muted">${item.employeeCode || item.email || '--'}</div>
         </td>
         <td>
           <strong>${item.name}</strong>
           <div class="text-muted">${item.jobTitle || 'Sin puesto'}</div>
         </td>
         <td>${item.schedule || '--'}</td>
-        <td>${ROLE_LABELS[item.role] || item.role}</td>
+        <td>${roleLabel(item.role)}</td>
         <td>${item.active ? 'Si' : 'No'}</td>
         <td>
           <div class="table-actions">
-            <a class="btn btn-outline btn-sm" href="/logistichub/user-form.html?id=${item.id}">Editar</a>
+            <a class="btn btn-outline btn-sm" href="/logistichub/usuario-form.html?id=${item.id}">Editar</a>
             <button class="btn btn-danger btn-sm" data-delete-id="${item.id}">Eliminar</button>
           </div>
         </td>

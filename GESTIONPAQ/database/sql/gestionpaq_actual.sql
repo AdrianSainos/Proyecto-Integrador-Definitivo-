@@ -1,64 +1,638 @@
-SET FOREIGN_KEY_CHECKS=0;
-
-DELETE FROM `roles`;
+﻿CREATE TABLE `paises` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `paises_nombre_unique` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `estados` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `pais_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `estados_nombre_pais_id_unique` (`nombre`,`pais_id`),
+  KEY `estados_pais_id_foreign` (`pais_id`),
+  CONSTRAINT `estados_pais_id_foreign` FOREIGN KEY (`pais_id`) REFERENCES `paises` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `municipios` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `estado_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `municipios_nombre_estado_id_unique` (`nombre`,`estado_id`),
+  KEY `municipios_estado_id_foreign` (`estado_id`),
+  CONSTRAINT `municipios_estado_id_foreign` FOREIGN KEY (`estado_id`) REFERENCES `estados` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `colonias` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `codigo_postal` varchar(10) DEFAULT NULL,
+  `municipio_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `colonias_nombre_municipio_id_unique` (`nombre`,`municipio_id`),
+  KEY `colonias_municipio_id_foreign` (`municipio_id`),
+  CONSTRAINT `colonias_municipio_id_foreign` FOREIGN KEY (`municipio_id`) REFERENCES `municipios` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `calles` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(150) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `calles_nombre_unique` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `roles` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roles_nombre_unique` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `tipo_vehiculo` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tipo_vehiculo_nombre_unique` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `tipo_paquete` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tipo_paquete_nombre_unique` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `tipo_mantenimiento` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tipo_mantenimiento_nombre_unique` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `tipo_licencia` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tipo_licencia_nombre_unique` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `estado_paquete` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `estado_paquete_nombre_unique` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `estado_ruta` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `estado_ruta_nombre_unique` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `estado_vehiculo` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `estado_vehiculo_nombre_unique` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `estado_conductor` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `estado_conductor_nombre_unique` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `usuarios` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `rol_id` int(10) unsigned DEFAULT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `api_token` varchar(80) DEFAULT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `last_login_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `usuarios_email_unique` (`email`),
+  UNIQUE KEY `usuarios_api_token_unique` (`api_token`),
+  KEY `usuarios_rol_id_index` (`rol_id`),
+  KEY `usuarios_activo_index` (`activo`),
+  CONSTRAINT `usuarios_rol_id_foreign` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `personas` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `usuario_id` int(10) unsigned DEFAULT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `apellido_paterno` varchar(100) NOT NULL,
+  `apellido_materno` varchar(100) DEFAULT NULL,
+  `telefono` varchar(20) DEFAULT NULL,
+  `nombres` varchar(120) DEFAULT NULL,
+  `apellidos` varchar(120) DEFAULT NULL,
+  `documento` varchar(30) DEFAULT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `personas_usuario_id_unique` (`usuario_id`),
+  KEY `personas_usuario_id_index` (`usuario_id`),
+  CONSTRAINT `personas_usuario_id_foreign` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `clientes` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `persona_id` int(10) unsigned DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `phone` varchar(40) DEFAULT NULL,
+  `identification` varchar(120) DEFAULT NULL,
+  `type` varchar(40) NOT NULL DEFAULT 'individual',
+  `status` varchar(40) NOT NULL DEFAULT 'active',
+  `default_address` text DEFAULT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `codigo_cliente` varchar(30) DEFAULT NULL,
+  `nivel_servicio` varchar(30) NOT NULL DEFAULT 'estandar',
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `clientes_persona_id_unique` (`persona_id`),
+  KEY `clientes_persona_id_index` (`persona_id`),
+  CONSTRAINT `clientes_persona_id_foreign` FOREIGN KEY (`persona_id`) REFERENCES `personas` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `cliente_direcciones` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `cliente_id` int(10) unsigned NOT NULL,
+  `direccion_id` int(10) unsigned DEFAULT NULL,
+  `label` varchar(80) NOT NULL DEFAULT 'principal',
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(120) DEFAULT NULL,
+  `state` varchar(120) DEFAULT NULL,
+  `postal_code` varchar(30) DEFAULT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `is_default` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `cliente_direcciones_cliente_id_index` (`cliente_id`),
+  KEY `cliente_direcciones_direccion_id_index` (`direccion_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `direcciones` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `referencia` varchar(180) DEFAULT NULL,
+  `calle` varchar(150) DEFAULT NULL,
+  `numero` varchar(30) DEFAULT NULL,
+  `colonia` varchar(120) DEFAULT NULL,
+  `ciudad` varchar(120) DEFAULT NULL,
+  `estado` varchar(120) DEFAULT NULL,
+  `pais` varchar(120) NOT NULL DEFAULT 'Mexico',
+  `codigo_postal` varchar(20) DEFAULT NULL,
+  `calle_id` int(10) unsigned DEFAULT NULL,
+  `colonia_id` int(10) unsigned DEFAULT NULL,
+  `numero_ext` varchar(20) DEFAULT NULL,
+  `numero_int` varchar(20) DEFAULT NULL,
+  `latitud` decimal(10,8) DEFAULT NULL,
+  `longitud` decimal(11,8) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `direcciones_calle_id_index` (`calle_id`),
+  KEY `direcciones_colonia_id_index` (`colonia_id`),
+  CONSTRAINT `direcciones_calle_id_foreign` FOREIGN KEY (`calle_id`) REFERENCES `calles` (`id`),
+  CONSTRAINT `direcciones_colonia_id_foreign` FOREIGN KEY (`colonia_id`) REFERENCES `colonias` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `almacenes` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `codigo` varchar(30) DEFAULT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `code` varchar(50) DEFAULT NULL,
+  `direccion_id` int(10) unsigned DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(120) DEFAULT NULL,
+  `state` varchar(120) DEFAULT NULL,
+  `postal_code` varchar(30) DEFAULT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `capacity` int(10) unsigned NOT NULL DEFAULT 500,
+  `status` varchar(40) NOT NULL DEFAULT 'active',
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `almacenes_direccion_id_index` (`direccion_id`),
+  CONSTRAINT `almacenes_direccion_id_foreign` FOREIGN KEY (`direccion_id`) REFERENCES `direcciones` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `vehiculos` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `placa` varchar(20) NOT NULL,
+  `warehouse_id` int(10) unsigned DEFAULT NULL,
+  `plate` varchar(20) DEFAULT NULL,
+  `model` varchar(120) DEFAULT NULL,
+  `brand` varchar(120) DEFAULT NULL,
+  `year` smallint(5) unsigned DEFAULT NULL,
+  `type` varchar(60) DEFAULT NULL,
+  `capacity_kg` decimal(10,2) DEFAULT NULL,
+  `capacity_packages` int(10) unsigned NOT NULL DEFAULT 0,
+  `current_fuel` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `fuel_capacity` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `fuel_consumption_km` decimal(10,4) NOT NULL DEFAULT 0.0000,
+  `status` varchar(40) NOT NULL DEFAULT 'available',
+  `last_maintenance` timestamp NULL DEFAULT NULL,
+  `total_km` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `vin` varchar(50) DEFAULT NULL,
+  `tipo_id` int(10) unsigned DEFAULT NULL,
+  `tipo_vehiculo_id` bigint(20) unsigned DEFAULT NULL,
+  `capacidad` decimal(10,2) DEFAULT NULL,
+  `capacidad_kg` int(10) unsigned NOT NULL DEFAULT 0,
+  `estado_id` int(10) unsigned DEFAULT NULL,
+  `estado` varchar(30) NOT NULL DEFAULT 'disponible',
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `consumo_km` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `vehiculos_placa_unique` (`placa`),
+  KEY `vehiculos_tipo_id_index` (`tipo_id`),
+  KEY `vehiculos_estado_id_index` (`estado_id`),
+  CONSTRAINT `vehiculos_estado_id_foreign` FOREIGN KEY (`estado_id`) REFERENCES `estado_vehiculo` (`id`),
+  CONSTRAINT `vehiculos_tipo_id_foreign` FOREIGN KEY (`tipo_id`) REFERENCES `tipo_vehiculo` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `conductores` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `persona_id` int(10) unsigned DEFAULT NULL,
+  `numero_licencia` varchar(50) DEFAULT NULL,
+  `licencia_vence` date DEFAULT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `estado_id` int(10) unsigned DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `phone` varchar(40) DEFAULT NULL,
+  `license_number` varchar(120) DEFAULT NULL,
+  `license_expiry` date DEFAULT NULL,
+  `identification` varchar(120) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `status` varchar(40) NOT NULL DEFAULT 'active',
+  `current_vehicle_id` int(10) unsigned DEFAULT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `last_seen_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `conductores_persona_id_unique` (`persona_id`),
+  KEY `conductores_persona_id_index` (`persona_id`),
+  KEY `conductores_estado_id_index` (`estado_id`),
+  CONSTRAINT `conductores_estado_id_foreign` FOREIGN KEY (`estado_id`) REFERENCES `estado_conductor` (`id`),
+  CONSTRAINT `conductores_persona_id_foreign` FOREIGN KEY (`persona_id`) REFERENCES `personas` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `licencias` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `persona_id` int(10) unsigned DEFAULT NULL,
+  `tipo_licencia_id` int(10) unsigned DEFAULT NULL,
+  `numero` varchar(50) NOT NULL,
+  `fecha_expiracion` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `licencias_numero_unique` (`numero`),
+  KEY `licencias_persona_id_index` (`persona_id`),
+  KEY `licencias_tipo_licencia_id_index` (`tipo_licencia_id`),
+  CONSTRAINT `licencias_persona_id_foreign` FOREIGN KEY (`persona_id`) REFERENCES `personas` (`id`),
+  CONSTRAINT `licencias_tipo_licencia_id_foreign` FOREIGN KEY (`tipo_licencia_id`) REFERENCES `tipo_licencia` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `disponibilidad_conductor` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `conductor_id` int(10) unsigned DEFAULT NULL,
+  `fecha` date DEFAULT NULL,
+  `disponible` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `disponibilidad_conductor_conductor_id_fecha_unique` (`conductor_id`,`fecha`),
+  KEY `disponibilidad_conductor_conductor_id_index` (`conductor_id`),
+  KEY `disponibilidad_conductor_fecha_index` (`fecha`),
+  CONSTRAINT `disponibilidad_conductor_conductor_id_foreign` FOREIGN KEY (`conductor_id`) REFERENCES `conductores` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `turnos_conductor` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `conductor_id` int(10) unsigned NOT NULL,
+  `driver_id` int(10) unsigned DEFAULT NULL,
+  `shift_date` date DEFAULT NULL,
+  `start_time` time DEFAULT NULL,
+  `end_time` time DEFAULT NULL,
+  `total_deliveries` int(10) unsigned NOT NULL DEFAULT 0,
+  `successful_deliveries` int(10) unsigned NOT NULL DEFAULT 0,
+  `failed_deliveries` int(10) unsigned NOT NULL DEFAULT 0,
+  `distance_km` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `status` varchar(40) NOT NULL DEFAULT 'scheduled',
+  `inicio_turno` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `fin_turno` timestamp NULL DEFAULT NULL,
+  `estado` varchar(30) NOT NULL DEFAULT 'activo',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `turnos_conductor_conductor_id_index` (`conductor_id`),
+  KEY `turnos_conductor_inicio_turno_index` (`inicio_turno`),
+  KEY `turnos_conductor_fin_turno_index` (`fin_turno`),
+  KEY `turnos_conductor_estado_index` (`estado`),
+  KEY `turnos_conductor_driver_id_shift_date_index` (`driver_id`,`shift_date`),
+  KEY `turnos_conductor_status_index` (`status`)
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `rutas` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `codigo` varchar(30) DEFAULT NULL,
+  `almacen_origen_id` int(10) unsigned DEFAULT NULL,
+  `origen_almacen_id` int(10) unsigned DEFAULT NULL,
+  `destino_almacen_id` int(10) unsigned DEFAULT NULL,
+  `distancia_km` decimal(10,2) DEFAULT NULL,
+  `tiempo_estimado_min` int(11) DEFAULT NULL,
+  `estado_id` int(10) unsigned DEFAULT NULL,
+  `route_code` varchar(100) DEFAULT NULL,
+  `vehicle_id` int(10) unsigned DEFAULT NULL,
+  `driver_id` int(10) unsigned DEFAULT NULL,
+  `warehouse_id` int(10) unsigned DEFAULT NULL,
+  `scheduled_date` date DEFAULT NULL,
+  `start_time` timestamp NULL DEFAULT NULL,
+  `end_time` timestamp NULL DEFAULT NULL,
+  `total_packages` int(10) unsigned NOT NULL DEFAULT 0,
+  `total_weight_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `estimated_distance_km` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `actual_distance_km` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `estimated_time_minutes` int(10) unsigned NOT NULL DEFAULT 0,
+  `actual_time_minutes` int(10) unsigned NOT NULL DEFAULT 0,
+  `fuel_consumed_liters` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `status` varchar(40) NOT NULL DEFAULT 'planned',
+  `optimization_score` decimal(6,2) NOT NULL DEFAULT 0.00,
+  `waypoints` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`waypoints`)),
+  `notes` text DEFAULT NULL,
+  `estado` varchar(30) NOT NULL DEFAULT 'activa',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `rutas_almacen_origen_id_index` (`almacen_origen_id`),
+  KEY `rutas_estado_id_index` (`estado_id`),
+  CONSTRAINT `rutas_almacen_origen_id_foreign` FOREIGN KEY (`almacen_origen_id`) REFERENCES `almacenes` (`id`),
+  CONSTRAINT `rutas_estado_id_foreign` FOREIGN KEY (`estado_id`) REFERENCES `estado_ruta` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `ruta_paradas` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ruta_id` int(10) unsigned DEFAULT NULL,
+  `route_id` int(10) unsigned DEFAULT NULL,
+  `direccion_id` int(10) unsigned DEFAULT NULL,
+  `package_id` int(10) unsigned DEFAULT NULL,
+  `type` varchar(40) NOT NULL DEFAULT 'delivery',
+  `stop_number` int(10) unsigned DEFAULT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(120) DEFAULT NULL,
+  `state` varchar(120) DEFAULT NULL,
+  `eta_at` timestamp NULL DEFAULT NULL,
+  `arrived_at` timestamp NULL DEFAULT NULL,
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `status` varchar(40) NOT NULL DEFAULT 'planned',
+  `notes` text DEFAULT NULL,
+  `meta` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`meta`)),
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `orden` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ruta_paradas_ruta_id_orden_unique` (`ruta_id`,`orden`),
+  KEY `ruta_paradas_ruta_id_index` (`ruta_id`),
+  KEY `ruta_paradas_direccion_id_index` (`direccion_id`),
+  CONSTRAINT `ruta_paradas_direccion_id_foreign` FOREIGN KEY (`direccion_id`) REFERENCES `direcciones` (`id`),
+  CONSTRAINT `ruta_paradas_ruta_id_foreign` FOREIGN KEY (`ruta_id`) REFERENCES `rutas` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `paquetes` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `cliente_id` int(10) unsigned DEFAULT NULL,
+  `tipo_id` int(10) unsigned DEFAULT NULL,
+  `peso` decimal(10,2) DEFAULT NULL,
+  `peso_kg` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `volumen` decimal(10,2) DEFAULT NULL,
+  `volumen_m3` decimal(10,3) NOT NULL DEFAULT 0.000,
+  `direccion_origen_id` int(10) unsigned DEFAULT NULL,
+  `origen_direccion_id` int(10) unsigned DEFAULT NULL,
+  `direccion_destino_id` int(10) unsigned DEFAULT NULL,
+  `destino_direccion_id` int(10) unsigned DEFAULT NULL,
+  `estado_id` int(10) unsigned DEFAULT NULL,
+  `estado` varchar(30) NOT NULL DEFAULT 'registrado',
+  `descripcion` varchar(255) DEFAULT NULL,
+  `fecha_estimada_entrega` timestamp NULL DEFAULT NULL,
+  `codigo_tracking` varchar(100) NOT NULL,
+  `tracking_code` varchar(100) DEFAULT NULL,
+  `sender_id` int(10) unsigned DEFAULT NULL,
+  `recipient_id` int(10) unsigned DEFAULT NULL,
+  `recipient_address_id` bigint(20) unsigned DEFAULT NULL,
+  `origin_warehouse_id` int(10) unsigned DEFAULT NULL,
+  `weight_kg` decimal(10,2) DEFAULT NULL,
+  `quantity` int(10) unsigned NOT NULL DEFAULT 1,
+  `volume_m3` decimal(10,4) DEFAULT NULL,
+  `package_type` varchar(60) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `declared_value` decimal(12,2) DEFAULT NULL,
+  `recipient_address` varchar(255) DEFAULT NULL,
+  `recipient_city` varchar(120) DEFAULT NULL,
+  `recipient_state` varchar(120) DEFAULT NULL,
+  `recipient_postal_code` varchar(30) DEFAULT NULL,
+  `recipient_latitude` decimal(10,8) DEFAULT NULL,
+  `recipient_longitude` decimal(11,8) DEFAULT NULL,
+  `status` varchar(40) NOT NULL DEFAULT 'pending',
+  `priority` varchar(40) NOT NULL DEFAULT 'standard',
+  `scheduled_date` date DEFAULT NULL,
+  `assigned_at` timestamp NULL DEFAULT NULL,
+  `eta_at` timestamp NULL DEFAULT NULL,
+  `promised_date` date DEFAULT NULL,
+  `pickup_time` timestamp NULL DEFAULT NULL,
+  `delivery_time` timestamp NULL DEFAULT NULL,
+  `attempts` int(10) unsigned NOT NULL DEFAULT 0,
+  `notes` text DEFAULT NULL,
+  `codigo_rastreo` varchar(40) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `paquetes_codigo_tracking_unique` (`codigo_tracking`),
+  KEY `paquetes_cliente_id_index` (`cliente_id`),
+  KEY `paquetes_tipo_id_index` (`tipo_id`),
+  KEY `paquetes_direccion_origen_id_index` (`direccion_origen_id`),
+  KEY `paquetes_direccion_destino_id_index` (`direccion_destino_id`),
+  KEY `paquetes_estado_id_index` (`estado_id`),
+  CONSTRAINT `paquetes_cliente_id_foreign` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`),
+  CONSTRAINT `paquetes_direccion_destino_id_foreign` FOREIGN KEY (`direccion_destino_id`) REFERENCES `direcciones` (`id`),
+  CONSTRAINT `paquetes_direccion_origen_id_foreign` FOREIGN KEY (`direccion_origen_id`) REFERENCES `direcciones` (`id`),
+  CONSTRAINT `paquetes_estado_id_foreign` FOREIGN KEY (`estado_id`) REFERENCES `estado_paquete` (`id`),
+  CONSTRAINT `paquetes_tipo_id_foreign` FOREIGN KEY (`tipo_id`) REFERENCES `tipo_paquete` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `asignaciones` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ruta_id` int(10) unsigned DEFAULT NULL,
+  `route_id` int(10) unsigned DEFAULT NULL,
+  `vehiculo_id` int(10) unsigned DEFAULT NULL,
+  `vehicle_id` int(10) unsigned DEFAULT NULL,
+  `conductor_id` int(10) unsigned DEFAULT NULL,
+  `package_id` int(10) unsigned DEFAULT NULL,
+  `warehouse_id` int(10) unsigned DEFAULT NULL,
+  `sequence_order` int(10) unsigned NOT NULL DEFAULT 0,
+  `status` varchar(40) NOT NULL DEFAULT 'assigned',
+  `driver_id` int(10) unsigned DEFAULT NULL,
+  `dispatcher_user_id` bigint(20) unsigned DEFAULT NULL,
+  `fecha_asignacion` timestamp NOT NULL DEFAULT current_timestamp(),
+  `fecha_salida` timestamp NULL DEFAULT NULL,
+  `fecha_llegada_estimada` timestamp NULL DEFAULT NULL,
+  `estado` varchar(30) NOT NULL DEFAULT 'programada',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `asignaciones_ruta_id_index` (`ruta_id`),
+  KEY `asignaciones_vehiculo_id_index` (`vehiculo_id`),
+  KEY `asignaciones_conductor_id_index` (`conductor_id`),
+  CONSTRAINT `asignaciones_conductor_id_foreign` FOREIGN KEY (`conductor_id`) REFERENCES `conductores` (`id`),
+  CONSTRAINT `asignaciones_ruta_id_foreign` FOREIGN KEY (`ruta_id`) REFERENCES `rutas` (`id`),
+  CONSTRAINT `asignaciones_vehiculo_id_foreign` FOREIGN KEY (`vehiculo_id`) REFERENCES `vehiculos` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `tracking` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `paquete_id` int(10) unsigned DEFAULT NULL,
+  `package_id` int(10) unsigned DEFAULT NULL,
+  `direccion_id` int(10) unsigned DEFAULT NULL,
+  `estado_id` int(10) unsigned DEFAULT NULL,
+  `event_type` varchar(60) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `timestamp_event` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `tracking_paquete_id_index` (`paquete_id`),
+  KEY `tracking_direccion_id_index` (`direccion_id`),
+  KEY `tracking_estado_id_index` (`estado_id`),
+  KEY `tracking_fecha_index` (`fecha`),
+  CONSTRAINT `tracking_direccion_id_foreign` FOREIGN KEY (`direccion_id`) REFERENCES `direcciones` (`id`),
+  CONSTRAINT `tracking_estado_id_foreign` FOREIGN KEY (`estado_id`) REFERENCES `estado_paquete` (`id`),
+  CONSTRAINT `tracking_paquete_id_foreign` FOREIGN KEY (`paquete_id`) REFERENCES `paquetes` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=343 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `evidencias` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `asignacion_id` int(10) unsigned DEFAULT NULL,
+  `package_id` int(10) unsigned DEFAULT NULL,
+  `driver_id` int(10) unsigned DEFAULT NULL,
+  `route_id` int(10) unsigned DEFAULT NULL,
+  `delivery_timestamp` timestamp NULL DEFAULT NULL,
+  `recipient_name` varchar(255) DEFAULT NULL,
+  `signature_path` varchar(255) DEFAULT NULL,
+  `photo_path` varchar(255) DEFAULT NULL,
+  `gps_latitude` decimal(10,8) DEFAULT NULL,
+  `gps_longitude` decimal(11,8) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `status` varchar(40) NOT NULL DEFAULT 'completed',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `url_imagen` text DEFAULT NULL,
+  `firma` text DEFAULT NULL,
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `evidencias_asignacion_id_index` (`asignacion_id`),
+  KEY `evidencias_fecha_index` (`fecha`),
+  CONSTRAINT `evidencias_asignacion_id_foreign` FOREIGN KEY (`asignacion_id`) REFERENCES `asignaciones` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `mantenimiento` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `vehiculo_id` int(10) unsigned DEFAULT NULL,
+  `vehicle_id` int(10) unsigned DEFAULT NULL,
+  `tipo_id` int(10) unsigned DEFAULT NULL,
+  `type` varchar(40) DEFAULT NULL,
+  `fecha` date DEFAULT NULL,
+  `costo` decimal(10,2) DEFAULT NULL,
+  `descripcion` text DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `scheduled_date` date DEFAULT NULL,
+  `cost` decimal(10,2) DEFAULT NULL,
+  `completion_date` date DEFAULT NULL,
+  `km_at_maintenance` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `status` varchar(40) NOT NULL DEFAULT 'scheduled',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `mantenimiento_vehiculo_id_index` (`vehiculo_id`),
+  KEY `mantenimiento_tipo_id_index` (`tipo_id`),
+  KEY `mantenimiento_fecha_index` (`fecha`),
+  CONSTRAINT `mantenimiento_tipo_id_foreign` FOREIGN KEY (`tipo_id`) REFERENCES `tipo_mantenimiento` (`id`),
+  CONSTRAINT `mantenimiento_vehiculo_id_foreign` FOREIGN KEY (`vehiculo_id`) REFERENCES `vehiculos` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `historial_estado_paquete` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `paquete_id` int(10) unsigned DEFAULT NULL,
+  `estado_id` int(10) unsigned DEFAULT NULL,
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `historial_estado_paquete_paquete_id_index` (`paquete_id`),
+  KEY `historial_estado_paquete_estado_id_index` (`estado_id`),
+  KEY `historial_estado_paquete_fecha_index` (`fecha`),
+  CONSTRAINT `historial_estado_paquete_estado_id_foreign` FOREIGN KEY (`estado_id`) REFERENCES `estado_paquete` (`id`),
+  CONSTRAINT `historial_estado_paquete_paquete_id_foreign` FOREIGN KEY (`paquete_id`) REFERENCES `paquetes` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=337 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `notificaciones_cliente` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `customer_id` int(10) unsigned NOT NULL,
+  `package_id` int(10) unsigned DEFAULT NULL,
+  `notification_type` varchar(40) NOT NULL DEFAULT 'email',
+  `event_type` varchar(60) DEFAULT NULL,
+  `message` text NOT NULL,
+  `sent` tinyint(1) NOT NULL DEFAULT 0,
+  `sent_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `notificaciones_cliente_customer_id_index` (`customer_id`),
+  KEY `notificaciones_cliente_package_id_index` (`package_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `configuracion_sistema` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `clave` varchar(120) NOT NULL,
+  `valor` text DEFAULT NULL,
+  `tipo` varchar(30) NOT NULL DEFAULT 'string',
+  `grupo` varchar(60) DEFAULT NULL,
+  `etiqueta` varchar(160) DEFAULT NULL,
+  `descripcion` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `configuracion_sistema_clave_unique` (`clave`)
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO `roles` (`id`, `nombre`) VALUES (1, 'admin');
 INSERT INTO `roles` (`id`, `nombre`) VALUES (6, 'customer');
 INSERT INTO `roles` (`id`, `nombre`) VALUES (4, 'dispatcher');
 INSERT INTO `roles` (`id`, `nombre`) VALUES (5, 'driver');
 INSERT INTO `roles` (`id`, `nombre`) VALUES (2, 'operator');
 INSERT INTO `roles` (`id`, `nombre`) VALUES (3, 'supervisor');
-
-DELETE FROM `tipo_vehiculo`;
 INSERT INTO `tipo_vehiculo` (`id`, `nombre`) VALUES (3, 'Camion caja seca');
 INSERT INTO `tipo_vehiculo` (`id`, `nombre`) VALUES (2, 'Camion ligero');
 INSERT INTO `tipo_vehiculo` (`id`, `nombre`) VALUES (1, 'Van');
-
-DELETE FROM `tipo_paquete`;
 INSERT INTO `tipo_paquete` (`id`, `nombre`) VALUES (4, 'Carga general');
 INSERT INTO `tipo_paquete` (`id`, `nombre`) VALUES (1, 'Documentacion');
 INSERT INTO `tipo_paquete` (`id`, `nombre`) VALUES (3, 'Electronica');
 INSERT INTO `tipo_paquete` (`id`, `nombre`) VALUES (2, 'Medicamento');
-
-DELETE FROM `tipo_mantenimiento`;
 INSERT INTO `tipo_mantenimiento` (`id`, `nombre`) VALUES (2, 'Correctivo');
 INSERT INTO `tipo_mantenimiento` (`id`, `nombre`) VALUES (3, 'Inspeccion');
 INSERT INTO `tipo_mantenimiento` (`id`, `nombre`) VALUES (4, 'Llantas');
 INSERT INTO `tipo_mantenimiento` (`id`, `nombre`) VALUES (1, 'Preventivo');
-
-DELETE FROM `estado_paquete`;
 INSERT INTO `estado_paquete` (`id`, `nombre`) VALUES (6, 'Asignado');
 INSERT INTO `estado_paquete` (`id`, `nombre`) VALUES (3, 'En ruta');
 INSERT INTO `estado_paquete` (`id`, `nombre`) VALUES (4, 'Entregado');
 INSERT INTO `estado_paquete` (`id`, `nombre`) VALUES (1, 'Pendiente');
 INSERT INTO `estado_paquete` (`id`, `nombre`) VALUES (5, 'Planificado');
 INSERT INTO `estado_paquete` (`id`, `nombre`) VALUES (2, 'Registrado');
-
-DELETE FROM `estado_ruta`;
 INSERT INTO `estado_ruta` (`id`, `nombre`) VALUES (4, 'Cancelada');
 INSERT INTO `estado_ruta` (`id`, `nombre`) VALUES (3, 'Completada');
 INSERT INTO `estado_ruta` (`id`, `nombre`) VALUES (2, 'En ejecucion');
 INSERT INTO `estado_ruta` (`id`, `nombre`) VALUES (1, 'Preparacion');
-
-DELETE FROM `estado_vehiculo`;
 INSERT INTO `estado_vehiculo` (`id`, `nombre`) VALUES (1, 'Disponible');
 INSERT INTO `estado_vehiculo` (`id`, `nombre`) VALUES (3, 'Mantenimiento');
 INSERT INTO `estado_vehiculo` (`id`, `nombre`) VALUES (2, 'Operativo');
-
-DELETE FROM `estado_conductor`;
 INSERT INTO `estado_conductor` (`id`, `nombre`) VALUES (4, 'Activo');
 INSERT INTO `estado_conductor` (`id`, `nombre`) VALUES (1, 'Disponible');
 INSERT INTO `estado_conductor` (`id`, `nombre`) VALUES (2, 'En ruta');
 INSERT INTO `estado_conductor` (`id`, `nombre`) VALUES (3, 'Fuera de turno');
-
-DELETE FROM `usuarios`;
 INSERT INTO `usuarios` (`id`, `email`, `password`, `rol_id`, `activo`, `api_token`, `remember_token`, `last_login_at`) VALUES (14, 'admin@gestionpaq.local', '$2y$12$68tjMp.R3cS/fN9D9CevlefXQBMjfyOV.l8l.57U0bBQYfc7c86tO', 1, 1, '7gCJkHCt2fsmKIt9fsGA4B0upwA8ZzW4i7S8MVNbOeiJgqJc14hqT0gJqS1v', NULL, '2026-03-30 04:03:39');
 INSERT INTO `usuarios` (`id`, `email`, `password`, `rol_id`, `activo`, `api_token`, `remember_token`, `last_login_at`) VALUES (15, 'operator@gestionpaq.local', '$2y$12$VrCdPToaLCHsx/KS44bsMeT6x9L6tjyYeUdc.BU.dbsO31T1fkUny', 2, 1, NULL, NULL, NULL);
 INSERT INTO `usuarios` (`id`, `email`, `password`, `rol_id`, `activo`, `api_token`, `remember_token`, `last_login_at`) VALUES (16, 'supervisor@gestionpaq.local', '$2y$12$NkrpOEop0xZMIQcbW0l9oeLGRbkxkKPj9izKxvprX94ToOIgB7Mn.', 3, 1, NULL, NULL, NULL);
 INSERT INTO `usuarios` (`id`, `email`, `password`, `rol_id`, `activo`, `api_token`, `remember_token`, `last_login_at`) VALUES (17, 'dispatcher@gestionpaq.local', '$2y$12$Ng2kIqsMKPB60Dg3f5SpquKw6BCg/WEz5OpHxlkbL4B.qm9tjVA7y', 4, 1, NULL, NULL, NULL);
 INSERT INTO `usuarios` (`id`, `email`, `password`, `rol_id`, `activo`, `api_token`, `remember_token`, `last_login_at`) VALUES (18, 'driver@gestionpaq.local', '$2y$12$JybWy.9iHtian1bLZVpJ8e2JUoahHreRVy/b88kXOJSYiXQDK1TSi', 5, 1, 'ToFqTsj61rfzQuyJlZDBGGOQJFMrenAKgxiTf8a8m0LQFe2ODPbH5daLHcHT', NULL, '2026-03-30 03:39:08');
 INSERT INTO `usuarios` (`id`, `email`, `password`, `rol_id`, `activo`, `api_token`, `remember_token`, `last_login_at`) VALUES (19, 'customer@gestionpaq.local', '$2y$12$LafBxZRaJrQMp9B1SVkbLeu/AZGe84MXHE.cXYwPOkmt8jqFwc5wO', 6, 1, 'sMB0WFLNDolamOwqUi6WX3iOWRIV3tK8ugUi0J6wA3DIYfs8PgBMKaEiCZaw', NULL, '2026-03-30 03:31:02');
-
-DELETE FROM `personas`;
 INSERT INTO `personas` (`id`, `usuario_id`, `nombre`, `apellido_paterno`, `apellido_materno`, `telefono`, `nombres`, `apellidos`, `documento`, `email`, `activo`, `created_at`, `updated_at`) VALUES (16, 14, 'Alicia', 'Ortega', 'Mena', 5550000101, 'Alicia', 'Ortega Mena', 'ADM-GPQ-001', 'admin@gestionpaq.local', 1, '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `personas` (`id`, `usuario_id`, `nombre`, `apellido_paterno`, `apellido_materno`, `telefono`, `nombres`, `apellidos`, `documento`, `email`, `activo`, `created_at`, `updated_at`) VALUES (20, 15, 'Olga', 'Reyes', 'Torres', 5550000102, 'Olga', 'Reyes Torres', 'OPE-GPQ-001', 'operator@gestionpaq.local', 1, '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `personas` (`id`, `usuario_id`, `nombre`, `apellido_paterno`, `apellido_materno`, `telefono`, `nombres`, `apellidos`, `documento`, `email`, `activo`, `created_at`, `updated_at`) VALUES (21, 16, 'Sofia', 'Salas', 'Gomez', 5550000103, 'Sofia', 'Salas Gomez', 'SUP-GPQ-001', 'supervisor@gestionpaq.local', 1, '2026-03-29 18:41:36', '2026-03-29 18:41:36');
@@ -97,8 +671,6 @@ INSERT INTO `personas` (`id`, `usuario_id`, `nombre`, `apellido_paterno`, `apell
 INSERT INTO `personas` (`id`, `usuario_id`, `nombre`, `apellido_paterno`, `apellido_materno`, `telefono`, `nombres`, `apellidos`, `documento`, `email`, `activo`, `created_at`, `updated_at`) VALUES (54, NULL, 'Ximena', 'Chan', 'Baeza', 9998304106, 'Ximena', 'Chan Baeza', 'DRV-GPQ-017', 'ximena.chan@gestionpaq.local', 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `personas` (`id`, `usuario_id`, `nombre`, `apellido_paterno`, `apellido_materno`, `telefono`, `nombres`, `apellidos`, `documento`, `email`, `activo`, `created_at`, `updated_at`) VALUES (55, NULL, 'Cesar', 'Ibarra', 'Meza', 6648304107, 'Cesar', 'Ibarra Meza', 'DRV-GPQ-018', 'cesar.ibarra@gestionpaq.local', 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `personas` (`id`, `usuario_id`, `nombre`, `apellido_paterno`, `apellido_materno`, `telefono`, `nombres`, `apellidos`, `documento`, `email`, `activo`, `created_at`, `updated_at`) VALUES (56, NULL, 'Gabriela', 'Rosas', 'Aguayo', 6648304108, 'Gabriela', 'Rosas Aguayo', 'DRV-GPQ-019', 'gabriela.rosas@gestionpaq.local', 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
-
-DELETE FROM `clientes`;
 INSERT INTO `clientes` (`id`, `persona_id`, `name`, `email`, `phone`, `identification`, `type`, `status`, `default_address`, `latitude`, `longitude`, `notes`, `codigo_cliente`, `nivel_servicio`, `activo`, `created_at`, `updated_at`) VALUES (9, 24, 'Carla Mendoza', 'customer@gestionpaq.local', 5550000106, 'CLI-GPQ-001', 'individual', 'active', 'Paseo del Acueducto 118, Cumbres Elite, Monterrey, Nuevo Leon', 25.73654000, -100.36029000, 'Cuenta demo para el portal cliente de GESTIONPAQ.', 'CLI-GPQ-001', 'premium', 1, '2026-03-29 18:41:38', '2026-03-29 18:41:38');
 INSERT INTO `clientes` (`id`, `persona_id`, `name`, `email`, `phone`, `identification`, `type`, `status`, `default_address`, `latitude`, `longitude`, `notes`, `codigo_cliente`, `nivel_servicio`, `activo`, `created_at`, `updated_at`) VALUES (10, 25, 'Farmacia Centro', 'operaciones@farmaciacentro.mx', 8187001122, 'CLI-GPQ-002', 'business', 'active', 'Av. Sendero 810, Residencial Anahuac, San Nicolas, Nuevo Leon', 25.74203000, -100.30210000, 'Cliente corporativo de prueba para operaciones farmaceuticas.', 'CLI-GPQ-002', 'corporativo', 1, '2026-03-29 18:41:38', '2026-03-29 18:41:38');
 INSERT INTO `clientes` (`id`, `persona_id`, `name`, `email`, `phone`, `identification`, `type`, `status`, `default_address`, `latitude`, `longitude`, `notes`, `codigo_cliente`, `nivel_servicio`, `activo`, `created_at`, `updated_at`) VALUES (11, 26, 'Textiles Oriente', 'logistica@textilesoriente.mx', 8187001133, 'CLI-GPQ-003', 'business', 'active', 'Av. Miguel de la Madrid 1501, Nueva Linda Vista, Guadalupe, Nuevo Leon', 25.68802000, -100.20831000, 'Cliente corporativo de textiles para cobertura metropolitana.', 'CLI-GPQ-003', 'estandar', 1, '2026-03-29 18:41:38', '2026-03-29 18:41:38');
@@ -116,8 +688,6 @@ INSERT INTO `clientes` (`id`, `persona_id`, `name`, `email`, `phone`, `identific
 INSERT INTO `clientes` (`id`, `persona_id`, `name`, `email`, `phone`, `identification`, `type`, `status`, `default_address`, `latitude`, `longitude`, `notes`, `codigo_cliente`, `nivel_servicio`, `activo`, `created_at`, `updated_at`) VALUES (23, 46, 'Textiles Angelopolis', 'trafico@textilesangelopolis.mx', 2229002104, 'CLI-GPQ-015', 'business', 'active', 'Boulevard Forjadores 3105, San Pedro Cholula, Puebla', 19.07505000, -98.27114000, 'Despacho recurrente a tiendas.', 'CLI-GPQ-015', 'estandar', 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `clientes` (`id`, `persona_id`, `name`, `email`, `phone`, `identification`, `type`, `status`, `default_address`, `latitude`, `longitude`, `notes`, `codigo_cliente`, `nivel_servicio`, `activo`, `created_at`, `updated_at`) VALUES (24, 47, 'Agroinsumos Peninsula', 'operaciones@agroinsumospeninsula.mx', 9999002105, 'CLI-GPQ-016', 'business', 'active', 'Calle 24 358, Merida, Yucatan', 20.93657000, -89.59062000, 'Suministro regional.', 'CLI-GPQ-016', 'estandar', 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `clientes` (`id`, `persona_id`, `name`, `email`, `phone`, `identification`, `type`, `status`, `default_address`, `latitude`, `longitude`, `notes`, `codigo_cliente`, `nivel_servicio`, `activo`, `created_at`, `updated_at`) VALUES (25, 48, 'MedSupply Frontera', 'supply@medsupplyfrontera.mx', 6649002106, 'CLI-GPQ-017', 'business', 'active', 'Avenida Universidad 1951, Tijuana, Baja California', 32.53199000, -116.97236000, 'Material medico controlado.', 'CLI-GPQ-017', 'premium', 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
-
-DELETE FROM `cliente_direcciones`;
 INSERT INTO `cliente_direcciones` (`id`, `cliente_id`, `direccion_id`, `label`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `is_default`, `created_at`, `updated_at`) VALUES (8, 9, 17, 'principal', 'Paseo del Acueducto 118', 'Monterrey', 'Nuevo Leon', 64349, 25.73654000, -100.36029000, 1, '2026-03-29 18:41:38', '2026-03-29 18:41:38');
 INSERT INTO `cliente_direcciones` (`id`, `cliente_id`, `direccion_id`, `label`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `is_default`, `created_at`, `updated_at`) VALUES (9, 9, 18, 'oficina', 'Av. Revolucion 4020', 'Monterrey', 'Nuevo Leon', 64860, 25.65114000, -100.27856000, 0, '2026-03-29 18:41:38', '2026-03-29 18:41:38');
 INSERT INTO `cliente_direcciones` (`id`, `cliente_id`, `direccion_id`, `label`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `is_default`, `created_at`, `updated_at`) VALUES (10, 10, 19, 'principal', 'Av. Sendero 810', 'San Nicolas', 'Nuevo Leon', 66457, 25.74203000, -100.30210000, 1, '2026-03-29 18:41:38', '2026-03-29 18:41:38');
@@ -136,8 +706,6 @@ INSERT INTO `cliente_direcciones` (`id`, `cliente_id`, `direccion_id`, `label`, 
 INSERT INTO `cliente_direcciones` (`id`, `cliente_id`, `direccion_id`, `label`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `is_default`, `created_at`, `updated_at`) VALUES (23, 23, 40, 'principal', 'Boulevard Forjadores 3105', 'San Pedro Cholula', 'Puebla', 72760, 19.07505000, -98.27114000, 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `cliente_direcciones` (`id`, `cliente_id`, `direccion_id`, `label`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `is_default`, `created_at`, `updated_at`) VALUES (24, 24, 41, 'principal', 'Calle 24 358', 'Merida', 'Yucatan', 97288, 20.93657000, -89.59062000, 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `cliente_direcciones` (`id`, `cliente_id`, `direccion_id`, `label`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `is_default`, `created_at`, `updated_at`) VALUES (25, 25, 42, 'principal', 'Avenida Universidad 1951', 'Tijuana', 'Baja California', 22427, 32.53199000, -116.97236000, 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
-
-DELETE FROM `direcciones`;
 INSERT INTO `direcciones` (`id`, `referencia`, `calle`, `numero`, `colonia`, `ciudad`, `estado`, `pais`, `codigo_postal`, `calle_id`, `colonia_id`, `numero_ext`, `numero_int`, `latitud`, `longitud`, `created_at`, `updated_at`) VALUES (15, 'Cedis Monterrey', 'Av. Industria', 2450, 'Parque Industrial Escobedo', 'Monterrey', 'Nuevo Leon', 'Mexico', 66052, NULL, NULL, 2450, NULL, 25.79456000, -100.31487000, '2026-03-29 18:41:38', '2026-03-29 18:41:38');
 INSERT INTO `direcciones` (`id`, `referencia`, `calle`, `numero`, `colonia`, `ciudad`, `estado`, `pais`, `codigo_postal`, `calle_id`, `colonia_id`, `numero_ext`, `numero_int`, `latitud`, `longitud`, `created_at`, `updated_at`) VALUES (16, 'Hub Apodaca', 'Carretera Miguel Aleman', 980, 'Parque Stiva', 'Apodaca', 'Nuevo Leon', 'Mexico', 66603, NULL, NULL, 980, NULL, 25.77943000, -100.18641000, '2026-03-29 18:41:38', '2026-03-29 18:41:38');
 INSERT INTO `direcciones` (`id`, `referencia`, `calle`, `numero`, `colonia`, `ciudad`, `estado`, `pais`, `codigo_postal`, `calle_id`, `colonia_id`, `numero_ext`, `numero_int`, `latitud`, `longitud`, `created_at`, `updated_at`) VALUES (17, 'Carla Mendoza - Casa', 'Paseo del Acueducto', 118, 'Cumbres Elite', 'Monterrey', 'Nuevo Leon', 'Mexico', 64349, NULL, NULL, 118, NULL, 25.73654000, -100.36029000, '2026-03-29 18:41:38', '2026-03-29 18:41:38');
@@ -166,8 +734,6 @@ INSERT INTO `direcciones` (`id`, `referencia`, `calle`, `numero`, `colonia`, `ci
 INSERT INTO `direcciones` (`id`, `referencia`, `calle`, `numero`, `colonia`, `ciudad`, `estado`, `pais`, `codigo_postal`, `calle_id`, `colonia_id`, `numero_ext`, `numero_int`, `latitud`, `longitud`, `created_at`, `updated_at`) VALUES (40, 'Textiles Angelopolis Patio Puebla', 'Boulevard Forjadores', 3105, 'Momoxpan', 'San Pedro Cholula', 'Puebla', 'Mexico', 72760, NULL, NULL, 3105, NULL, 19.07505000, -98.27114000, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `direcciones` (`id`, `referencia`, `calle`, `numero`, `colonia`, `ciudad`, `estado`, `pais`, `codigo_postal`, `calle_id`, `colonia_id`, `numero_ext`, `numero_int`, `latitud`, `longitud`, `created_at`, `updated_at`) VALUES (41, 'Agroinsumos Peninsula Bodega', 'Calle 24', 358, 'Ciudad Industrial', 'Merida', 'Yucatan', 'Mexico', 97288, NULL, NULL, 358, NULL, 20.93657000, -89.59062000, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `direcciones` (`id`, `referencia`, `calle`, `numero`, `colonia`, `ciudad`, `estado`, `pais`, `codigo_postal`, `calle_id`, `colonia_id`, `numero_ext`, `numero_int`, `latitud`, `longitud`, `created_at`, `updated_at`) VALUES (42, 'MedSupply Frontera Centro Operativo', 'Avenida Universidad', 1951, 'Otay Universidad', 'Tijuana', 'Baja California', 'Mexico', 22427, NULL, NULL, 1951, NULL, 32.53199000, -116.97236000, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
-
-DELETE FROM `almacenes`;
 INSERT INTO `almacenes` (`id`, `codigo`, `nombre`, `code`, `direccion_id`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `capacity`, `status`, `activo`, `created_at`, `updated_at`) VALUES (7, 'ALM-GPQ-MTY', 'Cedis Monterrey', 'MTY-CEDIS', 15, 'Av. Industria 2450', 'Monterrey', 'Nuevo Leon', 66052, 25.79456000, -100.31487000, 1200, 'active', 1, '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `almacenes` (`id`, `codigo`, `nombre`, `code`, `direccion_id`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `capacity`, `status`, `activo`, `created_at`, `updated_at`) VALUES (8, 'ALM-GPQ-APD', 'Hub Apodaca', 'APD-HUB', 16, 'Carretera Miguel Aleman 980', 'Apodaca', 'Nuevo Leon', 66603, 25.77943000, -100.18641000, 800, 'active', 1, '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `almacenes` (`id`, `codigo`, `nombre`, `code`, `direccion_id`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `capacity`, `status`, `activo`, `created_at`, `updated_at`) VALUES (9, 'ALM-GPQ-STC', 'Crossdock Santa Catarina', 'STC-CROSS', 21, 'Av. Heberto Castillo 245', 'Santa Catarina', 'Nuevo Leon', 66367, 25.68392000, -100.45834000, 620, 'active', 1, '2026-03-29 18:41:36', '2026-03-29 18:41:36');
@@ -178,8 +744,6 @@ INSERT INTO `almacenes` (`id`, `codigo`, `nombre`, `code`, `direccion_id`, `addr
 INSERT INTO `almacenes` (`id`, `codigo`, `nombre`, `code`, `direccion_id`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `capacity`, `status`, `activo`, `created_at`, `updated_at`) VALUES (14, 'ALM-GPQ-PUE', 'Crossdock Puebla', 'PUE-CROSS', 34, 'Autopista Mexico Puebla 117', 'Cuautlancingo', 'Puebla', 72700, 19.08828000, -98.27286000, 720, 'active', 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `almacenes` (`id`, `codigo`, `nombre`, `code`, `direccion_id`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `capacity`, `status`, `activo`, `created_at`, `updated_at`) VALUES (15, 'ALM-GPQ-MID', 'Cedis Merida Poniente', 'MID-PONIENTE', 35, 'Calle 60 491', 'Merida', 'Yucatan', 97238, 20.98186000, -89.67761000, 640, 'active', 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `almacenes` (`id`, `codigo`, `nombre`, `code`, `direccion_id`, `address`, `city`, `state`, `postal_code`, `latitude`, `longitude`, `capacity`, `status`, `activo`, `created_at`, `updated_at`) VALUES (16, 'ALM-GPQ-TIJ', 'Hub Tijuana', 'TIJ-FRONTERA', 36, 'Boulevard Bellas Artes 17634', 'Tijuana', 'Baja California', 22444, 32.52982000, -116.94227000, 880, 'active', 1, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
-
-DELETE FROM `vehiculos`;
 INSERT INTO `vehiculos` (`id`, `placa`, `warehouse_id`, `plate`, `model`, `brand`, `year`, `type`, `capacity_kg`, `capacity_packages`, `current_fuel`, `fuel_capacity`, `fuel_consumption_km`, `status`, `last_maintenance`, `total_km`, `latitude`, `longitude`, `vin`, `tipo_id`, `tipo_vehiculo_id`, `capacidad`, `capacidad_kg`, `estado_id`, `estado`, `activo`, `consumo_km`, `created_at`, `updated_at`) VALUES (10, 'GPQ-231-A', 7, 'GPQ-231-A', 'Sprinter 311', 'Mercedes-Benz', 2023, 'Van', 900.00, 42, 62.00, 80.00, 0.1080, 'Operativo', '2026-03-11 14:00:00', 18450.00, 25.76831000, -100.30052000, 'MBGPQSPRINTER231A', 1, NULL, 900.00, 900, 2, 'Operativo', 1, 0.11, '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `vehiculos` (`id`, `placa`, `warehouse_id`, `plate`, `model`, `brand`, `year`, `type`, `capacity_kg`, `capacity_packages`, `current_fuel`, `fuel_capacity`, `fuel_consumption_km`, `status`, `last_maintenance`, `total_km`, `latitude`, `longitude`, `vin`, `tipo_id`, `tipo_vehiculo_id`, `capacidad`, `capacidad_kg`, `estado_id`, `estado`, `activo`, `consumo_km`, `created_at`, `updated_at`) VALUES (11, 'GPQ-745-B', 7, 'GPQ-745-B', 'Forward 800', 'Isuzu', 2022, 'Camion ligero', 2500.00, 90, 88.00, 110.00, 0.1570, 'Disponible', '2026-03-20 11:30:00', 26380.00, 25.79211000, -100.31201000, 'ISUGPQFORWARD745B', 2, NULL, 2500.00, 2500, 1, 'Disponible', 1, 0.16, '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `vehiculos` (`id`, `placa`, `warehouse_id`, `plate`, `model`, `brand`, `year`, `type`, `capacity_kg`, `capacity_packages`, `current_fuel`, `fuel_capacity`, `fuel_consumption_km`, `status`, `last_maintenance`, `total_km`, `latitude`, `longitude`, `vin`, `tipo_id`, `tipo_vehiculo_id`, `capacidad`, `capacidad_kg`, `estado_id`, `estado`, `activo`, `consumo_km`, `created_at`, `updated_at`) VALUES (12, 'GPQ-118-C', 8, 'GPQ-118-C', 'Transit Custom', 'Ford', 2021, 'Van', 800.00, 38, 18.00, 72.00, 0.1180, 'Mantenimiento', '2026-02-17 09:00:00', 31820.00, 25.77943000, -100.18641000, 'FORDGPQTRANSIT118C', 1, NULL, 800.00, 800, 3, 'Mantenimiento', 1, 0.12, '2026-03-29 18:41:36', '2026-03-29 18:41:36');
@@ -198,8 +762,6 @@ INSERT INTO `vehiculos` (`id`, `placa`, `warehouse_id`, `plate`, `model`, `brand
 INSERT INTO `vehiculos` (`id`, `placa`, `warehouse_id`, `plate`, `model`, `brand`, `year`, `type`, `capacity_kg`, `capacity_packages`, `current_fuel`, `fuel_capacity`, `fuel_consumption_km`, `status`, `last_maintenance`, `total_km`, `latitude`, `longitude`, `vin`, `tipo_id`, `tipo_vehiculo_id`, `capacidad`, `capacidad_kg`, `estado_id`, `estado`, `activo`, `consumo_km`, `created_at`, `updated_at`) VALUES (25, 'GPQ-507-YN', 15, 'GPQ-507-YN', 'Ram ProMaster City', 'Ram', 2024, 'Van', 720.00, 30, 43.00, 60.00, 0.0960, 'Disponible', '2026-03-22 09:00:00', 12000.00, 20.98186000, -89.67761000, 'RAMGPQ507YN0006', 1, NULL, 720.00, 720, 1, 'Disponible', 1, 0.10, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `vehiculos` (`id`, `placa`, `warehouse_id`, `plate`, `model`, `brand`, `year`, `type`, `capacity_kg`, `capacity_packages`, `current_fuel`, `fuel_capacity`, `fuel_consumption_km`, `status`, `last_maintenance`, `total_km`, `latitude`, `longitude`, `vin`, `tipo_id`, `tipo_vehiculo_id`, `capacidad`, `capacidad_kg`, `estado_id`, `estado`, `activo`, `consumo_km`, `created_at`, `updated_at`) VALUES (26, 'GPQ-611-BC', 16, 'GPQ-611-BC', 'Transit Connect', 'Ford', 2022, 'Van', 760.00, 32, 44.00, 56.00, 0.0980, 'Disponible', '2026-03-22 09:00:00', 12000.00, 32.52982000, -116.94227000, 'FORDGPQ611BC0007', 1, NULL, 760.00, 760, 1, 'Disponible', 1, 0.10, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `vehiculos` (`id`, `placa`, `warehouse_id`, `plate`, `model`, `brand`, `year`, `type`, `capacity_kg`, `capacity_packages`, `current_fuel`, `fuel_capacity`, `fuel_consumption_km`, `status`, `last_maintenance`, `total_km`, `latitude`, `longitude`, `vin`, `tipo_id`, `tipo_vehiculo_id`, `capacidad`, `capacidad_kg`, `estado_id`, `estado`, `activo`, `consumo_km`, `created_at`, `updated_at`) VALUES (27, 'GPQ-612-BC', 16, 'GPQ-612-BC', 'Cabstar', 'Nissan', 2021, 'Camion caja seca', 4700.00, 160, 86.00, 125.00, 0.1910, 'Operativo', '2026-03-22 09:00:00', 12000.00, 32.53054000, -116.94488000, 'NISGPQ612BC0008', 3, NULL, 4700.00, 4700, 2, 'Operativo', 1, 0.19, '2026-03-29 21:58:28', '2026-03-29 21:58:28');
-
-DELETE FROM `conductores`;
 INSERT INTO `conductores` (`id`, `persona_id`, `numero_licencia`, `licencia_vence`, `activo`, `estado_id`, `name`, `email`, `phone`, `license_number`, `license_expiry`, `identification`, `date_of_birth`, `address`, `status`, `current_vehicle_id`, `latitude`, `longitude`, `last_seen_at`, `created_at`, `updated_at`) VALUES (7, 23, 'LIC-GPQ-1001', '2027-11-30', 1, 2, 'Daniel Rios', 'driver@gestionpaq.local', 5550000105, 'LIC-GPQ-1001', '2027-11-30', 'DRV-GPQ-001', '1992-03-14', 'Cumbres Elite, Monterrey, Nuevo Leon', 'En ruta', 10, 25.73411000, -100.30452000, '2026-03-29 18:33:36', '2026-03-29 18:41:36', '2026-03-29 20:11:21');
 INSERT INTO `conductores` (`id`, `persona_id`, `numero_licencia`, `licencia_vence`, `activo`, `estado_id`, `name`, `email`, `phone`, `license_number`, `license_expiry`, `identification`, `date_of_birth`, `address`, `status`, `current_vehicle_id`, `latitude`, `longitude`, `last_seen_at`, `created_at`, `updated_at`) VALUES (8, 27, 'LIC-GPQ-1002', '2026-08-18', 1, 3, 'Lucia Herrera', 'lucia.herrera@gestionpaq.local', 8187001144, 'LIC-GPQ-1002', '2026-08-18', 'DRV-GPQ-002', '1988-09-22', 'San Nicolas, Nuevo Leon', 'Fuera de turno', 11, 25.74203000, -100.30210000, '2026-03-29 07:05:00', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `conductores` (`id`, `persona_id`, `numero_licencia`, `licencia_vence`, `activo`, `estado_id`, `name`, `email`, `phone`, `license_number`, `license_expiry`, `identification`, `date_of_birth`, `address`, `status`, `current_vehicle_id`, `latitude`, `longitude`, `last_seen_at`, `created_at`, `updated_at`) VALUES (9, 20, NULL, NULL, 1, 2, 'Olga Reyes', NULL, 5514753659, NULL, NULL, NULL, NULL, NULL, 'En ruta', NULL, NULL, NULL, NULL, '2026-03-29 04:16:57', '2026-03-29 04:27:44');
@@ -220,8 +782,6 @@ INSERT INTO `conductores` (`id`, `persona_id`, `numero_licencia`, `licencia_venc
 INSERT INTO `conductores` (`id`, `persona_id`, `numero_licencia`, `licencia_vence`, `activo`, `estado_id`, `name`, `email`, `phone`, `license_number`, `license_expiry`, `identification`, `date_of_birth`, `address`, `status`, `current_vehicle_id`, `latitude`, `longitude`, `last_seen_at`, `created_at`, `updated_at`) VALUES (24, 54, 'LIC-GPQ-2017', '2028-03-30', 1, 1, 'Ximena Chan', 'ximena.chan@gestionpaq.local', 9998304106, 'LIC-GPQ-2017', '2028-03-30', 'DRV-GPQ-017', '1994-10-12', 'Merida, Yucatan', 'Disponible', 25, 20.98186000, -89.67761000, '2026-03-29 21:48:28', '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `conductores` (`id`, `persona_id`, `numero_licencia`, `licencia_vence`, `activo`, `estado_id`, `name`, `email`, `phone`, `license_number`, `license_expiry`, `identification`, `date_of_birth`, `address`, `status`, `current_vehicle_id`, `latitude`, `longitude`, `last_seen_at`, `created_at`, `updated_at`) VALUES (25, 55, 'LIC-GPQ-2018', '2027-09-19', 1, 2, 'Cesar Ibarra', 'cesar.ibarra@gestionpaq.local', 6648304107, 'LIC-GPQ-2018', '2027-09-19', 'DRV-GPQ-018', '1989-01-28', 'Tijuana, Baja California', 'En ruta', 26, 32.52982000, -116.94227000, '2026-03-29 21:48:28', '2026-03-29 21:58:28', '2026-03-30 00:59:33');
 INSERT INTO `conductores` (`id`, `persona_id`, `numero_licencia`, `licencia_vence`, `activo`, `estado_id`, `name`, `email`, `phone`, `license_number`, `license_expiry`, `identification`, `date_of_birth`, `address`, `status`, `current_vehicle_id`, `latitude`, `longitude`, `last_seen_at`, `created_at`, `updated_at`) VALUES (26, 56, 'LIC-GPQ-2019', '2028-04-22', 1, 4, 'Gabriela Rosas', 'gabriela.rosas@gestionpaq.local', 6648304108, 'LIC-GPQ-2019', '2028-04-22', 'DRV-GPQ-019', '1986-08-17', 'Tijuana, Baja California', 'Activo', 27, 32.53054000, -116.94488000, '2026-03-29 21:48:28', '2026-03-29 21:58:28', '2026-03-29 21:58:28');
-
-DELETE FROM `turnos_conductor`;
 INSERT INTO `turnos_conductor` (`id`, `conductor_id`, `driver_id`, `shift_date`, `start_time`, `end_time`, `total_deliveries`, `successful_deliveries`, `failed_deliveries`, `distance_km`, `status`, `inicio_turno`, `fin_turno`, `estado`, `created_at`, `updated_at`) VALUES (7, 7, 7, '2026-03-29', '08:00:00', '18:00:00', 6, 5, 1, 72.40, 'in_progress', '2026-03-29 08:00:00', NULL, 'activo', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `turnos_conductor` (`id`, `conductor_id`, `driver_id`, `shift_date`, `start_time`, `end_time`, `total_deliveries`, `successful_deliveries`, `failed_deliveries`, `distance_km`, `status`, `inicio_turno`, `fin_turno`, `estado`, `created_at`, `updated_at`) VALUES (8, 8, 8, '2026-03-29', '07:00:00', '15:00:00', 2, 2, 0, 18.00, 'scheduled', '2026-03-29 07:00:00', '2026-03-29 15:05:00', 'cerrado', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `turnos_conductor` (`id`, `conductor_id`, `driver_id`, `shift_date`, `start_time`, `end_time`, `total_deliveries`, `successful_deliveries`, `failed_deliveries`, `distance_km`, `status`, `inicio_turno`, `fin_turno`, `estado`, `created_at`, `updated_at`) VALUES (9, 11, 11, '2026-03-29', '07:30:00', '18:30:00', 8, 5, 0, 64.80, 'in_progress', '2026-03-29 07:30:00', NULL, 'activo', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
@@ -253,8 +813,6 @@ INSERT INTO `turnos_conductor` (`id`, `conductor_id`, `driver_id`, `shift_date`,
 INSERT INTO `turnos_conductor` (`id`, `conductor_id`, `driver_id`, `shift_date`, `start_time`, `end_time`, `total_deliveries`, `successful_deliveries`, `failed_deliveries`, `distance_km`, `status`, `inicio_turno`, `fin_turno`, `estado`, `created_at`, `updated_at`) VALUES (35, 25, 25, '2026-03-30', '07:00:00', '17:00:00', 0, 0, 0, 0.00, 'scheduled', '2026-03-30 07:00:00', NULL, 'programado', '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `turnos_conductor` (`id`, `conductor_id`, `driver_id`, `shift_date`, `start_time`, `end_time`, `total_deliveries`, `successful_deliveries`, `failed_deliveries`, `distance_km`, `status`, `inicio_turno`, `fin_turno`, `estado`, `created_at`, `updated_at`) VALUES (36, 26, 26, '2026-03-29', '07:00:00', '17:00:00', 0, 0, 0, 0.00, 'scheduled', '2026-03-29 07:00:00', NULL, 'activo', '2026-03-29 21:58:28', '2026-03-29 21:58:28');
 INSERT INTO `turnos_conductor` (`id`, `conductor_id`, `driver_id`, `shift_date`, `start_time`, `end_time`, `total_deliveries`, `successful_deliveries`, `failed_deliveries`, `distance_km`, `status`, `inicio_turno`, `fin_turno`, `estado`, `created_at`, `updated_at`) VALUES (37, 26, 26, '2026-03-30', '07:00:00', '17:00:00', 0, 0, 0, 0.00, 'scheduled', '2026-03-30 07:00:00', NULL, 'programado', '2026-03-29 21:58:28', '2026-03-29 21:58:28');
-
-DELETE FROM `rutas`;
 INSERT INTO `rutas` (`id`, `codigo`, `almacen_origen_id`, `origen_almacen_id`, `destino_almacen_id`, `distancia_km`, `tiempo_estimado_min`, `estado_id`, `route_code`, `vehicle_id`, `driver_id`, `warehouse_id`, `scheduled_date`, `start_time`, `end_time`, `total_packages`, `total_weight_kg`, `estimated_distance_km`, `actual_distance_km`, `estimated_time_minutes`, `actual_time_minutes`, `fuel_consumed_liters`, `status`, `optimization_score`, `waypoints`, `notes`, `estado`, `created_at`, `updated_at`) VALUES (25, 'GPQ-R-001', 7, 7, 8, 38.40, 95, 2, 'GPQ-R-001', 10, 7, 7, '2026-03-29', '2026-03-29 15:41:36', NULL, 5, 789.00, 38.40, 21.80, 95, 68, 9.70, 'En ejecucion', 78.80, '[{\"label\":\"Cedis Monterrey\",\"lat\":25.79456,\"lng\":-100.31487},{\"label\":\"San Nicolas\",\"lat\":25.74203,\"lng\":-100.3021},{\"label\":\"Guadalupe\",\"lat\":25.68802,\"lng\":-100.20831}]', 'Ruta activa del dataset demo GESTIONPAQ.', 'En ejecucion', '2026-03-29 18:41:36', '2026-03-29 18:41:38');
 INSERT INTO `rutas` (`id`, `codigo`, `almacen_origen_id`, `origen_almacen_id`, `destino_almacen_id`, `distancia_km`, `tiempo_estimado_min`, `estado_id`, `route_code`, `vehicle_id`, `driver_id`, `warehouse_id`, `scheduled_date`, `start_time`, `end_time`, `total_packages`, `total_weight_kg`, `estimated_distance_km`, `actual_distance_km`, `estimated_time_minutes`, `actual_time_minutes`, `fuel_consumed_liters`, `status`, `optimization_score`, `waypoints`, `notes`, `estado`, `created_at`, `updated_at`) VALUES (26, 'GPQ-R-002', 7, 7, 8, 29.10, 80, 1, 'GPQ-R-002', 11, 8, 7, '2026-03-30', NULL, NULL, 1, 140.00, 29.10, 0.00, 80, 0, 0.00, 'Preparacion', 50.00, '[{\"label\":\"Cedis Monterrey\",\"lat\":25.79456,\"lng\":-100.31487},{\"label\":\"Monterrey Sur\",\"lat\":25.65114,\"lng\":-100.27856}]', 'Ruta en preparacion para el siguiente corte.', 'Preparacion', '2026-03-29 18:41:36', '2026-03-29 18:41:38');
 INSERT INTO `rutas` (`id`, `codigo`, `almacen_origen_id`, `origen_almacen_id`, `destino_almacen_id`, `distancia_km`, `tiempo_estimado_min`, `estado_id`, `route_code`, `vehicle_id`, `driver_id`, `warehouse_id`, `scheduled_date`, `start_time`, `end_time`, `total_packages`, `total_weight_kg`, `estimated_distance_km`, `actual_distance_km`, `estimated_time_minutes`, `actual_time_minutes`, `fuel_consumed_liters`, `status`, `optimization_score`, `waypoints`, `notes`, `estado`, `created_at`, `updated_at`) VALUES (27, 'GPQ-R-003', 8, 8, 7, 44.20, 105, 3, 'GPQ-R-003', 11, 8, 8, '2026-03-28', '2026-03-28 09:10:00', '2026-03-28 13:00:00', 1, 210.00, 44.20, 46.10, 105, 230, 17.80, 'Completada', 31.30, '[{\"label\":\"Hub Apodaca\",\"lat\":25.77943,\"lng\":-100.18641},{\"label\":\"Guadalupe\",\"lat\":25.68802,\"lng\":-100.20831},{\"label\":\"San Nicolas\",\"lat\":25.74203,\"lng\":-100.3021}]', 'Ruta cerrada para historico del tablero.', 'Completada', '2026-03-29 18:41:36', '2026-03-29 18:41:38');
@@ -267,10 +825,8 @@ INSERT INTO `rutas` (`id`, `codigo`, `almacen_origen_id`, `origen_almacen_id`, `
 INSERT INTO `rutas` (`id`, `codigo`, `almacen_origen_id`, `origen_almacen_id`, `destino_almacen_id`, `distancia_km`, `tiempo_estimado_min`, `estado_id`, `route_code`, `vehicle_id`, `driver_id`, `warehouse_id`, `scheduled_date`, `start_time`, `end_time`, `total_packages`, `total_weight_kg`, `estimated_distance_km`, `actual_distance_km`, `estimated_time_minutes`, `actual_time_minutes`, `fuel_consumed_liters`, `status`, `optimization_score`, `waypoints`, `notes`, `estado`, `created_at`, `updated_at`) VALUES (34, 'GPQ-R-015', 10, 10, 7, 92.40, 135, 3, 'GPQ-R-015', 17, 15, 10, '2026-03-27', '2026-03-27 06:50:00', '2026-03-27 14:30:00', 4, 694.00, 92.40, 95.90, 135, 276, 19.10, 'Completada', 30.00, '[{\"label\":\"Punto Saltillo\",\"lat\":25.43981,\"lng\":-100.99532},{\"label\":\"Cedis Monterrey\",\"lat\":25.79456,\"lng\":-100.31487}]', 'Historico cerrado para la plaza Saltillo.', 'Completada', '2026-03-29 18:41:36', '2026-03-29 18:41:39');
 INSERT INTO `rutas` (`id`, `codigo`, `almacen_origen_id`, `origen_almacen_id`, `destino_almacen_id`, `distancia_km`, `tiempo_estimado_min`, `estado_id`, `route_code`, `vehicle_id`, `driver_id`, `warehouse_id`, `scheduled_date`, `start_time`, `end_time`, `total_packages`, `total_weight_kg`, `estimated_distance_km`, `actual_distance_km`, `estimated_time_minutes`, `actual_time_minutes`, `fuel_consumed_liters`, `status`, `optimization_score`, `waypoints`, `notes`, `estado`, `created_at`, `updated_at`) VALUES (35, 'GPQ-R-016', 8, 8, 7, 28.60, 72, 2, 'GPQ-R-016', 19, 16, 8, '2026-03-29', '2026-03-29 08:40:00', NULL, 4, 408.00, 28.60, 17.80, 72, 59, 6.20, 'En ejecucion', 74.30, '[{\"label\":\"Hub Apodaca\",\"lat\":25.77943,\"lng\":-100.18641},{\"label\":\"Cedis Monterrey\",\"lat\":25.79456,\"lng\":-100.31487}]', 'Ruta activa del corredor aeropuerto y centro.', 'En ejecucion', '2026-03-29 18:41:36', '2026-03-29 18:41:39');
 INSERT INTO `rutas` (`id`, `codigo`, `almacen_origen_id`, `origen_almacen_id`, `destino_almacen_id`, `distancia_km`, `tiempo_estimado_min`, `estado_id`, `route_code`, `vehicle_id`, `driver_id`, `warehouse_id`, `scheduled_date`, `start_time`, `end_time`, `total_packages`, `total_weight_kg`, `estimated_distance_km`, `actual_distance_km`, `estimated_time_minutes`, `actual_time_minutes`, `fuel_consumed_liters`, `status`, `optimization_score`, `waypoints`, `notes`, `estado`, `created_at`, `updated_at`) VALUES (36, 'GPQ-R-017', 7, 7, 8, 33.70, 88, 3, 'GPQ-R-017', 11, 10, 7, '2026-03-26', '2026-03-26 08:05:00', '2026-03-26 12:55:00', 4, 323.00, 33.70, 35.00, 88, 174, 11.60, 'Completada', 38.30, '[{\"label\":\"Cedis Monterrey\",\"lat\":25.79456,\"lng\":-100.31487},{\"label\":\"Hub Apodaca\",\"lat\":25.77943,\"lng\":-100.18641}]', 'Historico completado de entregas centro-oriente.', 'Completada', '2026-03-29 18:41:36', '2026-03-29 20:11:21');
-INSERT INTO `rutas` (`id`, `codigo`, `almacen_origen_id`, `origen_almacen_id`, `destino_almacen_id`, `distancia_km`, `tiempo_estimado_min`, `estado_id`, `route_code`, `vehicle_id`, `driver_id`, `warehouse_id`, `scheduled_date`, `start_time`, `end_time`, `total_packages`, `total_weight_kg`, `estimated_distance_km`, `actual_distance_km`, `estimated_time_minutes`, `actual_time_minutes`, `fuel_consumed_liters`, `status`, `optimization_score`, `waypoints`, `notes`, `estado`, `created_at`, `updated_at`) VALUES (37, 'AUTO-R-0037', 7, 7, 8, 15.90, 48, 1, 'AUTO-R-0037', 15, 13, 7, '2026-04-02', NULL, NULL, 6, 60.00, 15.90, 0.00, 48, 0, 0.00, 'Preparacion', 54.00, '[{\"label\":\"Cedis Monterrey\",\"lat\":25.79456,\"lng\":-100.31487},{\"label\":\"Av. Miguel de la Madrid 1501\",\"lat\":25.68802,\"lng\":-100.20831}]', 'Ruta creada automaticamente a partir del motor de asignacion para mantener SLA y capacidad operativa.', 'Preparacion', '2026-03-29 21:38:03', '2026-03-29 21:38:33');
+INSERT INTO `rutas` (`id`, `codigo`, `almacen_origen_id`, `origen_almacen_id`, `destino_almacen_id`, `distancia_km`, `tiempo_estimado_min`, `estado_id`, `route_code`, `vehicle_id`, `driver_id`, `warehouse_id`, `scheduled_date`, `start_time`, `end_time`, `total_packages`, `total_weight_kg`, `estimated_distance_km`, `actual_distance_km`, `estimated_time_minutes`, `actual_time_minutes`, `fuel_consumed_liters`, `status`, `optimization_score`, `waypoints`, `notes`, `estado`, `created_at`, `updated_at`) VALUES (37, 'GPQ-R-0037', 7, 7, 8, 15.90, 48, 1, 'GPQ-R-0037', 15, 13, 7, '2026-04-02', NULL, NULL, 6, 60.00, 15.90, 0.00, 48, 0, 0.00, 'Preparacion', 54.00, '[{\"label\":\"Cedis Monterrey\",\"lat\":25.79456,\"lng\":-100.31487},{\"label\":\"Av. Miguel de la Madrid 1501\",\"lat\":25.68802,\"lng\":-100.20831}]', 'Ruta planificada por el motor de asignacion para mantener SLA y capacidad operativa.', 'Preparacion', '2026-03-29 21:38:03', '2026-03-29 21:38:33');
 INSERT INTO `rutas` (`id`, `codigo`, `almacen_origen_id`, `origen_almacen_id`, `destino_almacen_id`, `distancia_km`, `tiempo_estimado_min`, `estado_id`, `route_code`, `vehicle_id`, `driver_id`, `warehouse_id`, `scheduled_date`, `start_time`, `end_time`, `total_packages`, `total_weight_kg`, `estimated_distance_km`, `actual_distance_km`, `estimated_time_minutes`, `actual_time_minutes`, `fuel_consumed_liters`, `status`, `optimization_score`, `waypoints`, `notes`, `estado`, `created_at`, `updated_at`) VALUES (38, 'RUTA-0038', 13, 13, NULL, 2.00, 15, 2, NULL, 26, 25, 13, NULL, NULL, NULL, 0, 0.00, 2.00, 0.00, 15, 0, 0.00, 'En ejecucion', 58.10, NULL, NULL, 'En ejecucion', '2026-03-30 00:59:33', '2026-03-30 00:59:33');
-
-DELETE FROM `paquetes`;
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (33, 9, 4, 340.00, 340.00, 0.28, 0.280, 15, 15, 19, 19, 3, 'En ruta', 'Reposicion de inventario de alto volumen para sucursal norte.', '2026-03-29 18:30:00', 'GPQ-250001', 'GPQ-250001', 9, 10, 10, 7, 340.00, 12, 0.2800, 'Carga general', 'Reposicion de inventario de alto volumen para sucursal norte.', 18500.00, 'Av. Sendero 810', 'San Nicolas', 'Nuevo Leon', 66457, 25.74203000, -100.30210000, 'En ruta', 'high', '2026-03-29', '2026-03-29 08:20:00', '2026-03-29 18:30:00', '2026-03-29', '2026-03-29 08:05:00', NULL, 0, 'Shipment demo GESTIONPAQ en ruta.', 'GPQ-250001', '2026-03-26 10:10:00', '2026-03-29 18:41:36');
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (34, 9, 1, 280.00, 280.00, 0.22, 0.220, 15, 15, 20, 20, 4, 'Entregado', 'Expediente contractual con entrega confirmada.', '2026-03-29 15:00:00', 'GPQ-250002', 'GPQ-250002', 9, 11, 11, 7, 280.00, 9, 0.2200, 'Documentacion', 'Expediente contractual con entrega confirmada.', 12600.00, 'Av. Miguel de la Madrid 1501', 'Guadalupe', 'Nuevo Leon', 67130, 25.68802000, -100.20831000, 'Entregado', 'express', '2026-03-29', '2026-03-29 08:10:00', '2026-03-29 14:30:00', '2026-03-29', '2026-03-29 07:55:00', '2026-03-29 14:12:00', 1, 'Shipment demo GESTIONPAQ entregado con evidencia.', 'GPQ-250002', '2026-03-27 16:40:00', '2026-03-29 18:41:36');
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (35, 10, 2, 140.00, 140.00, 0.16, 0.160, 15, 15, 17, 17, 1, 'Pendiente', 'Pedido programado para la siguiente ventana de despacho.', '2026-03-30 16:00:00', 'GPQ-250003', 'GPQ-250003', 10, 9, 8, 7, 140.00, 6, 0.1600, 'Medicamento', 'Pedido programado para la siguiente ventana de despacho.', 9700.00, 'Paseo del Acueducto 118', 'Monterrey', 'Nuevo Leon', 64349, 25.73654000, -100.36029000, 'Pendiente', 'standard', '2026-03-30', '2026-03-29 17:10:00', '2026-03-30 16:00:00', '2026-03-30', NULL, NULL, 0, 'Shipment demo GESTIONPAQ en cola de salida.', 'GPQ-250003', '2026-03-28 11:15:00', '2026-03-29 18:41:36');
@@ -280,7 +836,7 @@ INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volum
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (39, 9, 2, 12.00, 12.00, 3.00, 3.000, NULL, NULL, NULL, NULL, 1, 'Pendiente', 'Vacuna contra el covid', NULL, 345634, 345634, 9, 11, NULL, 7, 12.00, 23, 3.0000, 'Medicamento', 'Vacuna contra el covid', 4334453.00, 'Av. Sendero 810', 'San Nicolas', 'Nuevo Leon', 66457, NULL, NULL, 'Pendiente', 'urgente', '2026-03-28', '2026-03-29 04:24:37', NULL, NULL, NULL, NULL, 0, NULL, 345634, '2026-03-29 04:23:55', '2026-03-29 04:24:37');
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (40, 9, 3, 34.00, 34.00, 3.00, 3.000, NULL, NULL, NULL, NULL, 1, 'Pendiente', 'sdfgdsf', NULL, 'GPQ-250006', 'GPQ-250006', 9, 11, 11, 7, 34.00, 56, 3.0000, 'Electronica', 'sdfgdsf', 2423.00, 'Av. Miguel de la Madrid 1501', 'Guadalupe', 'Nuevo Leon', 67130, NULL, NULL, 'Pendiente', 'urgente', '2026-03-28', '2026-03-29 04:29:00', NULL, NULL, NULL, NULL, 0, NULL, 'GPQ-250006', '2026-03-29 04:29:00', '2026-03-29 04:29:00');
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (41, 12, 3, 180.00, 180.00, 0.14, 0.140, 21, 21, 24, 24, 3, 'En ruta', 'Terminales de cobro y lectores para modulo clinico.', '2026-03-29 15:15:00', 'GPQ-260010', 'GPQ-260010', 12, 13, 13, 9, 180.00, 4, 0.1400, 'Electronica', 'Terminales de cobro y lectores para modulo clinico.', 19500.00, 'Av. Vasconcelos 910', 'San Pedro Garza Garcia', 'Nuevo Leon', 66220, 25.65238000, -100.40611000, 'En ruta', 'high', '2026-03-29', '2026-03-29 07:50:00', '2026-03-29 15:15:00', '2026-03-29', '2026-03-29 08:20:00', NULL, 0, 'Registro ampliado del dataset demo GESTIONPAQ.', 'GPQ-260010', '2026-03-27 09:10:00', '2026-03-29 18:41:36');
-INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (42, 15, 4, 220.00, 220.00, 0.19, 0.190, 21, 21, 27, 27, 3, 'En ruta', 'Reposicion de equipos pequeños y refacciones de soporte.', '2026-03-29 16:15:00', 'GPQ-260011', 'GPQ-260011', 15, 16, 16, 9, 220.00, 7, 0.1900, 'Carga general', 'Reposicion de equipos pequeños y refacciones de soporte.', 22800.00, 'Av. Universidad 315', 'San Nicolas', 'Nuevo Leon', 66450, 25.74788000, -100.29877000, 'En ruta', 'high', '2026-03-29', '2026-03-29 07:57:00', '2026-03-29 16:15:00', '2026-03-29', '2026-03-29 08:26:00', NULL, 0, 'Registro ampliado del dataset demo GESTIONPAQ.', 'GPQ-260011', '2026-03-27 10:17:00', '2026-03-29 18:41:36');
+INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (42, 15, 4, 220.00, 220.00, 0.19, 0.190, 21, 21, 27, 27, 3, 'En ruta', 'Reposicion de equipos pequeÃ±os y refacciones de soporte.', '2026-03-29 16:15:00', 'GPQ-260011', 'GPQ-260011', 15, 16, 16, 9, 220.00, 7, 0.1900, 'Carga general', 'Reposicion de equipos pequeÃ±os y refacciones de soporte.', 22800.00, 'Av. Universidad 315', 'San Nicolas', 'Nuevo Leon', 66450, 25.74788000, -100.29877000, 'En ruta', 'high', '2026-03-29', '2026-03-29 07:57:00', '2026-03-29 16:15:00', '2026-03-29', '2026-03-29 08:26:00', NULL, 0, 'Registro ampliado del dataset demo GESTIONPAQ.', 'GPQ-260011', '2026-03-27 10:17:00', '2026-03-29 18:41:36');
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (43, 19, 1, 45.00, 45.00, 0.05, 0.050, 21, 21, 18, 18, 4, 'Entregado', 'Entrega de contratos y guias escolares urgentes.', '2026-03-29 17:15:00', 'GPQ-260012', 'GPQ-260012', 19, 9, 9, 9, 45.00, 5, 0.0500, 'Documentacion', 'Entrega de contratos y guias escolares urgentes.', 3900.00, 'Av. Revolucion 4020', 'Monterrey', 'Nuevo Leon', 64860, 25.65114000, -100.27856000, 'Entregado', 'express', '2026-03-29', '2026-03-29 08:04:00', '2026-03-29 17:15:00', '2026-03-29', '2026-03-29 08:32:00', '2026-03-29 13:22:00', 1, 'Registro ampliado del dataset demo GESTIONPAQ.', 'GPQ-260012', '2026-03-27 11:24:00', '2026-03-29 18:41:36');
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (44, 18, 2, 95.00, 95.00, 0.07, 0.070, 21, 21, 19, 19, 4, 'Entregado', 'Lotes de laboratorio sensibles a temperatura controlada.', '2026-03-29 15:15:00', 'GPQ-260013', 'GPQ-260013', 18, 10, 10, 9, 95.00, 3, 0.0700, 'Medicamento', 'Lotes de laboratorio sensibles a temperatura controlada.', 12800.00, 'Av. Sendero 810', 'San Nicolas', 'Nuevo Leon', 66457, 25.74203000, -100.30210000, 'Entregado', 'high', '2026-03-29', '2026-03-29 08:11:00', '2026-03-29 15:15:00', '2026-03-29', '2026-03-29 08:38:00', '2026-03-29 14:28:00', 1, 'Registro ampliado del dataset demo GESTIONPAQ.', 'GPQ-260013', '2026-03-27 12:31:00', '2026-03-29 18:41:36');
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (45, 17, 4, 640.00, 640.00, 0.42, 0.420, 22, 22, 23, 23, 3, 'En ruta', 'Abasto interurbano con consolidado mixto de patio.', '2026-03-29 16:15:00', 'GPQ-260014', 'GPQ-260014', 17, 12, 12, 10, 640.00, 14, 0.4200, 'Carga general', 'Abasto interurbano con consolidado mixto de patio.', 34200.00, 'Av. Las Torres 880', 'Santa Catarina', 'Nuevo Leon', 66350, 25.68142000, -100.44124000, 'En ruta', 'standard', '2026-03-29', '2026-03-29 07:50:00', '2026-03-29 16:15:00', '2026-03-29', '2026-03-29 08:20:00', NULL, 0, 'Registro ampliado del dataset demo GESTIONPAQ.', 'GPQ-260014', '2026-03-27 09:38:00', '2026-03-29 18:41:36');
@@ -322,8 +878,6 @@ INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volum
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (92, 10, 1, 10.00, 10.00, 23.00, 23.000, NULL, NULL, NULL, NULL, 5, 'Planificado', '', NULL, 'GPQ-260048', 'GPQ-260048', 10, 11, 11, 7, 10.00, 2, 23.0000, 'Documentacion', '', 230.00, 'Av. Miguel de la Madrid 1501', 'Guadalupe', 'Nuevo Leon', 67130, NULL, NULL, 'Planificado', 'high', '2026-04-02', '2026-03-29 21:38:33', '2026-04-02 08:48:00', '2026-04-02', NULL, NULL, 0, NULL, 'GPQ-260048', '2026-03-29 20:56:13', '2026-03-29 21:38:33');
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (93, 10, 1, 10.00, 10.00, 23.00, 23.000, NULL, NULL, NULL, NULL, 5, 'Planificado', '', NULL, 'GPQ-260049', 'GPQ-260049', 10, 11, 11, 7, 10.00, 2, 23.0000, 'Documentacion', '', 230.00, 'Av. Miguel de la Madrid 1501', 'Guadalupe', 'Nuevo Leon', 67130, NULL, NULL, 'Planificado', 'high', '2026-04-02', '2026-03-29 21:38:03', '2026-04-02 08:48:00', '2026-04-02', NULL, NULL, 0, NULL, 'GPQ-260049', '2026-03-29 20:56:15', '2026-03-29 21:38:03');
 INSERT INTO `paquetes` (`id`, `cliente_id`, `tipo_id`, `peso`, `peso_kg`, `volumen`, `volumen_m3`, `direccion_origen_id`, `origen_direccion_id`, `direccion_destino_id`, `destino_direccion_id`, `estado_id`, `estado`, `descripcion`, `fecha_estimada_entrega`, `codigo_tracking`, `tracking_code`, `sender_id`, `recipient_id`, `recipient_address_id`, `origin_warehouse_id`, `weight_kg`, `quantity`, `volume_m3`, `package_type`, `description`, `declared_value`, `recipient_address`, `recipient_city`, `recipient_state`, `recipient_postal_code`, `recipient_latitude`, `recipient_longitude`, `status`, `priority`, `scheduled_date`, `assigned_at`, `eta_at`, `promised_date`, `pickup_time`, `delivery_time`, `attempts`, `notes`, `codigo_rastreo`, `created_at`, `updated_at`) VALUES (100, 15, 3, 15.00, 15.00, 0.00, 0.000, NULL, NULL, NULL, NULL, 5, 'Planificado', NULL, NULL, 'GPQ-260050', 'GPQ-260050', 15, 19, 19, 13, 15.00, 2, 0.0000, 'Electronica', NULL, 123.00, 'Av. Concordia 1402', 'Apodaca', 'Queretaro', 66612, NULL, NULL, 'Planificado', 'express', '2026-04-03', NULL, NULL, NULL, NULL, NULL, 0, NULL, 'GPQ-260050', '2026-03-30 02:39:17', '2026-03-30 02:39:17');
-
-DELETE FROM `asignaciones`;
 INSERT INTO `asignaciones` (`id`, `ruta_id`, `route_id`, `vehiculo_id`, `vehicle_id`, `conductor_id`, `package_id`, `warehouse_id`, `sequence_order`, `status`, `driver_id`, `dispatcher_user_id`, `fecha_asignacion`, `fecha_salida`, `fecha_llegada_estimada`, `estado`, `created_at`, `updated_at`) VALUES (52, 25, 25, 10, 10, 7, 33, 7, 1, 'assigned', 7, 17, '2026-03-29 08:20:00', '2026-03-29 08:35:00', '2026-03-29 18:30:00', 'en curso', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `asignaciones` (`id`, `ruta_id`, `route_id`, `vehiculo_id`, `vehicle_id`, `conductor_id`, `package_id`, `warehouse_id`, `sequence_order`, `status`, `driver_id`, `dispatcher_user_id`, `fecha_asignacion`, `fecha_salida`, `fecha_llegada_estimada`, `estado`, `created_at`, `updated_at`) VALUES (53, 25, 25, 10, 10, 7, 34, 7, 2, 'delivered', 7, 17, '2026-03-29 08:10:00', '2026-03-29 08:30:00', '2026-03-29 14:30:00', 'entregada', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `asignaciones` (`id`, `ruta_id`, `route_id`, `vehiculo_id`, `vehicle_id`, `conductor_id`, `package_id`, `warehouse_id`, `sequence_order`, `status`, `driver_id`, `dispatcher_user_id`, `fecha_asignacion`, `fecha_salida`, `fecha_llegada_estimada`, `estado`, `created_at`, `updated_at`) VALUES (54, 26, 26, 11, 11, 8, 35, 7, 1, 'assigned', 8, 17, '2026-03-29 17:10:00', NULL, '2026-03-30 16:00:00', 'programada', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
@@ -371,8 +925,6 @@ INSERT INTO `asignaciones` (`id`, `ruta_id`, `route_id`, `vehiculo_id`, `vehicle
 INSERT INTO `asignaciones` (`id`, `ruta_id`, `route_id`, `vehiculo_id`, `vehicle_id`, `conductor_id`, `package_id`, `warehouse_id`, `sequence_order`, `status`, `driver_id`, `dispatcher_user_id`, `fecha_asignacion`, `fecha_salida`, `fecha_llegada_estimada`, `estado`, `created_at`, `updated_at`) VALUES (96, 37, 37, 15, 15, 13, 90, 7, 4, 'planned', 13, NULL, '2026-03-29 21:38:32', NULL, '2026-04-02 08:48:00', 'planificada', '2026-03-29 21:38:32', '2026-03-29 21:38:32');
 INSERT INTO `asignaciones` (`id`, `ruta_id`, `route_id`, `vehiculo_id`, `vehicle_id`, `conductor_id`, `package_id`, `warehouse_id`, `sequence_order`, `status`, `driver_id`, `dispatcher_user_id`, `fecha_asignacion`, `fecha_salida`, `fecha_llegada_estimada`, `estado`, `created_at`, `updated_at`) VALUES (97, 37, 37, 15, 15, 13, 91, 7, 5, 'planned', 13, NULL, '2026-03-29 21:38:33', NULL, '2026-04-02 08:48:00', 'planificada', '2026-03-29 21:38:33', '2026-03-29 21:38:33');
 INSERT INTO `asignaciones` (`id`, `ruta_id`, `route_id`, `vehiculo_id`, `vehicle_id`, `conductor_id`, `package_id`, `warehouse_id`, `sequence_order`, `status`, `driver_id`, `dispatcher_user_id`, `fecha_asignacion`, `fecha_salida`, `fecha_llegada_estimada`, `estado`, `created_at`, `updated_at`) VALUES (98, 37, 37, 15, 15, 13, 92, 7, 6, 'planned', 13, NULL, '2026-03-29 21:38:33', NULL, '2026-04-02 08:48:00', 'planificada', '2026-03-29 21:38:33', '2026-03-29 21:38:33');
-
-DELETE FROM `tracking`;
 INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (197, 38, 38, NULL, 1, 'Asignacion', 'Envio asignado automaticamente a GPQ-R-001 con score 98.7 pts.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 04:20:33', '2026-03-29 04:20:33', '2026-03-29 04:20:33', '2026-03-29 04:20:33');
 INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (198, 39, 39, NULL, 1, 'Asignacion', 'Envio asignado automaticamente a GPQ-R-001 con score 98 pts.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 04:24:37', '2026-03-29 04:24:37', '2026-03-29 04:24:37', '2026-03-29 04:24:37');
 INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (199, 38, 38, NULL, 1, 'Asignacion', 'Envio asignado automaticamente a GPQ-R-001 con score 70.4 pts.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 04:25:37', '2026-03-29 04:25:37', '2026-03-29 04:25:37', '2026-03-29 04:25:37');
@@ -508,14 +1060,12 @@ INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estad
 INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (329, 74, 74, NULL, 2, 'Registro', 'Envio registrado en la mesa operativa ampliada.', 25.43981000, -100.99532000, 'Punto Saltillo', '2026-03-28 10:41:00', '2026-03-29 18:41:39', '2026-03-29 18:41:39', '2026-03-28 10:41:00');
 INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (330, 75, 75, NULL, 1, 'Asignacion', 'Envio asignado automaticamente a GPQ-R-013 con score 112 pts. Conductor: Rosa Elizondo.', NULL, NULL, 'Hub Apodaca', '2026-03-29 18:46:00', '2026-03-29 18:46:00', '2026-03-29 18:46:00', '2026-03-29 18:46:00');
 INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (331, 76, 76, NULL, 1, 'Asignacion', 'Envio asignado automaticamente a GPQ-R-010 con score 119 pts. Conductor: Marco Tellez.', NULL, NULL, 'Crossdock Santa Catarina', '2026-03-29 18:57:31', '2026-03-29 18:57:31', '2026-03-29 18:57:31', '2026-03-29 18:57:31');
-INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (332, 93, 93, NULL, 5, 'Asignacion', 'Envio asignado automaticamente a AUTO-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 1.5%, ocupacion por bultos 7.1%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Ruta nueva sugerida para balancear carga y nivel de servicio. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:03', '2026-03-29 21:38:03', '2026-03-29 21:38:03', '2026-03-29 21:38:03');
-INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (333, 88, 88, NULL, 5, 'Asignacion', 'Envio asignado automaticamente a AUTO-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 3.1%, ocupacion por bultos 14.3%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:32', '2026-03-29 21:38:32', '2026-03-29 21:38:32', '2026-03-29 21:38:32');
-INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (334, 89, 89, NULL, 5, 'Asignacion', 'Envio asignado automaticamente a AUTO-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 4.6%, ocupacion por bultos 21.4%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:32', '2026-03-29 21:38:32', '2026-03-29 21:38:32', '2026-03-29 21:38:32');
-INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (335, 90, 90, NULL, 5, 'Asignacion', 'Envio asignado automaticamente a AUTO-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 6.2%, ocupacion por bultos 28.6%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33');
-INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (336, 91, 91, NULL, 5, 'Asignacion', 'Envio asignado automaticamente a AUTO-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 7.7%, ocupacion por bultos 35.7%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33');
-INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (337, 92, 92, NULL, 5, 'Asignacion', 'Envio asignado automaticamente a AUTO-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 9.2%, ocupacion por bultos 42.9%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33');
-
-DELETE FROM `evidencias`;
+INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (332, 93, 93, NULL, 5, 'Asignacion', 'Envio asignado a GPQ-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 1.5%, ocupacion por bultos 7.1%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Ruta nueva sugerida para balancear carga y nivel de servicio. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:03', '2026-03-29 21:38:03', '2026-03-29 21:38:03', '2026-03-29 21:38:03');
+INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (333, 88, 88, NULL, 5, 'Asignacion', 'Envio asignado a GPQ-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 3.1%, ocupacion por bultos 14.3%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:32', '2026-03-29 21:38:32', '2026-03-29 21:38:32', '2026-03-29 21:38:32');
+INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (334, 89, 89, NULL, 5, 'Asignacion', 'Envio asignado a GPQ-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 4.6%, ocupacion por bultos 21.4%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:32', '2026-03-29 21:38:32', '2026-03-29 21:38:32', '2026-03-29 21:38:32');
+INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (335, 90, 90, NULL, 5, 'Asignacion', 'Envio asignado a GPQ-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 6.2%, ocupacion por bultos 28.6%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33');
+INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (336, 91, 91, NULL, 5, 'Asignacion', 'Envio asignado a GPQ-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 7.7%, ocupacion por bultos 35.7%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33');
+INSERT INTO `tracking` (`id`, `paquete_id`, `package_id`, `direccion_id`, `estado_id`, `event_type`, `description`, `latitude`, `longitude`, `location`, `timestamp_event`, `created_at`, `updated_at`, `fecha`) VALUES (337, 92, 92, NULL, 5, 'Asignacion', 'Envio asignado a GPQ-R-0037 con score 100 pts. Ruta 2026-04-02, destino a 0 km del corredor, carga proyectada 9.2%, ocupacion por bultos 42.9%, conductor sugerido Omar Pena, autonomia estimada 471.3 km. Conductor: Omar Pena.', NULL, NULL, 'Cedis Monterrey', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33', '2026-03-29 21:38:33');
 INSERT INTO `evidencias` (`id`, `asignacion_id`, `package_id`, `driver_id`, `route_id`, `delivery_timestamp`, `recipient_name`, `signature_path`, `photo_path`, `gps_latitude`, `gps_longitude`, `notes`, `status`, `created_at`, `updated_at`, `url_imagen`, `firma`, `fecha`) VALUES (30, 53, 34, 7, 25, '2026-03-29 14:12:00', 'Rafael Lozano', '/uploads/evidences/signatures/demo-signature-gpq.svg', '/uploads/evidences/photos/demo-delivery-gpq.svg', 25.68802000, -100.20831000, 'Entrega confirmada sin incidencias en recepcion.', 'delivered', '2026-03-29 18:41:36', '2026-03-29 18:41:36', '/uploads/evidences/photos/demo-delivery-gpq.svg', 'Rafael Lozano', '2026-03-29 14:12:00');
 INSERT INTO `evidencias` (`id`, `asignacion_id`, `package_id`, `driver_id`, `route_id`, `delivery_timestamp`, `recipient_name`, `signature_path`, `photo_path`, `gps_latitude`, `gps_longitude`, `notes`, `status`, `created_at`, `updated_at`, `url_imagen`, `firma`, `fecha`) VALUES (31, 55, 36, 8, 27, '2026-03-28 13:08:00', 'Mariana Paredes', '/uploads/evidences/signatures/demo-signature-gpq.svg', '/uploads/evidences/photos/demo-delivery-gpq.svg', 25.74203000, -100.30210000, 'Entrega recibida despues de reprogramar acceso de muelle.', 'delivered', '2026-03-29 18:41:36', '2026-03-29 18:41:36', '/uploads/evidences/photos/demo-delivery-gpq.svg', 'Mariana Paredes', '2026-03-28 13:08:00');
 INSERT INTO `evidencias` (`id`, `asignacion_id`, `package_id`, `driver_id`, `route_id`, `delivery_timestamp`, `recipient_name`, `signature_path`, `photo_path`, `gps_latitude`, `gps_longitude`, `notes`, `status`, `created_at`, `updated_at`, `url_imagen`, `firma`, `fecha`) VALUES (32, 61, 43, 11, 29, '2026-03-29 13:22:00', 'Carla Mendoza', '/uploads/evidences/signatures/demo-signature-gpq.svg', '/uploads/evidences/photos/demo-delivery-gpq.svg', 25.65114000, -100.27856000, 'Evidencia automatica del dataset ampliado GESTIONPAQ.', 'delivered', '2026-03-29 18:41:36', '2026-03-29 18:41:36', '/uploads/evidences/photos/demo-delivery-gpq.svg', 'Carla Mendoza', '2026-03-29 13:22:00');
@@ -530,8 +1080,6 @@ INSERT INTO `evidencias` (`id`, `asignacion_id`, `package_id`, `driver_id`, `rou
 INSERT INTO `evidencias` (`id`, `asignacion_id`, `package_id`, `driver_id`, `route_id`, `delivery_timestamp`, `recipient_name`, `signature_path`, `photo_path`, `gps_latitude`, `gps_longitude`, `notes`, `status`, `created_at`, `updated_at`, `url_imagen`, `firma`, `fecha`) VALUES (41, 81, 63, 15, 34, '2026-03-27 13:22:00', 'Carla Mendoza', '/uploads/evidences/signatures/demo-signature-gpq.svg', '/uploads/evidences/photos/demo-delivery-gpq.svg', 25.73654000, -100.36029000, 'Evidencia automatica del dataset ampliado GESTIONPAQ.', 'delivered', '2026-03-29 18:41:36', '2026-03-29 18:41:36', '/uploads/evidences/photos/demo-delivery-gpq.svg', 'Carla Mendoza', '2026-03-27 13:22:00');
 INSERT INTO `evidencias` (`id`, `asignacion_id`, `package_id`, `driver_id`, `route_id`, `delivery_timestamp`, `recipient_name`, `signature_path`, `photo_path`, `gps_latitude`, `gps_longitude`, `notes`, `status`, `created_at`, `updated_at`, `url_imagen`, `firma`, `fecha`) VALUES (42, 82, 64, 15, 34, '2026-03-27 14:28:00', 'ElectroHogar Valle', '/uploads/evidences/signatures/demo-signature-gpq.svg', '/uploads/evidences/photos/demo-delivery-gpq.svg', 25.67947000, -100.31386000, 'Evidencia automatica del dataset ampliado GESTIONPAQ.', 'delivered', '2026-03-29 18:41:36', '2026-03-29 18:41:36', '/uploads/evidences/photos/demo-delivery-gpq.svg', 'ElectroHogar Valle', '2026-03-27 14:28:00');
 INSERT INTO `evidencias` (`id`, `asignacion_id`, `package_id`, `driver_id`, `route_id`, `delivery_timestamp`, `recipient_name`, `signature_path`, `photo_path`, `gps_latitude`, `gps_longitude`, `notes`, `status`, `created_at`, `updated_at`, `url_imagen`, `firma`, `fecha`) VALUES (43, 85, 67, 16, 35, '2026-03-29 13:46:00', 'Laboratorio BioPlus', '/uploads/evidences/signatures/demo-signature-gpq.svg', '/uploads/evidences/photos/demo-delivery-gpq.svg', 25.69282000, -100.45931000, 'Evidencia automatica del dataset ampliado GESTIONPAQ.', 'delivered', '2026-03-29 18:41:36', '2026-03-29 18:41:36', '/uploads/evidences/photos/demo-delivery-gpq.svg', 'Laboratorio BioPlus', '2026-03-29 13:46:00');
-
-DELETE FROM `mantenimiento`;
 INSERT INTO `mantenimiento` (`id`, `vehiculo_id`, `vehicle_id`, `tipo_id`, `type`, `fecha`, `costo`, `descripcion`, `description`, `scheduled_date`, `cost`, `completion_date`, `km_at_maintenance`, `status`, `created_at`, `updated_at`) VALUES (49, 10, 10, 1, 'Preventivo', '2026-03-11', 3200.00, 'Servicio preventivo completado para dataset demo GESTIONPAQ.', 'Servicio preventivo completado para dataset demo GESTIONPAQ.', '2026-03-11', 3200.00, '2026-03-12', 17640.00, 'completed', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `mantenimiento` (`id`, `vehiculo_id`, `vehicle_id`, `tipo_id`, `type`, `fecha`, `costo`, `descripcion`, `description`, `scheduled_date`, `cost`, `completion_date`, `km_at_maintenance`, `status`, `created_at`, `updated_at`) VALUES (50, 12, 12, 2, 'Correctivo', '2026-03-29', 4850.00, 'Revision correctiva de frenos y suspension en curso.', 'Revision correctiva de frenos y suspension en curso.', '2026-03-29', 4850.00, NULL, 31820.00, 'in_progress', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `mantenimiento` (`id`, `vehiculo_id`, `vehicle_id`, `tipo_id`, `type`, `fecha`, `costo`, `descripcion`, `description`, `scheduled_date`, `cost`, `completion_date`, `km_at_maintenance`, `status`, `created_at`, `updated_at`) VALUES (51, 13, 13, 1, 'Preventivo', '2026-03-16', 2850.00, 'Cambio de aceite, revision general y ajuste ligero.', 'Cambio de aceite, revision general y ajuste ligero.', '2026-03-16', 2850.00, '2026-03-17', 13610.00, 'completed', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
@@ -541,8 +1089,6 @@ INSERT INTO `mantenimiento` (`id`, `vehiculo_id`, `vehicle_id`, `tipo_id`, `type
 INSERT INTO `mantenimiento` (`id`, `vehiculo_id`, `vehicle_id`, `tipo_id`, `type`, `fecha`, `costo`, `descripcion`, `description`, `scheduled_date`, `cost`, `completion_date`, `km_at_maintenance`, `status`, `created_at`, `updated_at`) VALUES (55, 17, 17, 2, 'Correctivo', '2026-03-28', 6240.00, 'Revision de sistema electrico y conectores de caja.', 'Revision de sistema electrico y conectores de caja.', '2026-03-28', 6240.00, NULL, 40280.00, 'in_progress', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `mantenimiento` (`id`, `vehiculo_id`, `vehicle_id`, `tipo_id`, `type`, `fecha`, `costo`, `descripcion`, `description`, `scheduled_date`, `cost`, `completion_date`, `km_at_maintenance`, `status`, `created_at`, `updated_at`) VALUES (56, 18, 18, 1, 'Preventivo', '2026-03-12', 2480.00, 'Afinacion preventiva y cambio de filtros.', 'Afinacion preventiva y cambio de filtros.', '2026-03-12', 2480.00, '2026-03-13', 12680.00, 'completed', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
 INSERT INTO `mantenimiento` (`id`, `vehiculo_id`, `vehicle_id`, `tipo_id`, `type`, `fecha`, `costo`, `descripcion`, `description`, `scheduled_date`, `cost`, `completion_date`, `km_at_maintenance`, `status`, `created_at`, `updated_at`) VALUES (57, 19, 19, 3, 'Inspeccion', '2026-03-24', 1750.00, 'Inspeccion de seguridad y chequeo de niveles.', 'Inspeccion de seguridad y chequeo de niveles.', '2026-03-24', 1750.00, '2026-03-25', 8610.00, 'completed', '2026-03-29 18:41:36', '2026-03-29 18:41:36');
-
-DELETE FROM `configuracion_sistema`;
 INSERT INTO `configuracion_sistema` (`id`, `clave`, `valor`, `tipo`, `grupo`, `etiqueta`, `descripcion`, `created_at`, `updated_at`) VALUES (17, 'companyName', 'GESTIONPAQ', 'string', 'general', 'Nombre de la empresa', 'Nombre comercial mostrado en tableros y reportes.', '2026-03-29 03:38:52', '2026-03-29 18:41:36');
 INSERT INTO `configuracion_sistema` (`id`, `clave`, `valor`, `tipo`, `grupo`, `etiqueta`, `descripcion`, `created_at`, `updated_at`) VALUES (18, 'supportEmail', 'soporte@gestionpaq.mx', 'string', 'general', 'Email de soporte', 'Canal operativo para incidencias y acompanamiento.', '2026-03-29 03:38:52', '2026-03-29 18:41:36');
 INSERT INTO `configuracion_sistema` (`id`, `clave`, `valor`, `tipo`, `grupo`, `etiqueta`, `descripcion`, `created_at`, `updated_at`) VALUES (19, 'supportPhone', '555-000-4455', 'string', 'general', 'Telefono de soporte', 'Telefono de respaldo para coordinacion de ultima milla.', '2026-03-29 03:38:52', '2026-03-29 18:41:36');
@@ -551,5 +1097,263 @@ INSERT INTO `configuracion_sistema` (`id`, `clave`, `valor`, `tipo`, `grupo`, `e
 INSERT INTO `configuracion_sistema` (`id`, `clave`, `valor`, `tipo`, `grupo`, `etiqueta`, `descripcion`, `created_at`, `updated_at`) VALUES (22, 'maxDeliveryAttempts', 3, 'number', 'operacion', 'Intentos maximos', 'Cantidad maxima de intentos antes de escalar el envio.', '2026-03-29 03:38:52', '2026-03-29 18:41:36');
 INSERT INTO `configuracion_sistema` (`id`, `clave`, `valor`, `tipo`, `grupo`, `etiqueta`, `descripcion`, `created_at`, `updated_at`) VALUES (23, 'requirePhoto', 1, 'boolean', 'evidencia', 'Foto obligatoria', 'La prueba de entrega requiere fotografia.', '2026-03-29 03:38:52', '2026-03-29 18:41:36');
 INSERT INTO `configuracion_sistema` (`id`, `clave`, `valor`, `tipo`, `grupo`, `etiqueta`, `descripcion`, `created_at`, `updated_at`) VALUES (24, 'requireSignature', 1, 'boolean', 'evidencia', 'Firma obligatoria', 'La prueba de entrega requiere firma.', '2026-03-29 03:38:52', '2026-03-29 18:41:36');
+ALTER TABLE `usuarios`
+  ADD COLUMN `username` varchar(60) DEFAULT NULL AFTER `email`,
+  ADD UNIQUE KEY `usuarios_username_unique` (`username`);
 
-SET FOREIGN_KEY_CHECKS=1;
+ALTER TABLE `personas`
+  ADD COLUMN `employee_code` varchar(40) DEFAULT NULL AFTER `email`,
+  ADD COLUMN `job_title` varchar(120) DEFAULT NULL AFTER `employee_code`,
+  ADD COLUMN `schedule_label` varchar(120) DEFAULT NULL AFTER `job_title`,
+  ADD COLUMN `work_days` varchar(120) DEFAULT NULL AFTER `schedule_label`,
+  ADD COLUMN `shift_start` time DEFAULT NULL AFTER `work_days`,
+  ADD COLUMN `shift_end` time DEFAULT NULL AFTER `shift_start`;
+
+UPDATE `usuarios`
+SET `username` = CASE `id`
+  WHEN 14 THEN 'alicia.ortega'
+  WHEN 15 THEN 'olga.reyes'
+  WHEN 16 THEN 'sofia.salas'
+  WHEN 17 THEN 'diego.lujan'
+  WHEN 18 THEN 'daniel.rios'
+  WHEN 19 THEN 'carla.mendoza'
+END,
+`email` = LOWER(`email`)
+WHERE `id` BETWEEN 14 AND 19;
+
+INSERT INTO `usuarios` (`id`, `email`, `username`, `password`, `rol_id`, `activo`, `api_token`, `remember_token`, `last_login_at`) VALUES
+  (20, 'lucia.herrera@gestionpaq.local', 'lucia.herrera', '$2y$12$qimxHvmfar0Ey/Vu6g.OWe5LE3TTHuUkpERbqbxhTtJjHhQdva6mq', 5, 1, NULL, NULL, NULL),
+  (21, 'marco.tellez@gestionpaq.local', 'marco.tellez', '$2y$12$/LV8fDp5EW03zIW4CLVIOOM0U6u1oxIpDfJzMl8878EQJPzGxtl.u', 5, 1, NULL, NULL, NULL),
+  (22, 'brenda.garza@gestionpaq.local', 'brenda.garza', '$2y$12$8XvruLRMiYDyWX4hGwvwHOzRMuMHgY4EswQDNVjAvbRTEUaAVhOhK', 5, 1, NULL, NULL, NULL),
+  (23, 'omar.pena@gestionpaq.local', 'omar.pena', '$2y$12$83eu6KXDnGoST7ZCWycTAu02PxCee.23/o03y8yC6y26/HSl6eeE2', 5, 1, NULL, NULL, NULL),
+  (24, 'rosa.elizondo@gestionpaq.local', 'rosa.elizondo', '$2y$12$q5l6P1KvEH6KbwemPUVUGeahwRwmU2eSQ.8YlaKELG2fPccqfgm1S', 5, 1, NULL, NULL, NULL),
+  (25, 'carlos.mireles@gestionpaq.local', 'carlos.mireles', '$2y$12$6F/t.cKzJZFCHovYSkwxL.XktWdb775i7/x4vKXqSMDD.WVZJwzaK', 5, 1, NULL, NULL, NULL),
+  (26, 'ivan.castaneda@gestionpaq.local', 'ivan.castaneda', '$2y$12$6y7Rv3TLg0JfbymBUf.Zju0MyCcwP46ribchm4LinobLPgfnZT1SC', 5, 1, NULL, NULL, NULL),
+  (27, 'elena.leal@gestionpaq.local', 'elena.leal', '$2y$12$HZo2hcMYOIhyqFzkMMwcOOUmL.zGJJNQ1kokUr1p157u0iuCX0MZy', 5, 1, NULL, NULL, NULL),
+  (28, 'paola.leal@gestionpaq.local', 'paola.leal', '$2y$12$eNSztwpNCUDHqEt7M7zmLOsa0xZfUZUa0bNKKufxYJ/dASfDxG7PK', 5, 1, NULL, NULL, NULL),
+  (29, 'fernando.macias@gestionpaq.local', 'fernando.macias', '$2y$12$jXUaRuBm0ucfob0Fc2T4Keylit4m4tf0Pmf0wgs3TnzRU1P4If3PK', 5, 1, NULL, NULL, NULL),
+  (30, 'andrea.sandoval@gestionpaq.local', 'andrea.sandoval', '$2y$12$0NGzmJUxBsMKObhQTpNqKuk8n4kuDGgwBJXkgaozO6S.eCiydrDU6', 5, 1, NULL, NULL, NULL),
+  (31, 'ismael.ponce@gestionpaq.local', 'ismael.ponce', '$2y$12$hCd8i4uJrGaD2SI3INN.WOnJAM3l4EGT88YshtAq8zYr3SKkVjMnq', 5, 1, NULL, NULL, NULL),
+  (32, 'monica.lozano@gestionpaq.local', 'monica.lozano', '$2y$12$RyUJdokiB5dNeCwgW8f8C..tCcEo8tq2NaCsmAC6ijeAH8SYN9JSG', 5, 1, NULL, NULL, NULL),
+  (33, 'rafael.montes@gestionpaq.local', 'rafael.montes', '$2y$12$dStSCoL/IqOcGpd0zooC.eKsHlsQ7ctQPOpmJqu661i1GKgDjdr7C', 5, 1, NULL, NULL, NULL),
+  (34, 'ximena.chan@gestionpaq.local', 'ximena.chan', '$2y$12$Y5wojUi/ZHC8dVmgLNBLO.zTCSkDJO3VABi3LDFnh2m7Q3eL.D69e', 5, 1, NULL, NULL, NULL),
+  (35, 'cesar.ibarra@gestionpaq.local', 'cesar.ibarra', '$2y$12$wOvOaW65a9DH/xh/DxLB5eL3xs29AOkApcJdV7ydB.mOtLgZ1xL4O', 5, 1, NULL, NULL, NULL),
+  (36, 'gabriela.rosas@gestionpaq.local', 'gabriela.rosas', '$2y$12$qMbSG8y78Jflrii81/fgz.D.EwrwUwP3dtlEo/NCSzMFumQCYH61G', 5, 1, NULL, NULL, NULL);
+
+UPDATE `personas`
+SET
+  `usuario_id` = CASE `id`
+    WHEN 27 THEN 20
+    WHEN 31 THEN 28
+    WHEN 36 THEN 21
+    WHEN 37 THEN 22
+    WHEN 38 THEN 23
+    WHEN 39 THEN 24
+    WHEN 40 THEN 25
+    WHEN 41 THEN 26
+    WHEN 42 THEN 27
+    WHEN 49 THEN 29
+    WHEN 50 THEN 30
+    WHEN 51 THEN 31
+    WHEN 52 THEN 32
+    WHEN 53 THEN 33
+    WHEN 54 THEN 34
+    WHEN 55 THEN 35
+    WHEN 56 THEN 36
+    ELSE `usuario_id`
+  END,
+  `email` = CASE `id`
+    WHEN 16 THEN 'admin@gestionpaq.local'
+    WHEN 20 THEN 'operator@gestionpaq.local'
+    WHEN 21 THEN 'supervisor@gestionpaq.local'
+    WHEN 22 THEN 'dispatcher@gestionpaq.local'
+    WHEN 23 THEN 'driver@gestionpaq.local'
+    WHEN 24 THEN 'customer@gestionpaq.local'
+    WHEN 27 THEN 'lucia.herrera@gestionpaq.local'
+    WHEN 31 THEN 'paola.leal@gestionpaq.local'
+    WHEN 36 THEN 'marco.tellez@gestionpaq.local'
+    WHEN 37 THEN 'brenda.garza@gestionpaq.local'
+    WHEN 38 THEN 'omar.pena@gestionpaq.local'
+    WHEN 39 THEN 'rosa.elizondo@gestionpaq.local'
+    WHEN 40 THEN 'carlos.mireles@gestionpaq.local'
+    WHEN 41 THEN 'ivan.castaneda@gestionpaq.local'
+    WHEN 42 THEN 'elena.leal@gestionpaq.local'
+    WHEN 49 THEN 'fernando.macias@gestionpaq.local'
+    WHEN 50 THEN 'andrea.sandoval@gestionpaq.local'
+    WHEN 51 THEN 'ismael.ponce@gestionpaq.local'
+    WHEN 52 THEN 'monica.lozano@gestionpaq.local'
+    WHEN 53 THEN 'rafael.montes@gestionpaq.local'
+    WHEN 54 THEN 'ximena.chan@gestionpaq.local'
+    WHEN 55 THEN 'cesar.ibarra@gestionpaq.local'
+    WHEN 56 THEN 'gabriela.rosas@gestionpaq.local'
+  END,
+  `employee_code` = CASE `id`
+    WHEN 16 THEN 'ADM-0014'
+    WHEN 20 THEN 'DRV-0015'
+    WHEN 21 THEN 'DRV-0016'
+    WHEN 22 THEN 'DSP-0017'
+    WHEN 23 THEN 'DRV-0018'
+    WHEN 24 THEN 'CLI-0019'
+    WHEN 27 THEN 'DRV-0020'
+    WHEN 31 THEN 'DRV-0028'
+    WHEN 36 THEN 'DRV-0021'
+    WHEN 37 THEN 'DRV-0022'
+    WHEN 38 THEN 'DRV-0023'
+    WHEN 39 THEN 'DRV-0024'
+    WHEN 40 THEN 'DRV-0025'
+    WHEN 41 THEN 'DRV-0026'
+    WHEN 42 THEN 'DRV-0027'
+    WHEN 49 THEN 'DRV-0029'
+    WHEN 50 THEN 'DRV-0030'
+    WHEN 51 THEN 'DRV-0031'
+    WHEN 52 THEN 'DRV-0032'
+    WHEN 53 THEN 'DRV-0033'
+    WHEN 54 THEN 'DRV-0034'
+    WHEN 55 THEN 'DRV-0035'
+    WHEN 56 THEN 'DRV-0036'
+  END,
+  `job_title` = CASE `id`
+    WHEN 16 THEN 'Administrador de plataforma'
+    WHEN 22 THEN 'Despachador operativo'
+    WHEN 24 THEN 'Contacto cliente'
+    ELSE 'Conductor de reparto'
+  END,
+  `schedule_label` = CASE `id`
+    WHEN 16 THEN 'Jornada administrativa'
+    WHEN 22 THEN 'Despacho AM'
+    WHEN 24 THEN 'Portal cliente'
+    ELSE 'Primera salida'
+  END,
+  `work_days` = CASE `id`
+    WHEN 16 THEN 'Lun-Vie'
+    WHEN 24 THEN 'Lun-Dom'
+    ELSE 'Lun-Sab'
+  END,
+  `shift_start` = CASE `id`
+    WHEN 16 THEN '08:00:00'
+    WHEN 22 THEN '06:00:00'
+    WHEN 24 THEN '00:00:00'
+    ELSE '07:30:00'
+  END,
+  `shift_end` = CASE `id`
+    WHEN 16 THEN '17:00:00'
+    WHEN 22 THEN '15:00:00'
+    WHEN 24 THEN '23:59:00'
+    ELSE '18:00:00'
+  END,
+  `updated_at` = '2026-03-30 12:00:00'
+WHERE `id` IN (16, 20, 21, 22, 23, 24, 27, 31, 36, 37, 38, 39, 40, 41, 42, 49, 50, 51, 52, 53, 54, 55, 56);
+
+UPDATE `conductores`
+SET
+  `email` = CASE `id`
+    WHEN 7 THEN 'driver@gestionpaq.local'
+    WHEN 8 THEN 'lucia.herrera@gestionpaq.local'
+    WHEN 9 THEN 'operator@gestionpaq.local'
+    WHEN 10 THEN 'supervisor@gestionpaq.local'
+    WHEN 11 THEN 'marco.tellez@gestionpaq.local'
+    WHEN 12 THEN 'brenda.garza@gestionpaq.local'
+    WHEN 13 THEN 'omar.pena@gestionpaq.local'
+    WHEN 14 THEN 'rosa.elizondo@gestionpaq.local'
+    WHEN 15 THEN 'carlos.mireles@gestionpaq.local'
+    WHEN 16 THEN 'ivan.castaneda@gestionpaq.local'
+    WHEN 17 THEN 'elena.leal@gestionpaq.local'
+    WHEN 18 THEN 'paola.leal@gestionpaq.local'
+    WHEN 19 THEN 'fernando.macias@gestionpaq.local'
+    WHEN 20 THEN 'andrea.sandoval@gestionpaq.local'
+    WHEN 21 THEN 'ismael.ponce@gestionpaq.local'
+    WHEN 22 THEN 'monica.lozano@gestionpaq.local'
+    WHEN 23 THEN 'rafael.montes@gestionpaq.local'
+    WHEN 24 THEN 'ximena.chan@gestionpaq.local'
+    WHEN 25 THEN 'cesar.ibarra@gestionpaq.local'
+    WHEN 26 THEN 'gabriela.rosas@gestionpaq.local'
+  END,
+  `status` = CASE `id`
+    WHEN 7 THEN 'En ruta'
+    WHEN 8 THEN 'Disponible'
+    WHEN 10 THEN 'Disponible'
+    WHEN 18 THEN 'Activo'
+    WHEN 19 THEN 'En ruta'
+    WHEN 20 THEN 'Disponible'
+    WHEN 21 THEN 'Activo'
+    WHEN 22 THEN 'En ruta'
+    WHEN 23 THEN 'Disponible'
+    WHEN 24 THEN 'Disponible'
+    WHEN 25 THEN 'Activo'
+    WHEN 26 THEN 'En ruta'
+    ELSE `status`
+  END,
+  `estado_id` = CASE `id`
+    WHEN 7 THEN 2
+    WHEN 8 THEN 1
+    WHEN 10 THEN 1
+    WHEN 18 THEN 4
+    WHEN 19 THEN 2
+    WHEN 20 THEN 1
+    WHEN 21 THEN 4
+    WHEN 22 THEN 2
+    WHEN 23 THEN 1
+    WHEN 24 THEN 1
+    WHEN 25 THEN 4
+    WHEN 26 THEN 2
+    ELSE `estado_id`
+  END,
+  `updated_at` = '2026-03-30 12:00:00'
+WHERE `id` BETWEEN 7 AND 26;
+
+INSERT INTO `rutas` (`id`, `codigo`, `almacen_origen_id`, `origen_almacen_id`, `destino_almacen_id`, `distancia_km`, `tiempo_estimado_min`, `estado_id`, `route_code`, `vehicle_id`, `driver_id`, `warehouse_id`, `scheduled_date`, `start_time`, `end_time`, `total_packages`, `total_weight_kg`, `estimated_distance_km`, `actual_distance_km`, `estimated_time_minutes`, `actual_time_minutes`, `fuel_consumed_liters`, `status`, `optimization_score`, `waypoints`, `notes`, `estado`, `created_at`, `updated_at`) VALUES
+  (39, 'GPQ-R-101', 7, 7, 8, 34.80, 92, 3, 'GPQ-R-101', 11, 8, 7, '2026-03-27', '2026-03-27 08:10:00', '2026-03-27 13:40:00', 11, 702.50, 34.80, 36.40, 92, 181, 9.80, 'Completada', 84.70, '[{"label":"Cedis Monterrey","lat":25.79456,"lng":-100.31487},{"label":"Parque Industrial Nogalar","lat":25.75279,"lng":-100.28621},{"label":"Hub Apodaca","lat":25.77943,"lng":-100.18641}]', 'Cobertura metropolitana Monterrey-Apodaca con entregas empresariales.', 'Completada', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (40, 'GPQ-R-102', 7, 7, 9, 29.60, 74, 2, 'GPQ-R-102', 10, 7, 7, '2026-03-30', '2026-03-30 07:50:00', NULL, 7, 486.20, 29.60, 17.40, 74, 58, 5.90, 'En ejecucion', 91.40, '[{"label":"Cedis Monterrey","lat":25.79456,"lng":-100.31487},{"label":"Parque Industrial FINSA","lat":25.69063,"lng":-100.45219},{"label":"Crossdock Santa Catarina","lat":25.68392,"lng":-100.45834}]', 'Ruta activa de reparto poniente para clientes de Santa Catarina.', 'En ejecucion', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (41, 'GPQ-R-103', 7, 7, 8, 27.10, 69, 3, 'GPQ-R-103', 11, 10, 7, '2026-03-29', '2026-03-29 09:15:00', '2026-03-29 14:05:00', 5, 322.00, 27.10, 28.00, 69, 164, 6.40, 'Completada', 84.70, '[{"label":"Cedis Monterrey","lat":25.79456,"lng":-100.31487},{"label":"Guadalupe Centro","lat":25.67654,"lng":-100.25672},{"label":"Hub Apodaca","lat":25.77943,"lng":-100.18641}]', 'Cobertura de soporte supervisor entre cedis y hub aeropuerto.', 'Completada', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (42, 'GPQ-R-104', 8, 8, 7, 31.20, 80, 1, 'GPQ-R-104', 16, 18, 8, '2026-03-31', '2026-03-31 08:30:00', '2026-03-31 15:30:00', 9, 558.00, 31.20, 0.00, 80, 0, 0.00, 'Preparacion', 84.70, '[{"label":"Hub Apodaca","lat":25.77943,"lng":-100.18641},{"label":"Parque Industrial Milimex","lat":25.76092,"lng":-100.22085},{"label":"Cedis Monterrey","lat":25.79456,"lng":-100.31487}]', 'Ruta planeada de consolidado retail del aeropuerto al centro metropolitano.', 'Preparacion', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (43, 'GPQ-R-105', 11, 11, 13, 223.50, 210, 2, 'GPQ-R-105', 20, 19, 11, '2026-03-30', '2026-03-30 06:20:00', NULL, 16, 1280.00, 223.50, 129.60, 210, 146, 23.70, 'En ejecucion', 91.40, '[{"label":"Cedis Vallejo CDMX","lat":19.49486,"lng":-99.16443},{"label":"Arco Norte Jilotepec","lat":19.94791,"lng":-99.52287},{"label":"Centro Queretaro","lat":20.61057,"lng":-100.41108}]', 'Salida troncal Vallejo-Queretaro con consolidado de refacciones y farmacia.', 'En ejecucion', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (44, 'GPQ-R-106', 11, 11, 14, 138.90, 165, 3, 'GPQ-R-106', 21, 20, 11, '2026-03-29', '2026-03-29 07:05:00', '2026-03-29 14:45:00', 14, 1114.00, 138.90, 142.20, 165, 292, 17.80, 'Completada', 84.70, '[{"label":"Cedis Vallejo CDMX","lat":19.49486,"lng":-99.16443},{"label":"San Martin Texmelucan","lat":19.28505,"lng":-98.43874},{"label":"Crossdock Puebla","lat":19.08828,"lng":-98.27286}]', 'Distribucion cerrada hacia Puebla con surtido de temporada.', 'Completada', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (45, 'GPQ-R-107', 12, 12, 13, 341.40, 295, 1, 'GPQ-R-107', 22, 21, 12, '2026-03-31', '2026-03-31 07:15:00', '2026-03-31 18:10:00', 18, 1362.00, 341.40, 0.00, 295, 0, 0.00, 'Preparacion', 84.70, '[{"label":"Hub Guadalajara El Salto","lat":20.55634,"lng":-103.30655},{"label":"Lagos de Moreno","lat":21.35819,"lng":-101.92913},{"label":"Centro Queretaro","lat":20.61057,"lng":-100.41108}]', 'Planeacion Bajio con carga consolidada desde El Salto.', 'Preparacion', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (46, 'GPQ-R-108', 13, 13, 14, 336.70, 288, 2, 'GPQ-R-108', 23, 22, 13, '2026-03-30', '2026-03-30 07:40:00', NULL, 13, 982.00, 336.70, 201.30, 288, 189, 22.90, 'En ejecucion', 91.40, '[{"label":"Centro Queretaro","lat":20.61057,"lng":-100.41108},{"label":"San Juan del Rio","lat":20.38705,"lng":-99.99656},{"label":"Crossdock Puebla","lat":19.08828,"lng":-98.27286}]', 'Ruta Bajio-Oriente con compromiso de entrega antes de corte vespertino.', 'En ejecucion', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (47, 'GPQ-R-109', 14, 14, 11, 139.10, 168, 3, 'GPQ-R-109', 24, 23, 14, '2026-03-28', '2026-03-28 06:55:00', '2026-03-28 13:15:00', 12, 904.00, 139.10, 141.00, 168, 248, 16.90, 'Completada', 84.70, '[{"label":"Crossdock Puebla","lat":19.08828,"lng":-98.27286},{"label":"Ixtapaluca","lat":19.31687,"lng":-98.88611},{"label":"Cedis Vallejo CDMX","lat":19.49486,"lng":-99.16443}]', 'Retorno consolidado Puebla-CDMX con devoluciones y surtido cruzado.', 'Completada', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (48, 'GPQ-R-110', 15, 15, 15, 24.20, 72, 3, 'GPQ-R-110', 25, 24, 15, '2026-03-29', '2026-03-29 08:30:00', '2026-03-29 12:35:00', 10, 416.00, 24.20, 25.60, 72, 139, 4.80, 'Completada', 84.70, '[{"label":"Cedis Merida Poniente","lat":20.98186,"lng":-89.67761},{"label":"Merida Centro","lat":20.96737,"lng":-89.6237},{"label":"Cedis Merida Poniente","lat":20.98186,"lng":-89.67761}]', 'Circuito urbano de Merida con entregas de ultima milla y recolecciones.', 'Completada', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (49, 'GPQ-R-111', 16, 16, 16, 41.80, 95, 1, 'GPQ-R-111', 26, 25, 16, '2026-03-31', '2026-03-31 07:00:00', '2026-03-31 15:45:00', 9, 501.00, 41.80, 0.00, 95, 0, 0.00, 'Preparacion', 84.70, '[{"label":"Hub Tijuana","lat":32.52982,"lng":-116.94227},{"label":"Otay Industrial","lat":32.53481,"lng":-116.95958},{"label":"Hub Tijuana","lat":32.52982,"lng":-116.94227}]', 'Ruta planeada de frontera para reparto local y recoleccion en parque industrial.', 'Preparacion', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (50, 'GPQ-R-112', 16, 16, 16, 38.90, 88, 2, 'GPQ-R-112', 27, 26, 16, '2026-03-30', '2026-03-30 07:35:00', NULL, 8, 448.00, 38.90, 20.60, 88, 64, 5.60, 'En ejecucion', 91.40, '[{"label":"Hub Tijuana","lat":32.52982,"lng":-116.94227},{"label":"Mesa de Otay","lat":32.53187,"lng":-116.94966},{"label":"Hub Tijuana","lat":32.52982,"lng":-116.94227}]', 'Circuito operativo Tijuana con cobertura de ultima milla para zona industrial.', 'En ejecucion', '2026-03-30 12:00:00', '2026-03-30 12:00:00');
+
+UPDATE `turnos_conductor`
+SET `conductor_id` = 19, `start_time` = '06:20:00', `end_time` = NULL, `total_deliveries` = 16, `successful_deliveries` = 14, `failed_deliveries` = 1, `distance_km` = 129.60, `status` = 'in_progress', `inicio_turno` = '2026-03-30 06:20:00', `fin_turno` = NULL, `estado` = 'activo', `created_at` = '2026-03-30 12:00:00', `updated_at` = '2026-03-30 12:00:00'
+WHERE `driver_id` = 19 AND `shift_date` = '2026-03-30';
+
+UPDATE `turnos_conductor`
+SET `conductor_id` = 20, `start_time` = '07:05:00', `end_time` = '14:45:00', `total_deliveries` = 14, `successful_deliveries` = 14, `failed_deliveries` = 0, `distance_km` = 142.20, `status` = 'completed', `inicio_turno` = '2026-03-29 07:05:00', `fin_turno` = '2026-03-29 14:45:00', `estado` = 'cerrado', `created_at` = '2026-03-30 12:00:00', `updated_at` = '2026-03-30 12:00:00'
+WHERE `driver_id` = 20 AND `shift_date` = '2026-03-29';
+
+UPDATE `turnos_conductor`
+SET `conductor_id` = 22, `start_time` = '07:40:00', `end_time` = NULL, `total_deliveries` = 13, `successful_deliveries` = 11, `failed_deliveries` = 1, `distance_km` = 201.30, `status` = 'in_progress', `inicio_turno` = '2026-03-30 07:40:00', `fin_turno` = NULL, `estado` = 'activo', `created_at` = '2026-03-30 12:00:00', `updated_at` = '2026-03-30 12:00:00'
+WHERE `driver_id` = 22 AND `shift_date` = '2026-03-30';
+
+UPDATE `turnos_conductor`
+SET `conductor_id` = 24, `start_time` = '08:30:00', `end_time` = '12:35:00', `total_deliveries` = 10, `successful_deliveries` = 10, `failed_deliveries` = 0, `distance_km` = 25.60, `status` = 'completed', `inicio_turno` = '2026-03-29 08:30:00', `fin_turno` = '2026-03-29 12:35:00', `estado` = 'cerrado', `created_at` = '2026-03-30 12:00:00', `updated_at` = '2026-03-30 12:00:00'
+WHERE `driver_id` = 24 AND `shift_date` = '2026-03-29';
+
+UPDATE `turnos_conductor`
+SET `conductor_id` = 26, `start_time` = '07:35:00', `end_time` = NULL, `total_deliveries` = 8, `successful_deliveries` = 6, `failed_deliveries` = 1, `distance_km` = 20.60, `status` = 'in_progress', `inicio_turno` = '2026-03-30 07:35:00', `fin_turno` = NULL, `estado` = 'activo', `created_at` = '2026-03-30 12:00:00', `updated_at` = '2026-03-30 12:00:00'
+WHERE `driver_id` = 26 AND `shift_date` = '2026-03-30';
+
+INSERT INTO `turnos_conductor` (`id`, `conductor_id`, `driver_id`, `shift_date`, `start_time`, `end_time`, `total_deliveries`, `successful_deliveries`, `failed_deliveries`, `distance_km`, `status`, `inicio_turno`, `fin_turno`, `estado`, `created_at`, `updated_at`) VALUES
+  (38, 8, 8, '2026-03-27', '08:10:00', '13:40:00', 11, 11, 0, 36.40, 'completed', '2026-03-27 08:10:00', '2026-03-27 13:40:00', 'cerrado', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (39, 7, 7, '2026-03-30', '07:50:00', NULL, 7, 5, 1, 17.40, 'in_progress', '2026-03-30 07:50:00', NULL, 'activo', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (40, 10, 10, '2026-03-29', '09:15:00', '14:05:00', 5, 5, 0, 28.00, 'completed', '2026-03-29 09:15:00', '2026-03-29 14:05:00', 'cerrado', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (41, 18, 18, '2026-03-31', '08:30:00', '15:30:00', 9, 7, 1, 31.20, 'scheduled', '2026-03-31 08:30:00', '2026-03-31 15:30:00', 'programado', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (42, 21, 21, '2026-03-31', '07:15:00', '18:10:00', 18, 16, 1, 341.40, 'scheduled', '2026-03-31 07:15:00', '2026-03-31 18:10:00', 'programado', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (43, 23, 23, '2026-03-28', '06:55:00', '13:15:00', 12, 12, 0, 141.00, 'completed', '2026-03-28 06:55:00', '2026-03-28 13:15:00', 'cerrado', '2026-03-30 12:00:00', '2026-03-30 12:00:00'),
+  (44, 25, 25, '2026-03-31', '07:00:00', '15:45:00', 9, 7, 1, 41.80, 'scheduled', '2026-03-31 07:00:00', '2026-03-31 15:45:00', 'programado', '2026-03-30 12:00:00', '2026-03-30 12:00:00');
+
+INSERT INTO `ruta_paradas` (`id`, `ruta_id`, `route_id`, `direccion_id`, `package_id`, `type`, `stop_number`, `latitude`, `longitude`, `address`, `city`, `state`, `eta_at`, `arrived_at`, `completed_at`, `status`, `notes`, `meta`, `created_at`, `updated_at`, `orden`) VALUES
+  (106, 39, 39, NULL, NULL, 'checkpoint', 1, 25.75279000, -100.28621000, 'Parque Industrial Nogalar', NULL, NULL, NULL, NULL, NULL, 'planned', 'Parque Industrial Nogalar', '{"label":"Parque Industrial Nogalar","lat":25.75279,"lng":-100.28621}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1),
+  (107, 40, 40, NULL, NULL, 'checkpoint', 1, 25.69063000, -100.45219000, 'Parque Industrial FINSA', NULL, NULL, NULL, NULL, NULL, 'planned', 'Parque Industrial FINSA', '{"label":"Parque Industrial FINSA","lat":25.69063,"lng":-100.45219}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1),
+  (108, 41, 41, NULL, NULL, 'checkpoint', 1, 25.67654000, -100.25672000, 'Guadalupe Centro', NULL, NULL, NULL, NULL, NULL, 'planned', 'Guadalupe Centro', '{"label":"Guadalupe Centro","lat":25.67654,"lng":-100.25672}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1),
+  (109, 42, 42, NULL, NULL, 'checkpoint', 1, 25.76092000, -100.22085000, 'Parque Industrial Milimex', NULL, NULL, NULL, NULL, NULL, 'planned', 'Parque Industrial Milimex', '{"label":"Parque Industrial Milimex","lat":25.76092,"lng":-100.22085}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1),
+  (110, 43, 43, NULL, NULL, 'checkpoint', 1, 19.94791000, -99.52287000, 'Arco Norte Jilotepec', NULL, NULL, NULL, NULL, NULL, 'planned', 'Arco Norte Jilotepec', '{"label":"Arco Norte Jilotepec","lat":19.94791,"lng":-99.52287}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1),
+  (111, 44, 44, NULL, NULL, 'checkpoint', 1, 19.28505000, -98.43874000, 'San Martin Texmelucan', NULL, NULL, NULL, NULL, NULL, 'planned', 'San Martin Texmelucan', '{"label":"San Martin Texmelucan","lat":19.28505,"lng":-98.43874}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1),
+  (112, 45, 45, NULL, NULL, 'checkpoint', 1, 21.35819000, -101.92913000, 'Lagos de Moreno', NULL, NULL, NULL, NULL, NULL, 'planned', 'Lagos de Moreno', '{"label":"Lagos de Moreno","lat":21.35819,"lng":-101.92913}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1),
+  (113, 46, 46, NULL, NULL, 'checkpoint', 1, 20.38705000, -99.99656000, 'San Juan del Rio', NULL, NULL, NULL, NULL, NULL, 'planned', 'San Juan del Rio', '{"label":"San Juan del Rio","lat":20.38705,"lng":-99.99656}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1),
+  (114, 47, 47, NULL, NULL, 'checkpoint', 1, 19.31687000, -98.88611000, 'Ixtapaluca', NULL, NULL, NULL, NULL, NULL, 'planned', 'Ixtapaluca', '{"label":"Ixtapaluca","lat":19.31687,"lng":-98.88611}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1),
+  (115, 48, 48, NULL, NULL, 'checkpoint', 1, 20.96737000, -89.62370000, 'Merida Centro', NULL, NULL, NULL, NULL, NULL, 'planned', 'Merida Centro', '{"label":"Merida Centro","lat":20.96737,"lng":-89.6237}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1),
+  (116, 49, 49, NULL, NULL, 'checkpoint', 1, 32.53481000, -116.95958000, 'Otay Industrial', NULL, NULL, NULL, NULL, NULL, 'planned', 'Otay Industrial', '{"label":"Otay Industrial","lat":32.53481,"lng":-116.95958}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1),
+  (117, 50, 50, NULL, NULL, 'checkpoint', 1, 32.53187000, -116.94966000, 'Mesa de Otay', NULL, NULL, NULL, NULL, NULL, 'planned', 'Mesa de Otay', '{"label":"Mesa de Otay","lat":32.53187,"lng":-116.94966}', '2026-03-30 12:00:00', '2026-03-30 12:00:00', 1);

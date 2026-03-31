@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rutas | GESTIONPAQ</title>
+  <title>Operaciones | GESTIONPAQ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -11,38 +11,34 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link href="/logistichub/assets/css/styles.css" rel="stylesheet" />
 </head>
-<body data-page="routes" data-eyebrow="Rutas" data-title="Ruteo administrativo" data-description="Tabla operativa con almacén, distancia, tiempo, estado y asignaciones.">
+<body data-page="operations" data-eyebrow="Operación" data-title="Flujo de despacho" data-description="Visibilidad táctica de cola de salida, capacidad y ejecución diaria.">
   <div data-page-content>
-    <section class="toolbar">
-      <div id="pageNotice"></div>
-      <div class="toolbar-group">
-        <a class="btn btn-success" href="/logistichub/route-form.html"><i class="fa-solid fa-plus"></i>Nueva ruta</a>
-      </div>
-    </section>
+    <section id="operationsPersona"></section>
+    <section id="operationsOverview" class="dashboard-strip"></section>
     <section class="table-panel">
+      <div class="table-header">
+        <h2 class="card-title">Cola de despacho</h2>
+        <p class="card-subtitle">Envíos con foco en salida, preparación y asignación.</p>
+      </div>
       <div class="table-responsive">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Almacen</th>
-              <th>Distancia KM</th>
-              <th>Tiempo</th>
-              <th>Carga</th>
-              <th>Score</th>
+              <th>Tracking</th>
+              <th>Cliente</th>
               <th>Estado</th>
+              <th>Ruta</th>
               <th>Vehiculo</th>
               <th>Conductor</th>
-              <th>Acciones</th>
             </tr>
           </thead>
-          <tbody id="routesTableBody"></tbody>
+          <tbody id="operationsTableBody"></tbody>
         </table>
       </div>
     </section>
   </div>
   <script src="/logistichub/assets/js/core.js"></script>
   <script src="/logistichub/assets/js/shared/layout.js"></script>
-  <script src="/logistichub/assets/js/pages/routes.js"></script>
+  <script src="/logistichub/assets/js/pages/operations.js"></script>
 </body>
 </html>

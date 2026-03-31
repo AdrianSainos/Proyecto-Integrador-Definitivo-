@@ -117,6 +117,35 @@ class ApiFlowTest extends TestCase
         ]);
     }
 
+    public function test_explicit_pending_shipment_stays_pending_without_assignment(): void
+    {
+        $token = $this->authenticateAdmin();
+        $scheduledDate = Carbon::now()->addDays(4)->toDateString();
+
+        $response = $this->withHeaders(['Authorization' => 'Bearer '.$token])->postJson(
+            '/api/shipments',
+            $this->buildShipmentPayload($scheduledDate, [
+                'priority' => 'standard',
+                'initialStatus' => 'Pendiente',
+            ])
+        );
+
+        $response->assertCreated()
+            ->assertJsonPath('item.status', 'Pendiente')
+            ->assertJsonPath('item.routeCode', 'Pendiente');
+
+        $shipmentId = (int) $response->json('item.id');
+
+        $this->assertNull($response->json('item.routeId'));
+        $this->assertDatabaseHas('paquetes', [
+            'id' => $shipmentId,
+            'estado' => 'Pendiente',
+        ]);
+        $this->assertDatabaseMissing('asignaciones', [
+            'package_id' => $shipmentId,
+        ]);
+    }
+
     public function test_future_shipment_creates_planned_route_even_when_resources_are_pending_confirmation(): void
     {
         $token = $this->authenticateAdmin();
@@ -152,6 +181,8 @@ class ApiFlowTest extends TestCase
         $routeId = (int) $response->json('item.routeId');
 
         $this->assertGreaterThan(0, $routeId);
+        $this->assertStringStartsWith('GPQ-R-', (string) $response->json('item.routeCode'));
+        $this->assertStringNotContainsString('AUTO-', (string) $response->json('item.routeCode'));
         $this->assertSame('Pendiente', $response->json('item.vehiclePlate'));
         $this->assertSame('Pendiente', $response->json('item.driverName'));
 
@@ -163,6 +194,100 @@ class ApiFlowTest extends TestCase
         $this->assertDatabaseHas('rutas', [
             'id' => $routeId,
             'status' => 'Preparacion',
+        ]);
+    }
+
+    public function test_future_shipment_prefers_existing_compatible_route_before_creating_a_new_one(): void
+    {
+        $token = $this->authenticateAdmin();
+        $scheduledDate = Carbon::now()->addDays(5)->toDateString();
+        $payload = $this->buildShipmentPayload($scheduledDate, ['priority' => 'standard', 'weightKg' => 42.0, 'quantity' => 2]);
+        $warehouseId = (int) $payload['originWarehouseId'];
+        $warehouse = DB::table('almacenes')->where('id', $warehouseId)->first();
+        $vehicle = DB::table('vehiculos')
+            ->where('warehouse_id', $warehouseId)
+            ->where(function ($query): void {
+                $query->whereNull('activo')->orWhere('activo', 1);
+            })
+            ->orderBy('id')
+            ->first();
+
+        $this->assertNotNull($warehouse);
+        $this->assertNotNull($vehicle);
+
+        DB::table('vehiculos')->where('id', $vehicle->id)->update([
+            'status' => 'Operativo',
+            'estado' => 'Operativo',
+            'current_fuel' => max(90, (float) ($vehicle->current_fuel ?? 0)),
+            'fuel_consumption_km' => max(0.08, (float) ($vehicle->fuel_consumption_km ?? 0.1)),
+            'capacity_kg' => max(1200, (float) ($vehicle->capacity_kg ?? $vehicle->capacidad_kg ?? 0)),
+            'capacity_packages' => max(60, (int) ($vehicle->capacity_packages ?? 0)),
+        ]);
+
+        DB::table('rutas')
+            ->where(function ($query) use ($warehouseId): void {
+                $query->where('warehouse_id', $warehouseId)
+                    ->orWhere('almacen_origen_id', $warehouseId)
+                    ->orWhere('origen_almacen_id', $warehouseId);
+            })
+            ->whereDate('scheduled_date', $scheduledDate)
+            ->update([
+                'status' => 'Completada',
+                'estado' => 'Completada',
+            ]);
+
+        $routeId = DB::table('rutas')->insertGetId([
+            'codigo' => 'TEST-R-EXISTENTE',
+            'route_code' => 'TEST-R-EXISTENTE',
+            'almacen_origen_id' => $warehouseId,
+            'origen_almacen_id' => $warehouseId,
+            'warehouse_id' => $warehouseId,
+            'destino_almacen_id' => null,
+            'distancia_km' => 18.4,
+            'estimated_distance_km' => 18.4,
+            'tiempo_estimado_min' => 55,
+            'estimated_time_minutes' => 55,
+            'vehicle_id' => $vehicle->id,
+            'driver_id' => null,
+            'scheduled_date' => $scheduledDate,
+            'start_time' => null,
+            'end_time' => null,
+            'total_packages' => 0,
+            'total_weight_kg' => 0,
+            'actual_distance_km' => 0,
+            'actual_time_minutes' => 0,
+            'fuel_consumed_liters' => 0,
+            'status' => 'Preparacion',
+            'estado' => 'Preparacion',
+            'estado_id' => DB::table('estado_ruta')->where('nombre', 'Preparacion')->value('id'),
+            'optimization_score' => 97.5,
+            'waypoints' => json_encode([
+                [
+                    'label' => (string) ($warehouse->nombre ?? $warehouse->code ?? $warehouse->codigo ?? 'Origen'),
+                    'lat' => (float) ($warehouse->latitude ?? 0),
+                    'lng' => (float) ($warehouse->longitude ?? 0),
+                ],
+                [
+                    'label' => (string) $payload['destinationAddress'],
+                    'lat' => (float) DB::table('cliente_direcciones')->where('id', $payload['destinationAddressId'])->value('latitude'),
+                    'lng' => (float) DB::table('cliente_direcciones')->where('id', $payload['destinationAddressId'])->value('longitude'),
+                ],
+            ], JSON_UNESCAPED_SLASHES),
+            'notes' => 'Ruta existente para validar preferencia del planner.',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->withHeaders(['Authorization' => 'Bearer '.$token])->postJson('/api/shipments', $payload);
+
+        $response->assertCreated()
+            ->assertJsonPath('item.status', 'Planificado')
+            ->assertJsonPath('item.routeId', $routeId)
+            ->assertJsonPath('item.routeCode', 'TEST-R-EXISTENTE');
+
+        $this->assertDatabaseHas('asignaciones', [
+            'ruta_id' => $routeId,
+            'package_id' => (int) $response->json('item.id'),
         ]);
     }
 

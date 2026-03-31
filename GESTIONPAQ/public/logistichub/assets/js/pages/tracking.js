@@ -1,4 +1,4 @@
-﻿window.LogisticHubCore.ready(async () => {
+window.LogisticHubCore.ready(async () => {
   if (!window.LogisticHubCore.protectPage(['admin', 'operator', 'supervisor', 'dispatcher', 'customer'])) {
     return;
   }

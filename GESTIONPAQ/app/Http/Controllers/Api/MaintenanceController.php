@@ -62,7 +62,7 @@ class MaintenanceController extends Controller
                 'plate' => $item->placa ?: $item->plate,
             ])->values(),
             'types' => $types,
-            'statuses' => ['scheduled', 'in_progress', 'completed', 'cancelled'],
+            'statuses' => LogisticsSupport::maintenanceStatusOptions(),
         ]);
     }
 

@@ -5,62 +5,62 @@
   const ROLE_PROFILES = {
     admin: {
       label: 'Administrador',
-      landingPage: '/logistichub/dashboard.html',
+      landingPage: '/logistichub/inicio.html',
       icon: 'fa-solid fa-shield-halved',
       mode: 'Gobierno integral',
       auth: 'Control total',
       data: 'Vista completa',
-      dashboardEyebrow: 'Dirección ejecutiva',
+      dashboardEyebrow: 'Direccion ejecutiva',
       dashboardTitle: 'Plataforma operativa integral',
-      dashboardDescription: 'Supervisión de servicio, capacidad y configuración desde una sola cabina.',
+      dashboardDescription: 'Supervision de servicio, capacidad y configuracion desde una sola cabina.',
     },
     operator: {
       label: 'Operador',
-      landingPage: '/logistichub/operations.html',
+      landingPage: '/logistichub/operaciones.html',
       icon: 'fa-solid fa-tower-broadcast',
       mode: 'Mesa operativa',
-      auth: 'Ejecución diaria',
+      auth: 'Ejecucion diaria',
       data: 'Despacho y seguimiento',
-      dashboardEyebrow: 'Operación central',
+      dashboardEyebrow: 'Operacion central',
       dashboardTitle: 'Flujo diario bajo control',
-      dashboardDescription: 'Priorización de salidas, incidencias y carga pendiente para el turno actual.',
+      dashboardDescription: 'Priorizacion de salidas, incidencias y carga pendiente para el turno actual.',
     },
     supervisor: {
       label: 'Supervisor',
-      landingPage: '/logistichub/dashboard.html',
+      landingPage: '/logistichub/inicio.html',
       icon: 'fa-solid fa-binoculars',
-      mode: 'Supervisión táctica',
-      auth: 'Coordinación regional',
+      mode: 'Supervision tactica',
+      auth: 'Coordinacion regional',
       data: 'SLA y capacidad',
-      dashboardEyebrow: 'Capa de supervisión',
+      dashboardEyebrow: 'Capa de supervision',
       dashboardTitle: 'Rendimiento y excepciones',
-      dashboardDescription: 'Lectura de cumplimiento, desbalance operativo y calidad de ejecución.',
+      dashboardDescription: 'Lectura de cumplimiento, desbalance operativo y calidad de ejecucion.',
     },
     dispatcher: {
       label: 'Despachador',
-      landingPage: '/logistichub/routes.html',
+      landingPage: '/logistichub/rutas.html',
       icon: 'fa-solid fa-route',
-      mode: 'Orquestación de rutas',
-      auth: 'Asignación en vivo',
+      mode: 'Orquestacion de rutas',
+      auth: 'Asignacion en vivo',
       data: 'Rutas y flota',
       dashboardEyebrow: 'Cabina de despacho',
       dashboardTitle: 'Capacidad en movimiento',
-      dashboardDescription: 'Asignaciones, rutas activas y cobertura de salida con foco en ejecución.',
+      dashboardDescription: 'Asignaciones, rutas activas y cobertura de salida con foco en ejecucion.',
     },
     driver: {
       label: 'Conductor',
-      landingPage: '/logistichub/routes.html',
+      landingPage: '/logistichub/rutas.html',
       icon: 'fa-solid fa-id-card-clip',
       mode: 'Ruta asignada',
-      auth: 'Operación en calle',
+      auth: 'Operacion en calle',
       data: 'Manifiesto personal',
-      dashboardEyebrow: 'Operación de última milla',
+      dashboardEyebrow: 'Operacion de ultima milla',
       dashboardTitle: 'Tu jornada en ruta',
       dashboardDescription: 'Entregas asignadas, secuencia de eventos y visibilidad de progreso personal.',
     },
     customer: {
       label: 'Cliente',
-      landingPage: '/logistichub/tracking.html',
+      landingPage: '/logistichub/rastreo.html',
       icon: 'fa-solid fa-user-tie',
       mode: 'Portal de seguimiento',
       auth: 'Consulta segura',
@@ -197,8 +197,8 @@
       if (response.status === 401) {
         clearToken();
         clearUser();
-        window.location.href = '/logistichub/login.html';
-        throw new Error('Sesión expirada');
+        window.location.href = '/logistichub/acceso.html';
+        throw new Error('Sesion expirada');
       }
 
       const payload = await parseResponse(response);
@@ -227,8 +227,8 @@
     if (response.status === 401) {
       clearToken();
       clearUser();
-      window.location.href = '/logistichub/login.html';
-      throw new Error('Sesión expirada');
+      window.location.href = '/logistichub/acceso.html';
+      throw new Error('Sesion expirada');
     }
 
     if (!response.ok) {
@@ -255,7 +255,7 @@
   function logout() {
     clearToken();
     clearUser();
-    window.location.href = '/logistichub/login.html';
+    window.location.href = '/logistichub/acceso.html';
   }
 
   function protectPage(allowedRoles) {
@@ -263,12 +263,12 @@
     const roles = Array.isArray(allowedRoles) ? allowedRoles : [];
 
     if (!getToken() || !currentUser) {
-      window.location.href = '/logistichub/login.html';
+      window.location.href = '/logistichub/acceso.html';
       return false;
     }
 
     if (!canAccess(currentUser, roles)) {
-      setNotice('error', 'No tienes permisos para ver este módulo.');
+      setNotice('error', 'No tienes permisos para ver este modulo.');
       window.location.href = landingPageFor(currentUser);
       return false;
     }
@@ -431,46 +431,22 @@
       .join('');
   }
 
-  const STATUS_LABELS = {
-    scheduled: 'Programado',
-    in_progress: 'En progreso',
-    completed: 'Completado',
-    cancelled: 'Cancelado',
-    canceled: 'Cancelado',
-    delivered: 'Entregado',
-    evidence_recorded: 'Evidencia registrada',
-    pending: 'Pendiente',
-    active: 'Activo',
-    inactive: 'Inactivo',
-    available: 'Disponible',
-    in_transit: 'En tránsito',
-    failed: 'Fallido',
-    assigned: 'Asignado',
-    unassigned: 'Sin asignar',
-  };
-
-  function statusLabel(value) {
-    if (!value) return '';
-    const key = String(value).toLowerCase().trim();
-    return STATUS_LABELS[key] || value;
-  }
-
   function badgeClass(value) {
     const normalized = String(value || '').toLowerCase();
 
-    if (normalized.includes('entreg') || normalized.includes('activo') || normalized.includes('operativo') || normalized.includes('complet') || normalized === 'delivered') {
+    if (normalized.includes('entreg') || normalized.includes('activo') || normalized.includes('operativo') || normalized.includes('complet')) {
       return 'status-pill';
     }
 
-    if (normalized.includes('pend') || normalized.includes('prepar') || normalized.includes('planific') || normalized === 'scheduled' || normalized === 'pending') {
+    if (normalized.includes('pend') || normalized.includes('prepar') || normalized.includes('planific')) {
       return 'badge-soft';
     }
 
-    if (normalized.includes('asign') || normalized === 'assigned' || normalized === 'in_progress') {
+    if (normalized.includes('asign')) {
       return 'badge-soft';
     }
 
-    if (normalized.includes('manten') || normalized.includes('fuera') || normalized.includes('cancel') || normalized === 'cancelled' || normalized === 'canceled' || normalized === 'failed') {
+    if (normalized.includes('manten') || normalized.includes('fuera') || normalized.includes('cancel')) {
       return 'role-pill';
     }
 
@@ -522,7 +498,6 @@
     toCurrency,
     toDate,
     initials,
-    statusLabel,
     badgeClass,
     tableMessage,
     ready,

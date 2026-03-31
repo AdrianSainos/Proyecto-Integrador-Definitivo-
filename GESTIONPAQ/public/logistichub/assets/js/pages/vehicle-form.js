@@ -34,6 +34,6 @@ window.LogisticHubCore.ready(async () => {
     });
 
     window.LogisticHubCore.setNotice('success', response.message);
-    window.location.href = '/logistichub/vehicles.html';
+    window.location.href = '/logistichub/vehiculos.html';
   });
 });

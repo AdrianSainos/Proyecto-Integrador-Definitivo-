@@ -105,15 +105,18 @@ class LogisticsPlanner
                 ];
             });
 
-        $fallbackCandidate = self::fallbackRouteCandidate($shipment, $requestedDate, $driverPool);
-
-        $scored = $existingCandidates
-            ->when($fallbackCandidate !== null, fn (Collection $collection) => $collection->push($fallbackCandidate))
+        $bestExistingCandidate = $existingCandidates
             ->filter(fn ($candidate) => $candidate['accepted'])
             ->sortByDesc('score')
-            ->values();
+            ->first();
 
-        return $scored->first();
+        if ($bestExistingCandidate) {
+            return $bestExistingCandidate;
+        }
+
+        $fallbackCandidate = self::fallbackRouteCandidate($shipment, $requestedDate, $driverPool);
+
+        return $fallbackCandidate && $fallbackCandidate['accepted'] ? $fallbackCandidate : null;
     }
 
     public static function materializeRecommendation(array $recommendation): array
@@ -124,7 +127,7 @@ class LogisticsPlanner
 
         $blueprint = $recommendation['routeBlueprint'];
         $nextSequence = (int) DB::table('rutas')->max('id') + 1;
-        $routeCode = sprintf('AUTO-R-%04d', $nextSequence);
+        $routeCode = sprintf('GPQ-R-%04d', $nextSequence);
         $status = $blueprint['status'] ?? 'Preparacion';
         $statusId = DB::table('estado_ruta')->where('nombre', $status)->value('id');
 
@@ -154,7 +157,7 @@ class LogisticsPlanner
             'estado_id' => $statusId,
             'optimization_score' => 0,
             'waypoints' => json_encode($blueprint['waypoints'] ?? [], JSON_UNESCAPED_SLASHES),
-            'notes' => $blueprint['notes'] ?? 'Ruta generada automaticamente para balancear la operacion.',
+            'notes' => $blueprint['notes'] ?? 'Ruta planificada por el motor de asignacion para balancear la operacion.',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -691,7 +694,7 @@ class LogisticsPlanner
                 'driverId' => $driverRecommendation['id'] ?? null,
                 'driverName' => $driverRecommendation['name'] ?? null,
                 'waypoints' => $waypoints,
-                'notes' => 'Ruta creada automaticamente a partir del motor de asignacion para mantener SLA y capacidad operativa.',
+                'notes' => 'Ruta planificada por el motor de asignacion para mantener SLA y capacidad operativa.',
             ],
         ];
     }
@@ -815,7 +818,7 @@ class LogisticsPlanner
                 'driverId' => $driverRecommendation['id'] ?? null,
                 'driverName' => $driverRecommendation['name'] ?? null,
                 'waypoints' => $waypoints,
-                'notes' => 'Ruta creada automaticamente en modo de planeacion. Los recursos operativos quedan pendientes de confirmacion.',
+                'notes' => 'Ruta planificada en modo de planeacion. Los recursos operativos quedan pendientes de confirmacion.',
             ],
         ];
     }

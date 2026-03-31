@@ -2,24 +2,26 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Card, Field, Notice, Pill, PrimaryButton, Screen } from '../components/Ui';
 import { palette, radius, spacing } from '../theme';
-import { getApiDebugInfo } from '../api';
 
 export function LoginScreen({ onLogin }) {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const apiDebug = getApiDebugInfo();
-  const hintBase = apiDebug.activeApiBase || apiDebug.candidates[0] || 'sin base detectada';
+  const [notice, setNotice] = useState({ type: 'info', message: '' });
 
   async function submit() {
+    if (!login.trim() || !password) {
+      setNotice({ type: 'error', message: 'Ingresa tu correo o usuario y la password.' });
+      return;
+    }
+
     setLoading(true);
-    setError('');
+    setNotice({ type: 'info', message: '' });
 
     try {
       await onLogin({ login: login.trim(), password });
     } catch (err) {
-      setError(err.message || 'No fue posible iniciar sesion.');
+      setNotice({ type: 'error', message: err.message || 'No fue posible iniciar sesion.' });
     } finally {
       setLoading(false);
     }
@@ -43,11 +45,7 @@ export function LoginScreen({ onLogin }) {
       <Card>
         <Field label="Correo o usuario" value={login} onChangeText={setLogin} placeholder="correo@gestionpaq.local" />
         <Field label="Password" value={password} onChangeText={setPassword} placeholder="********" secureTextEntry />
-        <Notice message={error} type="error" />
-        <View style={styles.connectionBox}>
-          <Text style={styles.connectionLabel}>Base API detectada</Text>
-          <Text style={styles.connectionValue}>{hintBase}</Text>
-        </View>
+        <Notice message={notice.message} type={notice.type} />
         <PrimaryButton label={loading ? 'Ingresando...' : 'Entrar'} onPress={submit} disabled={loading} />
       </Card>
     </Screen>
@@ -89,27 +87,5 @@ const styles = StyleSheet.create({
     color: palette.textOnDark,
     fontSize: 12,
     fontWeight: '700',
-  },
-  connectionBox: {
-    marginBottom: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderRadius: radius.md,
-    backgroundColor: palette.surfaceSoft,
-    borderWidth: 1,
-    borderColor: 'rgba(26, 38, 62, 0.08)',
-  },
-  connectionLabel: {
-    color: palette.textMuted,
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
-  connectionValue: {
-    marginTop: 4,
-    color: palette.text,
-    fontSize: 12,
-    lineHeight: 18,
   },
 });

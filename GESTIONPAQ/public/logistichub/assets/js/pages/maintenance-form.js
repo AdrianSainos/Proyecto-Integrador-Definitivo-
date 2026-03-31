@@ -17,7 +17,7 @@ window.LogisticHubCore.ready(async () => {
 
   fill('#vehicleId', options.vehicles, 'Selecciona vehiculo', (item) => ({ value: item.id, label: item.plate }));
   fill('#type', options.types, 'Selecciona tipo', (item) => ({ value: item, label: item }));
-  fill('#status', options.statuses, 'Selecciona estado', (item) => ({ value: item, label: window.LogisticHubCore.statusLabel(item) }));
+  fill('#status', options.statuses, 'Selecciona estado', (item) => ({ value: item.value, label: item.label }));
 
   if (maintenanceId) {
     const item = await window.LogisticHubCore.apiRequest(`/maintenance/${maintenanceId}`);
@@ -49,6 +49,6 @@ window.LogisticHubCore.ready(async () => {
     });
 
     window.LogisticHubCore.setNotice('success', response.message);
-    window.location.href = '/logistichub/maintenance.html';
+    window.location.href = '/logistichub/mantenimiento.html';
   });
 });

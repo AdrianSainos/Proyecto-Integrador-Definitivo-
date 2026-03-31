@@ -122,7 +122,7 @@ function describeFailure(error, candidates) {
   const attempts = candidates.slice(0, 4).join(', ');
   const suffix = attempts ? ` Bases probadas: ${attempts}.` : '';
 
-  return `No fue posible conectar la app movil con la API. Verifica que Laravel o Apache/XAMPP esten activos y que el telefono comparta la misma red Wi-Fi.${details}${suffix}`;
+  return `No fue posible conectar la app movil con la API.${details}${suffix}`;
 }
 
 export async function hydrateApiBase() {
@@ -133,13 +133,6 @@ export async function hydrateApiBase() {
   }
 
   return activeApiBase;
-}
-
-export function getApiDebugInfo() {
-  return {
-    activeApiBase,
-    candidates: candidateApiBases(),
-  };
 }
 
 export async function apiRequest(endpoint, options = {}) {

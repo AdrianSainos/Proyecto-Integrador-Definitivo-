@@ -1,4 +1,4 @@
-﻿window.LogisticHubCore.ready(async () => {
+window.LogisticHubCore.ready(async () => {
   if (!window.LogisticHubCore.protectPage(['admin', 'operator', 'supervisor', 'dispatcher'])) {
     return;
   }
@@ -252,7 +252,7 @@ setDestinationHelp('Dirección guardada cargada automáticamente para este desti
       : '';
 
     window.LogisticHubCore.setNotice('success', `${response.message || 'Envio guardado correctamente.'}${recommendation}`.trim());
-    window.location.href = '/logistichub/shipments.html';
+    window.location.href = '/logistichub/envios.html';
   });
 });
 

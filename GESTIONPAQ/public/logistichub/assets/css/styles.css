@@ -152,16 +152,24 @@ textarea {
 .brand-subtitle,
 .meta-text,
 .section-subtitle,
+.section-copy,
 .card-subtitle,
-.shell-subtitle,
-.text-muted {
-  color: rgba(224, 231, 243, 0.68);
+.shell-subtitle {
+  color: var(--ink-2);
 }
 
+.text-muted {
+  color: var(--ink-3);
+}
+
+.sidebar .brand-subtitle,
+.sidebar .meta-text,
 .sidebar .text-muted,
+.sidebar .section-copy,
 .sidebar .section-subtitle,
-.sidebar .card-subtitle {
-  color: rgba(224, 231, 243, 0.68);
+.sidebar .card-subtitle,
+.sidebar .shell-subtitle {
+  color: rgba(224, 231, 243, 0.78);
 }
 
 .user-chip,

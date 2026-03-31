@@ -13,7 +13,7 @@ window.LogisticHubCore.ready(async () => {
 
     body.innerHTML = items.map((item) => `
       <tr>
-        <td>${item.id}</td>
+        <td>${item.code || `RUTA-${String(item.id).padStart(4, '0')}`}</td>
         <td>${item.warehouseName}</td>
         <td>${item.distanceKm}</td>
         <td>${item.timeMinutes} min</td>
@@ -22,7 +22,7 @@ window.LogisticHubCore.ready(async () => {
         <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${window.LogisticHubCore.statusLabel(item.status)}</span></td>
         <td>${item.vehiclePlate || 'Pendiente'}</td>
         <td>${item.driverName || 'Pendiente'}</td>
-        <td><div class="table-actions">${canManage ? `<a class="btn btn-outline btn-sm" href="/logistichub/route-form.html?id=${item.id}">Editar</a><button class="btn btn-danger btn-sm" data-delete-id="${item.id}">Eliminar</button>` : '<span class="text-muted">Solo lectura</span>'}</div></td>
+        <td><div class="table-actions">${canManage ? `<a class="btn btn-outline btn-sm" href="/logistichub/ruta-form.html?id=${item.id}">Editar</a><button class="btn btn-danger btn-sm" data-delete-id="${item.id}">Eliminar</button>` : '<span class="text-muted">Solo lectura</span>'}</div></td>
       </tr>
     `).join('');
 

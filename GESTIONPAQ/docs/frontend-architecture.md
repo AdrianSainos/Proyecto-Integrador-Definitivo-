@@ -24,23 +24,23 @@ La capa visual queda completamente desacoplada de Laravel Blade y vive en archiv
 ```text
 public/logistichub/
   index.html
-  login.html
-  dashboard.html
-  operations.html
-  customers.html
-  shipments.html
-  shipment-form.html
-  routes.html
-  route-form.html
-  drivers.html
-  driver-form.html
-  vehicles.html
-  vehicle-form.html
-  users.html
-  user-form.html
-  settings.html
-  reports.html
-  tracking.html
+  acceso.html
+  inicio.html
+  operaciones.html
+  clientes.html
+  envios.html
+  envio-form.html
+  rutas.html
+  ruta-form.html
+  conductores.html
+  conductor-form.html
+  vehiculos.html
+  vehiculo-form.html
+  usuarios.html
+  usuario-form.html
+  configuracion.html
+  reportes.html
+  rastreo.html
   assets/
     css/
       styles.css

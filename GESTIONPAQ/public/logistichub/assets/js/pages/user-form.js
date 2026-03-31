@@ -128,6 +128,6 @@ window.LogisticHubCore.ready(async () => {
     });
 
     window.LogisticHubCore.setNotice('success', response.message || 'Usuario guardado correctamente.');
-    window.location.href = '/logistichub/users.html';
+    window.location.href = '/logistichub/usuarios.html';
   });
 });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, SafeAreaView, StatusBar, StyleSheet, View, Text, Pressable } from 'react-native';
+import { ActivityIndicator, SafeAreaView, StatusBar, StyleSheet, View, Text, Pressable, useWindowDimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -73,6 +73,7 @@ function renderActiveScreen(activeTab, session, handleLogout) {
 export default function App() {
   const [session, setSession] = useState({ token: null, user: null, hydrated: false });
   const [activeTab, setActiveTab] = useState('home');
+  const { width } = useWindowDimensions();
 
   useEffect(() => {
     (async () => {
@@ -157,6 +158,8 @@ export default function App() {
 
   const userTabs = allowedTabs(session.user.role);
   const displayRole = roleLabel(session.user.role);
+  const compactHeader = width < 420;
+  const tightHeader = width < 360;
 
   return (
     <SafeAreaView style={styles.appShell}>
@@ -164,26 +167,39 @@ export default function App() {
       <View style={styles.orbBottom} />
       <ExpoStatusBar style="dark" />
       <StatusBar barStyle="dark-content" />
-      <View style={styles.frame}>
-        <View style={styles.header}>
-          <View style={styles.headerBrand}>
-            <View style={styles.brandBadge}>
-              <MaterialCommunityIcons name="truck-fast-outline" size={28} color={palette.accent} />
+      <View style={[styles.frame, tightHeader && styles.frameTight]}>
+        <View style={[styles.header, compactHeader && styles.headerCompact]}>
+          <View style={[styles.headerTop, compactHeader && styles.headerTopCompact]}>
+            <View style={[styles.headerBrand, compactHeader && styles.headerBrandCompact]}>
+              <View style={[styles.brandBadge, tightHeader && styles.brandBadgeTight]}>
+                <MaterialCommunityIcons name="truck-fast-outline" size={tightHeader ? 24 : 28} color={palette.accent} />
+              </View>
+              <View style={styles.headerCopy}>
+                <Text style={[styles.eyebrow, tightHeader && styles.eyebrowTight]}>Centro operativo movil</Text>
+                <Text numberOfLines={1} style={[styles.title, compactHeader && styles.titleCompact]}>GESTIONPAQ</Text>
+              </View>
             </View>
-            <View style={styles.headerCopy}>
-              <Text style={styles.eyebrow}>Centro operativo movil</Text>
-              <Text style={styles.title}>GESTIONPAQ</Text>
-              <Text style={styles.subtitle}>La identidad visual del panel web, llevada a rutas, tracking y prueba de entrega.</Text>
+
+            <View style={[styles.accountChip, compactHeader && styles.accountChipCompact, tightHeader && styles.accountChipTight]}>
+              <View style={[styles.avatar, tightHeader && styles.avatarTight]}>
+                <Text style={[styles.avatarLabel, tightHeader && styles.avatarLabelTight]}>{getInitials(session.user.name)}</Text>
+              </View>
+              <View style={styles.accountMeta}>
+                <Text numberOfLines={1} style={[styles.accountName, compactHeader && styles.accountNameCompact]}>
+                  {session.user.name}
+                </Text>
+                <Text numberOfLines={1} style={[styles.accountRole, compactHeader && styles.accountRoleCompact]}>
+                  {displayRole}
+                </Text>
+              </View>
             </View>
           </View>
 
-          <View style={styles.accountChip}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarLabel}>{getInitials(session.user.name)}</Text>
-            </View>
-            <Text numberOfLines={1} style={styles.accountName}>{session.user.name}</Text>
-            <Text style={styles.accountRole}>{displayRole}</Text>
-          </View>
+          {!tightHeader ? (
+            <Text numberOfLines={compactHeader ? 2 : 1} style={[styles.subtitle, compactHeader && styles.subtitleCompact]}>
+              La identidad visual del panel web, llevada a rutas, tracking y prueba de entrega.
+            </Text>
+          ) : null}
         </View>
 
         <View style={styles.content}>
@@ -239,6 +255,10 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
     gap: spacing.md,
   },
+  frameTight: {
+    paddingHorizontal: spacing.sm,
+    gap: spacing.sm,
+  },
   loadingPanel: {
     marginTop: '42%',
     marginHorizontal: spacing.lg,
@@ -271,22 +291,37 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    justifyContent: 'space-between',
     gap: spacing.sm,
-    padding: spacing.lg,
+    padding: spacing.md,
     borderRadius: radius.xl,
     backgroundColor: palette.surfaceDark,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
     ...shadows.floating,
   },
+  headerCompact: {
+    gap: spacing.xs,
+    padding: spacing.sm + 2,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  headerTopCompact: {
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+  },
   headerBrand: {
     flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
     gap: spacing.md,
-    alignItems: 'flex-start',
+    alignItems: 'center',
+  },
+  headerBrandCompact: {
+    gap: spacing.sm,
   },
   brandBadge: {
     width: 60,
@@ -296,9 +331,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 138, 61, 0.16)',
   },
+  brandBadgeTight: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+  },
   headerCopy: {
     flex: 1,
-    gap: spacing.xxs,
+    minWidth: 0,
+    gap: 2,
   },
   eyebrow: {
     color: palette.accent,
@@ -307,50 +348,93 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
   },
+  eyebrowTight: {
+    fontSize: 10,
+    letterSpacing: 1.3,
+  },
   title: {
-    marginTop: 2,
-    fontSize: 28,
+    marginTop: 1,
+    fontSize: 26,
     fontWeight: '800',
     color: palette.textOnDark,
   },
+  titleCompact: {
+    fontSize: 22,
+  },
   subtitle: {
-    marginTop: 4,
     color: palette.textMutedOnDark,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 18,
+    marginLeft: 72,
+    flexShrink: 1,
+  },
+  subtitleCompact: {
+    marginLeft: 0,
+    fontSize: 12,
+    lineHeight: 17,
   },
   accountChip: {
-    width: 128,
-    padding: spacing.sm,
-    borderRadius: radius.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    minWidth: 146,
+    maxWidth: 180,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
+    justifyContent: 'flex-start',
+    gap: spacing.sm,
+  },
+  accountChipCompact: {
+    minWidth: 0,
+    maxWidth: '100%',
+    flexShrink: 1,
+  },
+  accountChipTight: {
+    width: '100%',
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: palette.brand,
   },
+  avatarTight: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+  },
   avatarLabel: {
     color: palette.white,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '800',
+  },
+  avatarLabelTight: {
+    fontSize: 14,
+  },
+  accountMeta: {
+    flex: 1,
+    minWidth: 0,
+    gap: 1,
   },
   accountName: {
     color: palette.textOnDark,
     fontWeight: '700',
     fontSize: 13,
   },
+  accountNameCompact: {
+    fontSize: 12.5,
+  },
   accountRole: {
     color: palette.textMutedOnDark,
     fontSize: 12,
-    textAlign: 'center',
+  },
+  accountRoleCompact: {
+    fontSize: 11.5,
   },
   content: {
     flex: 1,

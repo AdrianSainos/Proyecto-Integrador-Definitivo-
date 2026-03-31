@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Envios | GESTIONPAQ</title>
+  <title>Rutas | GESTIONPAQ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -11,42 +11,38 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link href="/logistichub/assets/css/styles.css" rel="stylesheet" />
 </head>
-<body data-page="shipments" data-eyebrow="Envíos" data-title="Control de envíos y paquetes" data-description="Listado administrativo con contexto operativo, estados y asignaciones enriquecidas.">
+<body data-page="routes" data-eyebrow="Rutas" data-title="Ruteo administrativo" data-description="Tabla operativa con almacén, distancia, tiempo, estado y asignaciones.">
   <div data-page-content>
     <section class="toolbar">
       <div id="pageNotice"></div>
       <div class="toolbar-group">
-        <a class="btn btn-success" id="createShipmentButton" href="/logistichub/shipment-form.html"><i class="fa-solid fa-plus"></i>Nuevo envío</a>
+        <a class="btn btn-success" href="/logistichub/ruta-form.html"><i class="fa-solid fa-plus"></i>Nueva ruta</a>
       </div>
     </section>
-    <section id="shipmentsPersona"></section>
     <section class="table-panel">
-      <div class="table-header">
-        <h2 class="card-title">Envíos registrados</h2>
-        <p class="card-subtitle">Con tracking, cliente, asignación, ruta y acción contextual.</p>
-      </div>
       <div class="table-responsive">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Tracking</th>
-              <th>Cliente</th>
+              <th>Codigo</th>
+              <th>Almacen</th>
+              <th>Distancia KM</th>
+              <th>Tiempo</th>
+              <th>Carga</th>
+              <th>Score</th>
               <th>Estado</th>
-              <th>Ruta</th>
               <th>Vehiculo</th>
               <th>Conductor</th>
-              <th>Peso</th>
               <th>Acciones</th>
             </tr>
           </thead>
-          <tbody id="shipmentsTableBody"></tbody>
+          <tbody id="routesTableBody"></tbody>
         </table>
       </div>
     </section>
   </div>
   <script src="/logistichub/assets/js/core.js"></script>
   <script src="/logistichub/assets/js/shared/layout.js"></script>
-  <script src="/logistichub/assets/js/pages/shipments.js"></script>
+  <script src="/logistichub/assets/js/pages/routes.js"></script>
 </body>
 </html>

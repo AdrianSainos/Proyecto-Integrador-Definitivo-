@@ -107,7 +107,7 @@ export function roleLabel(role) {
     admin: 'Administrador',
     operator: 'Operador',
     supervisor: 'Supervisor',
-    dispatcher: 'Despacho',
+    dispatcher: 'Despachador',
     customer: 'Cliente',
     driver: 'Conductor',
   }[normalizeToken(role)] || 'Usuario';

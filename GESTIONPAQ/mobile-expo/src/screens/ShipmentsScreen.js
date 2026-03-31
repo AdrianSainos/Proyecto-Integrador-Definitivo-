@@ -4,6 +4,24 @@ import { apiRequest } from '../api';
 import { Card, EmptyState, LoadingState, Pill, Screen } from '../components/Ui';
 import { palette, spacing, toneForStatus } from '../theme';
 
+function priorityLabel(priority) {
+  switch (String(priority || '').toLowerCase()) {
+    case 'express':
+    case 'urgent':
+    case 'urgente':
+      return 'Urgente';
+    case 'high':
+    case 'alta':
+    case 'priority':
+      return 'Alta';
+    case 'standard':
+    case 'normal':
+    case 'estandar':
+    default:
+      return 'Estandar';
+  }
+}
+
 export function ShipmentsScreen({ token, user }) {
   const [state, setState] = useState({ loading: true, error: '', items: [] });
 
@@ -86,7 +104,7 @@ export function ShipmentsScreen({ token, user }) {
               </View>
               <View style={styles.metaTile}>
                 <Text style={styles.metaLabel}>Prioridad</Text>
-                <Text style={styles.metaValue}>{item.priority || 'Estandar'}</Text>
+                <Text style={styles.metaValue}>{priorityLabel(item.priority)}</Text>
               </View>
             </View>
           </Card>

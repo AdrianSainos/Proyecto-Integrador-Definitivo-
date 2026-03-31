@@ -12,21 +12,20 @@ window.LogisticHubCore.ready(async () => {
     const body = document.querySelector('#maintenanceTableBody');
 
     if (!items.length) {
-      window.LogisticHubCore.tableMessage(body, 'No hay eventos de mantenimiento registrados.', 7);
+      window.LogisticHubCore.tableMessage(body, 'No hay eventos de mantenimiento registrados.', 6);
       return;
     }
 
     body.innerHTML = items.map((item) => `
       <tr>
-        <td>${item.id}</td>
-        <td>${item.vehiclePlate}</td>
+        <td>${item.vehiclePlate || 'Sin placa'}</td>
         <td>${item.type}</td>
         <td>${window.LogisticHubCore.toDate(item.scheduledDate)}</td>
-        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${window.LogisticHubCore.statusLabel(item.status)}</span></td>
+        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${item.statusLabel || item.status}</span></td>
         <td>${window.LogisticHubCore.toCurrency(item.cost)}</td>
         <td>
           <div class="table-actions">
-            <a class="btn btn-outline btn-sm" href="/logistichub/maintenance-form.html?id=${item.id}">Editar</a>
+            <a class="btn btn-outline btn-sm" href="/logistichub/mantenimiento-form.html?id=${item.id}">Editar</a>
             <button class="btn btn-danger btn-sm" data-delete-id="${item.id}">Eliminar</button>
           </div>
         </td>

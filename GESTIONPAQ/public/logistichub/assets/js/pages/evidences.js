@@ -38,7 +38,7 @@ window.LogisticHubCore.ready(async () => {
         <td>${window.LogisticHubCore.toDate(item.deliveryTimestamp)}</td>
         <td>${item.photoUrl ? `<a href="${item.photoUrl}" target="_blank" rel="noreferrer"><img class="evidence-thumb" src="${item.photoUrl}" alt="Foto de entrega ${item.tracking}" /></a>` : '<span class="text-muted">Sin foto</span>'}</td>
         <td>${item.signatureUrl ? `<a class="btn btn-outline btn-sm" href="${item.signatureUrl}" target="_blank" rel="noreferrer">Abrir</a>` : item.signatureText ? item.signatureText : '<span class="text-muted">Sin firma</span>'}</td>
-        <td><a class="btn btn-outline btn-sm" href="/logistichub/tracking.html?code=${encodeURIComponent(item.tracking)}">Ver tracking</a></td>
+        <td><a class="btn btn-outline btn-sm" href="/logistichub/rastreo.html?code=${encodeURIComponent(item.tracking)}">Ver tracking</a></td>
       </tr>
     `).join('');
   }

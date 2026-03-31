@@ -600,10 +600,6 @@ class LogisticsPlanner
         $timeMinutes = self::estimateRouteTimeMinutes($distanceKm, LogisticsSupport::normalizePriority($shipment['priority'] ?? null) ?: 'standard');
         $vehicle = self::vehicleCandidatesForNewRoute($shipment, $requestedDate, $distanceKm)->first();
 
-        if (! $vehicle) {
-            return null;
-        }
-
         $destinationWarehouse = self::nearestWarehouseToCoordinates($shipment['destinationLatitude'] ?? null, $shipment['destinationLongitude'] ?? null);
         $waypoints = array_values(array_filter([
             [
@@ -620,47 +616,29 @@ class LogisticsPlanner
                 : null,
         ]));
 
-        $routeStub = (object) [
-            'id' => 0,
-            'codigo' => 'POR-CREAR',
-            'route_code' => 'POR-CREAR',
-            'almacen_origen_id' => $warehouseId,
-            'origen_almacen_id' => $warehouseId,
-            'warehouse_id' => $warehouseId,
-            'warehouse_name' => (string) ($warehouse->nombre ?? $warehouse->code ?? $warehouse->codigo ?? 'Sin almacen'),
-            'warehouse_latitude' => self::numeric($warehouse->latitude ?? null),
-            'warehouse_longitude' => self::numeric($warehouse->longitude ?? null),
-            'distancia_km' => $distanceKm,
-            'estimated_distance_km' => $distanceKm,
-            'tiempo_estimado_min' => $timeMinutes,
-            'estimated_time_minutes' => $timeMinutes,
-            'status' => 'Preparacion',
-            'estado' => 'Preparacion',
-            'vehicle_id' => $vehicle['id'],
-            'vehicle_plate' => $vehicle['plate'],
-            'vehicle_status_name' => $vehicle['status'],
-            'vehicle_capacity_kg' => $vehicle['capacityKg'],
-            'vehicle_capacity_packages' => $vehicle['capacityPackages'],
-            'vehicle_current_fuel' => $vehicle['currentFuel'],
-            'vehicle_fuel_consumption_km' => $vehicle['fuelConsumptionKm'],
-            'vehicle_fuel_range_km' => $vehicle['fuelRangeKm'],
-            'driver_id' => null,
-            'scheduled_date' => $requestedDate->toDateString(),
-            'optimization_score' => 0,
-            'assigned_packages' => 0,
-            'assigned_package_units' => 0,
-            'assigned_weight_kg' => 0,
-            'remaining_capacity_kg' => $vehicle['capacityKg'],
-            'remaining_package_slots' => $vehicle['capacityPackages'],
-            'waypoints' => json_encode($waypoints, JSON_UNESCAPED_SLASHES),
-        ];
+        $routeStub = self::fallbackRouteStub($warehouseId, $warehouse, $requestedDate, $distanceKm, $timeMinutes, $vehicle, $waypoints);
 
         $allowWithoutShift = $requestedDate->isFuture();
-        $driverRecommendation = self::resolveDriverCandidate($routeStub, $requestedDate, $driverPool, $allowWithoutShift);
-        $evaluation = self::evaluateCandidate($routeStub, $shipment, $requestedDate, $driverRecommendation);
+        $driverRecommendation = $vehicle
+            ? self::resolveDriverCandidate($routeStub, $requestedDate, $driverPool, $allowWithoutShift)
+            : null;
+        $evaluation = $vehicle
+            ? self::evaluateCandidate($routeStub, $shipment, $requestedDate, $driverRecommendation)
+            : null;
 
-        if (! $evaluation['accepted']) {
-            return null;
+        if (! $evaluation || ! $evaluation['accepted']) {
+            return $requestedDate->isFuture()
+                ? self::plannedPlaceholderRecommendation(
+                    $shipment,
+                    $requestedDate,
+                    $routeStub,
+                    $destinationWarehouse,
+                    $waypoints,
+                    $vehicle,
+                    $driverRecommendation,
+                    $evaluation,
+                )
+                : null;
         }
 
         $priority = LogisticsSupport::normalizePriority($shipment['priority'] ?? null) ?: 'standard';
@@ -708,12 +686,136 @@ class LogisticsPlanner
                 'distanceKm' => round($distanceKm, 1),
                 'timeMinutes' => $timeMinutes,
                 'status' => 'Preparacion',
-                'vehicleId' => $vehicle['id'],
-                'vehiclePlate' => $vehicle['plate'],
+                'vehicleId' => $vehicle['id'] ?? null,
+                'vehiclePlate' => $vehicle['plate'] ?? null,
                 'driverId' => $driverRecommendation['id'] ?? null,
                 'driverName' => $driverRecommendation['name'] ?? null,
                 'waypoints' => $waypoints,
                 'notes' => 'Ruta creada automaticamente a partir del motor de asignacion para mantener SLA y capacidad operativa.',
+            ],
+        ];
+    }
+
+    private static function fallbackRouteStub(
+        int $warehouseId,
+        object $warehouse,
+        Carbon $requestedDate,
+        float $distanceKm,
+        int $timeMinutes,
+        ?array $vehicle,
+        array $waypoints,
+    ): object {
+        return (object) [
+            'id' => 0,
+            'codigo' => 'POR-CREAR',
+            'route_code' => 'POR-CREAR',
+            'almacen_origen_id' => $warehouseId,
+            'origen_almacen_id' => $warehouseId,
+            'warehouse_id' => $warehouseId,
+            'warehouse_name' => (string) ($warehouse->nombre ?? $warehouse->code ?? $warehouse->codigo ?? 'Sin almacen'),
+            'warehouse_latitude' => self::numeric($warehouse->latitude ?? null),
+            'warehouse_longitude' => self::numeric($warehouse->longitude ?? null),
+            'distancia_km' => $distanceKm,
+            'estimated_distance_km' => $distanceKm,
+            'tiempo_estimado_min' => $timeMinutes,
+            'estimated_time_minutes' => $timeMinutes,
+            'status' => 'Preparacion',
+            'estado' => 'Preparacion',
+            'vehicle_id' => $vehicle['id'] ?? null,
+            'vehicle_plate' => $vehicle['plate'] ?? null,
+            'vehicle_status_name' => $vehicle['status'] ?? 'Sin unidad',
+            'vehicle_capacity_kg' => $vehicle['capacityKg'] ?? 0,
+            'vehicle_capacity_packages' => $vehicle['capacityPackages'] ?? 0,
+            'vehicle_current_fuel' => $vehicle['currentFuel'] ?? 0,
+            'vehicle_fuel_consumption_km' => $vehicle['fuelConsumptionKm'] ?? 0,
+            'vehicle_fuel_range_km' => $vehicle['fuelRangeKm'] ?? 0,
+            'driver_id' => null,
+            'scheduled_date' => $requestedDate->toDateString(),
+            'optimization_score' => 0,
+            'assigned_packages' => 0,
+            'assigned_package_units' => 0,
+            'assigned_weight_kg' => 0,
+            'remaining_capacity_kg' => $vehicle['capacityKg'] ?? 0,
+            'remaining_package_slots' => $vehicle['capacityPackages'] ?? 0,
+            'waypoints' => json_encode($waypoints, JSON_UNESCAPED_SLASHES),
+        ];
+    }
+
+    private static function plannedPlaceholderRecommendation(
+        array $shipment,
+        Carbon $requestedDate,
+        object $routeStub,
+        ?object $destinationWarehouse,
+        array $waypoints,
+        ?array $vehicle,
+        ?array $driverRecommendation,
+        ?array $evaluation,
+    ): array {
+        $routePayload = LogisticsSupport::routePayload($routeStub);
+
+        if ($driverRecommendation) {
+            $routePayload['driverId'] = $driverRecommendation['id'];
+            $routePayload['driverName'] = $driverRecommendation['name'];
+            $routePayload['driverStatus'] = $driverRecommendation['status'];
+        }
+
+        $priority = LogisticsSupport::normalizePriority($shipment['priority'] ?? null) ?: 'standard';
+        $serviceLevel = self::normalizeServiceLevel($shipment['serviceLevel'] ?? null);
+        $pendingResources = [];
+
+        if (empty($routePayload['vehicleId'])) {
+            $pendingResources[] = 'unidad';
+        }
+
+        if (empty($routePayload['driverId'])) {
+            $pendingResources[] = 'conductor';
+        }
+
+        $baseScore = 48
+            + match ($priority) {
+                'express' => 8,
+                'high' => 5,
+                default => 0,
+            }
+            + match ($serviceLevel) {
+                'premium' => 4,
+                'corporate' => 2,
+                default => 0,
+            };
+        $score = round(max(24, min(78, $baseScore - (count($pendingResources) * 10))), 1);
+        $reason = 'Ruta nueva programada automaticamente para preservar la fecha operativa solicitada.';
+
+        if (! empty($pendingResources)) {
+            $reason .= ' Recursos pendientes de confirmar: '.implode(' y ', $pendingResources).'.';
+        }
+
+        return [
+            'accepted' => true,
+            'source' => 'planned_placeholder',
+            'needsRouteCreation' => true,
+            'score' => $score,
+            'reason' => $reason,
+            'remainingCapacityKg' => (float) ($evaluation['remainingCapacityKg'] ?? ($vehicle['capacityKg'] ?? 0)),
+            'remainingPackageSlots' => (int) ($evaluation['remainingPackageSlots'] ?? ($vehicle['capacityPackages'] ?? 0)),
+            'projectedLoadFactor' => (float) ($evaluation['projectedLoadFactor'] ?? 0),
+            'projectedPackageFactor' => (float) ($evaluation['projectedPackageFactor'] ?? 0),
+            'corridorDistanceKm' => $evaluation['corridorDistanceKm'] ?? 0.0,
+            'route' => $routePayload,
+            'driver' => $driverRecommendation,
+            'routeBlueprint' => [
+                'warehouseId' => (int) ($routePayload['warehouseId'] ?? 0),
+                'warehouseName' => (string) ($routePayload['warehouseName'] ?? 'Sin almacen'),
+                'destinationWarehouseId' => $destinationWarehouse ? (int) $destinationWarehouse->id : null,
+                'scheduledDate' => $requestedDate->toDateString(),
+                'distanceKm' => round((float) ($routePayload['distanceKm'] ?? 0), 1),
+                'timeMinutes' => (int) ($routePayload['timeMinutes'] ?? 0),
+                'status' => 'Preparacion',
+                'vehicleId' => $vehicle['id'] ?? null,
+                'vehiclePlate' => $vehicle['plate'] ?? null,
+                'driverId' => $driverRecommendation['id'] ?? null,
+                'driverName' => $driverRecommendation['name'] ?? null,
+                'waypoints' => $waypoints,
+                'notes' => 'Ruta creada automaticamente en modo de planeacion. Los recursos operativos quedan pendientes de confirmacion.',
             ],
         ];
     }

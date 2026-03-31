@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { apiRequest } from '../api';
 import { Card, EmptyState, Field, LoadingState, Notice, Pill, PrimaryButton, Screen } from '../components/Ui';
-import { palette, spacing } from '../theme';
+import { palette, spacing, toneForStatus } from '../theme';
 
 export function EvidenceScreen({ token, user }) {
   const [state, setState] = useState({ loading: true, error: '', shipments: [], settings: null });
@@ -34,7 +34,7 @@ export function EvidenceScreen({ token, user }) {
   }, [token]);
 
   if (user.role !== 'driver') {
-    return <Screen title="Prueba de entrega" subtitle="Registro de entrega en ruta."><EmptyState title="Módulo restringido" subtitle="Esta vista está disponible para el perfil conductor." /></Screen>;
+    return <Screen title="Prueba de entrega" subtitle="Registro de entrega en ruta."><EmptyState title="Modulo restringido" subtitle="Esta vista esta disponible para el perfil conductor." /></Screen>;
   }
 
   if (state.loading) {
@@ -42,27 +42,29 @@ export function EvidenceScreen({ token, user }) {
   }
 
   if (state.error) {
-    return <Screen title="Prueba de entrega" subtitle="Foto, firma y geolocalización de la entrega."><EmptyState title="No fue posible cargar tus envíos visibles" subtitle={state.error} /></Screen>;
+    return <Screen title="Prueba de entrega" subtitle="Foto, firma y geolocalizacion de la entrega."><EmptyState title="No fue posible cargar tus envios visibles" subtitle={state.error} /></Screen>;
   }
+
+  const readySteps = [selectedShipment, coords, photoPreview || photoDataUrl, signatureText.trim()].filter(Boolean).length;
 
   async function captureLocation() {
     const permission = await Location.requestForegroundPermissionsAsync();
 
     if (permission.status !== 'granted') {
-      setNotice({ type: 'error', message: 'No se concedió acceso a la ubicación.' });
+      setNotice({ type: 'error', message: 'No se concedio acceso a la ubicacion.' });
       return;
     }
 
     const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
     setCoords({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-    setNotice({ type: 'info', message: 'Ubicación capturada correctamente.' });
+    setNotice({ type: 'info', message: 'Ubicacion capturada correctamente.' });
   }
 
   async function capturePhoto() {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
 
     if (permission.status !== 'granted') {
-      setNotice({ type: 'error', message: 'No se concedió acceso a la cámara.' });
+      setNotice({ type: 'error', message: 'No se concedio acceso a la camara.' });
       return;
     }
 
@@ -86,7 +88,7 @@ export function EvidenceScreen({ token, user }) {
 
   async function submitEvidence() {
     if (!selectedShipment) {
-      setNotice({ type: 'error', message: 'Selecciona primero un envío visible.' });
+      setNotice({ type: 'error', message: 'Selecciona primero un envio visible.' });
       return;
     }
 
@@ -96,12 +98,12 @@ export function EvidenceScreen({ token, user }) {
     }
 
     if (state.settings?.requirePhoto && !photoDataUrl) {
-      setNotice({ type: 'error', message: 'La configuración actual exige foto.' });
+      setNotice({ type: 'error', message: 'La configuracion actual exige foto.' });
       return;
     }
 
     if (state.settings?.requireSignature && !signatureText.trim()) {
-      setNotice({ type: 'error', message: 'La configuración actual exige firma textual.' });
+      setNotice({ type: 'error', message: 'La configuracion actual exige firma textual.' });
       return;
     }
 
@@ -143,40 +145,61 @@ export function EvidenceScreen({ token, user }) {
   }
 
   return (
-    <Screen title="Prueba de entrega" subtitle="Captura operativa con foto, firma textual y geolocalización para la última milla.">
+    <Screen eyebrow="Ultima milla" title="Prueba de entrega" subtitle="Captura operativa con foto, firma textual y geolocalizacion para la ultima milla.">
       <Notice type={notice.type} message={notice.message} />
 
-      <Card accent>
-        <Text style={styles.sectionTitle}>Requisitos activos</Text>
-        <Text style={styles.meta}>Foto obligatoria: {state.settings?.requirePhoto ? 'Si' : 'No'}</Text>
-        <Text style={styles.meta}>Firma obligatoria: {state.settings?.requireSignature ? 'Si' : 'No'}</Text>
+      <Card tone="dark">
+        <Text style={styles.heroTitle}>Cierre de entrega</Text>
+        <Text style={styles.heroCopy}>Registra la ultima milla con evidencia lista para auditoria y lectura operativa más clara.</Text>
+        <View style={styles.requirementRow}>
+          <Pill tone="dark">{state.shipments.length} envios visibles</Pill>
+          <Pill tone={state.settings?.requirePhoto ? 'accent' : 'dark'}>Foto {state.settings?.requirePhoto ? 'obligatoria' : 'opcional'}</Pill>
+          <Pill tone={state.settings?.requireSignature ? 'accent' : 'dark'}>Firma {state.settings?.requireSignature ? 'obligatoria' : 'opcional'}</Pill>
+        </View>
       </Card>
 
       <Card>
-        <Text style={styles.sectionTitle}>Envios visibles</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Envios visibles</Text>
+          <Pill tone={selectedShipment ? 'brand' : 'neutral'}>{selectedShipment ? '1 seleccionado' : 'Selecciona uno'}</Pill>
+        </View>
         {state.shipments.length ? state.shipments.map((item) => {
           const active = selectedShipment?.id === item.id;
 
           return (
-            <View key={item.id} style={styles.shipmentRow}>
-              <View style={{ flex: 1 }}>
-                <Pill tone={active ? 'brand' : 'soft'}>{item.status}</Pill>
+            <View key={item.id} style={[styles.shipmentRow, active && styles.shipmentRowActive]}>
+              <View style={styles.shipmentInfo}>
+                <Pill tone={toneForStatus(item.status)}>{item.status}</Pill>
                 <Text style={styles.tracking}>{item.tracking}</Text>
                 <Text style={styles.meta}>{item.destinationAddress || 'Sin direccion'}{item.destinationCity ? ` - ${item.destinationCity}` : ''}</Text>
               </View>
-              <PrimaryButton label={active ? 'Seleccionado' : 'Usar'} onPress={() => setSelectedShipment(item)} tone={active ? 'brand' : 'outline'} />
+              <PrimaryButton label={active ? 'Seleccionado' : 'Usar'} onPress={() => setSelectedShipment(item)} tone={active ? 'brand' : 'outline'} style={styles.shipmentAction} />
             </View>
           );
         }) : <EmptyState title="Sin envios visibles" subtitle="Cuando tengas paquetes asignados apareceran aqui para registrar la entrega." />}
       </Card>
 
+      {selectedShipment ? (
+        <Card tone="soft">
+          <Text style={styles.sectionTitle}>Envio seleccionado</Text>
+          <Pill tone={toneForStatus(selectedShipment.status)}>{selectedShipment.status}</Pill>
+          <Text style={styles.tracking}>{selectedShipment.tracking}</Text>
+          <Text style={styles.meta}>{selectedShipment.destinationAddress || 'Sin direccion'}{selectedShipment.destinationCity ? ` - ${selectedShipment.destinationCity}` : ''}</Text>
+        </Card>
+      ) : null}
+
       <Card>
-        <Text style={styles.sectionTitle}>Captura de evidencia</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Captura de evidencia</Text>
+          <Pill tone={readySteps >= 4 ? 'success' : 'accent'}>{readySteps}/4 listos</Pill>
+        </View>
         <Field label="Receptor" value={recipientName} onChangeText={setRecipientName} placeholder="Nombre de quien recibe" autoCapitalize="words" />
         <Field label="Firma textual" value={signatureText} onChangeText={setSignatureText} placeholder="Nombre que quedara en la firma" autoCapitalize="words" />
-        <Field label="Notas" value={notes} onChangeText={setNotes} placeholder="Observaciones de entrega" autoCapitalize="sentences" />
-        <PrimaryButton label={coords ? 'Ubicacion capturada' : 'Capturar ubicacion'} onPress={captureLocation} tone="outline" />
-        <PrimaryButton label={photoPreview ? 'Repetir foto' : 'Tomar foto'} onPress={capturePhoto} tone="outline" />
+        <Field label="Notas" value={notes} onChangeText={setNotes} placeholder="Observaciones de entrega" autoCapitalize="sentences" multiline />
+        <View style={styles.actionRow}>
+          <PrimaryButton label={coords ? 'Ubicacion lista' : 'Capturar ubicacion'} onPress={captureLocation} tone="outline" style={styles.actionButton} />
+          <PrimaryButton label={photoPreview ? 'Repetir foto' : 'Tomar foto'} onPress={capturePhoto} tone="soft" style={styles.actionButton} />
+        </View>
         {coords ? <Text style={styles.meta}>GPS: {coords.latitude.toFixed(5)}, {coords.longitude.toFixed(5)}</Text> : null}
         {photoPreview ? <Image source={{ uri: photoPreview }} style={styles.preview} /> : null}
         <PrimaryButton label={submitting ? 'Registrando...' : 'Registrar entrega'} onPress={submitEvidence} disabled={submitting} />
@@ -186,6 +209,27 @@ export function EvidenceScreen({ token, user }) {
 }
 
 const styles = StyleSheet.create({
+  heroTitle: {
+    color: palette.textOnDark,
+    fontSize: 24,
+    fontWeight: '800',
+  },
+  heroCopy: {
+    color: palette.textMutedOnDark,
+    lineHeight: 20,
+  },
+  requirementRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '800',
@@ -195,13 +239,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
     alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.line,
+    padding: spacing.sm,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.62)',
+    borderWidth: 1,
+    borderColor: 'rgba(26, 38, 62, 0.06)',
+  },
+  shipmentRowActive: {
+    borderColor: 'rgba(15, 123, 108, 0.18)',
+    backgroundColor: 'rgba(15, 123, 108, 0.08)',
+  },
+  shipmentInfo: {
+    flex: 1,
+    gap: spacing.xs,
+  },
+  shipmentAction: {
+    minWidth: 112,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  actionButton: {
+    flex: 1,
+    minWidth: 150,
   },
   tracking: {
-    marginTop: 8,
-    fontSize: 16,
+    marginTop: 2,
+    fontSize: 18,
     fontWeight: '800',
     color: palette.brandDeep,
   },
@@ -213,6 +279,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 220,
     borderRadius: 18,
-    backgroundColor: palette.surfaceAlt,
+    backgroundColor: palette.surfaceMuted,
   },
 });

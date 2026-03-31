@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { apiRequest } from '../api';
 import { Card, EmptyState, Field, LoadingState, Pill, PrimaryButton, Screen } from '../components/Ui';
-import { palette, spacing, radius } from '../theme';
+import { palette, spacing, toneForStatus } from '../theme';
+
+function eventTimestamp(event) {
+  return event.timestampEvent || event.timestamp || event.fecha || event.createdAt || '';
+}
 
 export function TrackingScreen({ token }) {
   const [code, setCode] = useState('');
@@ -12,7 +16,7 @@ export function TrackingScreen({ token }) {
 
   async function search() {
     if (!code.trim()) {
-      setError('Ingresa un código de rastreo.');
+      setError('Ingresa un codigo de rastreo.');
       return;
     }
 
@@ -24,43 +28,59 @@ export function TrackingScreen({ token }) {
       setResult(response);
     } catch (err) {
       setResult(null);
-      setError(err.message || 'No fue posible consultar el rastreo.');
+      setError(err.message || 'No fue posible consultar el tracking.');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Screen title="Rastreo" subtitle="Consulta móvil de línea de tiempo y estado actual del envío.">
-      <Card accent>
-        <Field label="Código de rastreo" value={code} onChangeText={setCode} placeholder="GPQ-260001" autoCapitalize="characters" />
+    <Screen eyebrow="Consulta puntual" title="Rastreo" subtitle="Consulta movil de timeline y estado actual del envio.">
+      <Card tone="dark">
+        <Text style={styles.heroTitle}>Seguimiento unificado</Text>
+        <Text style={styles.heroCopy}>Consulta codigo, estado, destino y eventos con una lectura más clara para operación y clientes.</Text>
+      </Card>
+
+      <Card tone="soft">
+        <Field label="Codigo de tracking" value={code} onChangeText={setCode} placeholder="GPQ-260001" autoCapitalize="characters" />
         <PrimaryButton label={loading ? 'Buscando...' : 'Buscar'} onPress={search} disabled={loading} />
       </Card>
 
       {loading ? <LoadingState label="Buscando eventos..." /> : null}
-      {error ? <EmptyState title="No se encontró el envío" subtitle={error} /> : null}
+      {error ? <EmptyState title="No se encontro el envio" subtitle={error} /> : null}
 
       {result ? (
         <>
-          <Card>
-            <Pill>{result.shipment.status}</Pill>
+          <Card tone="dark">
+            <Pill tone={toneForStatus(result.shipment.status)}>{result.shipment.status}</Pill>
             <Text style={styles.title}>{result.shipment.tracking}</Text>
-            <Text style={styles.meta}>{result.shipment.customerName}</Text>
-            <Text style={styles.meta}>Destino: {result.shipment.destinationAddress || 'Sin dirección'}</Text>
+            <Text style={styles.metaDark}>{result.shipment.customerName}</Text>
+            <Text style={styles.metaDark}>Destino: {result.shipment.destinationAddress || 'Sin direccion'}</Text>
+            <View style={styles.summaryRow}>
+              <View style={styles.summaryTile}>
+                <Text style={styles.summaryLabel}>Ruta</Text>
+                <Text style={styles.summaryValue}>{result.shipment.routeCode || 'Pendiente'}</Text>
+              </View>
+              <View style={styles.summaryTile}>
+                <Text style={styles.summaryLabel}>Conductor</Text>
+                <Text style={styles.summaryValue}>{result.shipment.driverName || 'Pendiente'}</Text>
+              </View>
+            </View>
           </Card>
 
           <Card>
-            <Text style={styles.sectionTitle}>Línea de tiempo</Text>
-            {result.events.length ? result.events.map((event, i) => (
+            <Text style={styles.sectionTitle}>Timeline</Text>
+            {result.events.length ? result.events.map((event, index) => (
               <View key={event.id} style={styles.timelineItem}>
-                <View style={styles.timelineDotCol}>
-                  <View style={[styles.timelineDot, i === 0 && styles.timelineDotActive]} />
-                  {i < result.events.length - 1 && <View style={styles.timelineLine} />}
+                <View style={styles.timelineRail}>
+                  <View style={styles.timelineDot} />
+                  {index < result.events.length - 1 ? <View style={styles.timelineLine} /> : null}
                 </View>
-                <View style={styles.timelineContent}>
+                <View style={styles.timelineBody}>
                   <Text style={styles.eventTitle}>{event.type}</Text>
                   <Text style={styles.eventMeta}>{event.description}</Text>
-                  {event.location ? <Text style={styles.eventLocation}>{event.location}</Text> : null}
+                  {event.location ? <Text style={styles.eventFoot}>{event.location}</Text> : null}
+                  {eventTimestamp(event) ? <Text style={styles.eventTime}>{eventTimestamp(event)}</Text> : null}
                 </View>
               </View>
             )) : <Text style={styles.meta}>No hay eventos registrados.</Text>}
@@ -72,68 +92,99 @@ export function TrackingScreen({ token }) {
 }
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 17,
+  heroTitle: {
+    color: palette.textOnDark,
+    fontSize: 24,
     fontWeight: '800',
-    color: palette.text,
-    letterSpacing: -0.2,
+  },
+  heroCopy: {
+    color: palette.textMutedOnDark,
+    lineHeight: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: palette.textOnDark,
   },
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
     color: palette.text,
   },
   meta: {
     color: palette.textMuted,
-    fontSize: 13,
+  },
+  metaDark: {
+    color: palette.textMutedOnDark,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  summaryTile: {
+    flex: 1,
+    padding: spacing.sm,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  summaryLabel: {
+    color: palette.textMutedOnDark,
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    fontWeight: '700',
+  },
+  summaryValue: {
+    marginTop: 6,
+    color: palette.textOnDark,
+    fontWeight: '800',
   },
   timelineItem: {
     flexDirection: 'row',
+    alignItems: 'stretch',
     gap: spacing.sm,
-    paddingTop: spacing.sm,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: palette.line,
   },
-  timelineDotCol: {
+  timelineRail: {
+    width: 18,
     alignItems: 'center',
-    width: 16,
-    paddingTop: 3,
   },
   timelineDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: palette.line,
-    borderWidth: 2,
-    borderColor: palette.textLight,
-  },
-  timelineDotActive: {
+    marginTop: 4,
     backgroundColor: palette.brand,
-    borderColor: palette.brand,
   },
   timelineLine: {
-    width: 2,
     flex: 1,
-    backgroundColor: palette.line,
-    marginTop: 4,
-    minHeight: 20,
+    width: 2,
+    marginTop: 6,
+    backgroundColor: 'rgba(15, 123, 108, 0.16)',
   },
-  timelineContent: {
+  timelineBody: {
     flex: 1,
     gap: 2,
-    paddingBottom: spacing.sm,
   },
   eventTitle: {
     color: palette.text,
     fontWeight: '700',
-    fontSize: 13,
   },
   eventMeta: {
     color: palette.textMuted,
-    fontSize: 12,
-    lineHeight: 17,
+    marginTop: 2,
   },
-  eventLocation: {
-    color: palette.brand,
-    fontSize: 11,
-    fontWeight: '600',
+  eventFoot: {
+    color: palette.text,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  eventTime: {
+    color: palette.textSoft,
+    fontSize: 12,
+    marginTop: 4,
   },
 });

@@ -2,12 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { apiRequest } from '../api';
 import { Card, EmptyState, LoadingState, Pill, Screen } from '../components/Ui';
-import { palette, spacing } from '../theme';
-
-const STATUS_LABELS = { scheduled: 'Programado', in_progress: 'En progreso', completed: 'Completado', cancelled: 'Cancelado', canceled: 'Cancelado', delivered: 'Entregado', pending: 'Pendiente', active: 'Activo', in_transit: 'En tránsito', failed: 'Fallido', assigned: 'Asignado' };
-const STATUS_TONES = { completed: 'success', delivered: 'success', active: 'success', in_progress: 'info', in_transit: 'info', scheduled: 'brand', assigned: 'brand', pending: 'soft', cancelled: 'danger', canceled: 'danger', failed: 'danger' };
-function statusLabel(v) { return STATUS_LABELS[String(v || '').toLowerCase().trim()] || v || ''; }
-function statusTone(v) { return STATUS_TONES[String(v || '').toLowerCase().trim()] || 'neutral'; }
+import { palette, spacing, toneForStatus } from '../theme';
 
 export function RoutesScreen({ token, user }) {
   const [state, setState] = useState({ loading: true, error: '', items: [] });
@@ -28,56 +23,168 @@ export function RoutesScreen({ token, user }) {
   }
 
   if (state.error) {
-    return <Screen title="Rutas" subtitle="Planificación y ejecución móvil."><EmptyState title="No fue posible cargar rutas" subtitle={state.error} /></Screen>;
+    return <Screen title="Rutas" subtitle="Planificacion y ejecucion movil."><EmptyState title="No fue posible cargar rutas" subtitle={state.error} /></Screen>;
   }
 
+  const items = state.items || [];
+  const activeRoutes = items.filter((item) => ['brand', 'info'].includes(toneForStatus(item.status))).length;
+  const withDriver = items.filter((item) => Boolean(item.driverName)).length;
+  const withVehicle = items.filter((item) => Boolean(item.vehiclePlate)).length;
+
   return (
-    <Screen title="Rutas" subtitle={user.role === 'driver' ? 'Rutas visibles para tu jornada.' : 'Vista móvil de asignación, unidad y distancia.'}>
-      {state.items.length ? state.items.map((item) => (
-        <Card key={item.id}>
-          <Pill tone={statusTone(item.status)}>{statusLabel(item.status)}</Pill>
-          <Text style={styles.title}>{item.code}</Text>
-          <View style={styles.metaGrid}>
-            <Text style={styles.metaKey}>Origen</Text>
-            <Text style={styles.metaVal}>{item.warehouseName || '—'}</Text>
-            <Text style={styles.metaKey}>Distancia / Tiempo</Text>
-            <Text style={styles.metaVal}>{item.distanceKm} km · {item.timeMinutes} min</Text>
-            <Text style={styles.metaKey}>Vehículo</Text>
-            <Text style={styles.metaVal}>{item.vehiclePlate || 'Pendiente'}</Text>
-            <Text style={styles.metaKey}>Conductor</Text>
-            <Text style={styles.metaVal}>{item.driverName || 'Pendiente'}</Text>
+    <Screen eyebrow="Planificacion movil" title="Rutas" subtitle={user.role === 'driver' ? 'Rutas visibles para tu jornada.' : 'Vista movil de asignacion, unidad y distancia.'}>
+      <Card tone="dark">
+        <Text style={styles.heroTitle}>Control de rutas</Text>
+        <Text style={styles.heroCopy}>Visualiza estado operativo, unidad y conductor en un formato más cercano al dashboard web.</Text>
+        <View style={styles.summaryRow}>
+          <View style={styles.summaryTile}>
+            <Text style={styles.summaryValue}>{items.length}</Text>
+            <Text style={styles.summaryLabel}>Totales</Text>
           </View>
-        </Card>
-      )) : <EmptyState title="Sin rutas visibles" subtitle="El servidor mostrará aquí las rutas asociadas al rol autenticado." />}
+          <View style={styles.summaryTile}>
+            <Text style={styles.summaryValue}>{activeRoutes}</Text>
+            <Text style={styles.summaryLabel}>Activas</Text>
+          </View>
+          <View style={styles.summaryTile}>
+            <Text style={styles.summaryValue}>{withDriver}/{withVehicle}</Text>
+            <Text style={styles.summaryLabel}>Chofer / unidad</Text>
+          </View>
+        </View>
+      </Card>
+
+      {items.length ? items.map((item) => {
+        const tone = toneForStatus(item.status);
+
+        return (
+          <Card key={item.id} tone={tone === 'neutral' ? 'default' : 'soft'} style={styles.routeCard}>
+            <View style={styles.cardTop}>
+              <View style={styles.cardHeaderCopy}>
+                <Pill tone={tone}>{item.status}</Pill>
+                <Text style={styles.title}>{item.code}</Text>
+                <Text style={styles.origin}>Salida: {item.warehouseName || 'Sin almacen asignado'}</Text>
+              </View>
+              <Pill tone="soft">{item.scheduledDate || 'Sin fecha'}</Pill>
+            </View>
+
+            <View style={styles.metricRow}>
+              <View style={styles.metricTile}>
+                <Text style={styles.metricLabel}>Distancia</Text>
+                <Text style={styles.metricValue}>{item.distanceKm} km</Text>
+              </View>
+              <View style={styles.metricTile}>
+                <Text style={styles.metricLabel}>Tiempo</Text>
+                <Text style={styles.metricValue}>{item.timeMinutes} min</Text>
+              </View>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Vehiculo</Text>
+              <Text style={styles.detailValue}>{item.vehiclePlate || 'Pendiente'}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Conductor</Text>
+              <Text style={styles.detailValue}>{item.driverName || 'Pendiente'}</Text>
+            </View>
+          </Card>
+        );
+      }) : (
+        <EmptyState title="Sin rutas visibles" subtitle="El backend mostrara aqui las rutas asociadas al rol autenticado." />
+      )}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  heroTitle: {
+    color: palette.textOnDark,
+    fontSize: 24,
+    fontWeight: '800',
+  },
+  heroCopy: {
+    color: palette.textMutedOnDark,
+    lineHeight: 20,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  summaryTile: {
+    flex: 1,
+    padding: spacing.sm,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  summaryValue: {
+    color: palette.textOnDark,
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  summaryLabel: {
+    marginTop: 4,
+    color: palette.textMutedOnDark,
+    fontSize: 12,
+  },
+  routeCard: {
+    gap: spacing.sm,
+  },
+  cardTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  cardHeaderCopy: {
+    flex: 1,
+    gap: spacing.xs,
+  },
   title: {
-    fontSize: 17,
+    fontSize: 22,
     fontWeight: '800',
     color: palette.text,
-    letterSpacing: -0.2,
   },
-  metaGrid: {
-    gap: 4,
-    borderTopWidth: 1,
-    borderTopColor: palette.line,
-    paddingTop: spacing.sm,
-    marginTop: 2,
+  origin: {
+    color: palette.textMuted,
   },
-  metaKey: {
-    color: palette.textLight,
-    fontSize: 10,
-    fontWeight: '700',
+  metricRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  metricTile: {
+    flex: 1,
+    padding: spacing.sm,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.62)',
+    borderWidth: 1,
+    borderColor: 'rgba(26, 38, 62, 0.06)',
+  },
+  metricLabel: {
+    color: palette.textMuted,
+    fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
-    marginTop: 6,
+    fontWeight: '700',
   },
-  metaVal: {
+  metricValue: {
+    marginTop: 6,
     color: palette.text,
-    fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '800',
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: palette.line,
+  },
+  detailLabel: {
+    color: palette.textMuted,
+    fontWeight: '700',
+  },
+  detailValue: {
+    color: palette.text,
+    fontWeight: '700',
   },
 });

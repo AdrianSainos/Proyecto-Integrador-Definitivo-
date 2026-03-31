@@ -117,6 +117,55 @@ class ApiFlowTest extends TestCase
         ]);
     }
 
+    public function test_future_shipment_creates_planned_route_even_when_resources_are_pending_confirmation(): void
+    {
+        $token = $this->authenticateAdmin();
+        $scheduledDate = Carbon::now()->addDays(6)->toDateString();
+        $warehouseId = (int) DB::table('almacenes')->orderBy('id')->value('id');
+
+        DB::table('rutas')
+            ->where(function ($query) use ($warehouseId): void {
+                $query->where('warehouse_id', $warehouseId)
+                    ->orWhere('almacen_origen_id', $warehouseId)
+                    ->orWhere('origen_almacen_id', $warehouseId);
+            })
+            ->update([
+                'status' => 'Completada',
+                'estado' => 'Completada',
+            ]);
+
+        DB::table('vehiculos')
+            ->where('warehouse_id', $warehouseId)
+            ->update(['activo' => 0]);
+
+        $response = $this->withHeaders(['Authorization' => 'Bearer '.$token])->postJson(
+            '/api/shipments',
+            $this->buildShipmentPayload($scheduledDate, [
+                'originWarehouseId' => $warehouseId,
+                'priority' => 'standard',
+            ])
+        );
+
+        $response->assertCreated()->assertJsonPath('item.status', 'Planificado');
+
+        $shipmentId = (int) $response->json('item.id');
+        $routeId = (int) $response->json('item.routeId');
+
+        $this->assertGreaterThan(0, $routeId);
+        $this->assertSame('Pendiente', $response->json('item.vehiclePlate'));
+        $this->assertSame('Pendiente', $response->json('item.driverName'));
+
+        $this->assertDatabaseHas('asignaciones', [
+            'package_id' => $shipmentId,
+            'ruta_id' => $routeId,
+        ]);
+
+        $this->assertDatabaseHas('rutas', [
+            'id' => $routeId,
+            'status' => 'Preparacion',
+        ]);
+    }
+
     public function test_shipment_rejects_same_sender_and_recipient(): void
     {
         $token = $this->authenticateAdmin();

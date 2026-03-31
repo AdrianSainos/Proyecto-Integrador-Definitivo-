@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Field, Notice, PrimaryButton } from '../components/Ui';
-import { palette, radius, shadow, spacing } from '../theme';
+import { StyleSheet, Text, View } from 'react-native';
+import { Card, Field, Notice, Pill, PrimaryButton, Screen } from '../components/Ui';
+import { palette, radius, spacing } from '../theme';
 import { getApiDebugInfo } from '../api';
 
 export function LoginScreen({ onLogin }) {
@@ -19,128 +19,97 @@ export function LoginScreen({ onLogin }) {
     try {
       await onLogin({ login: login.trim(), password });
     } catch (err) {
-      setError(err.message || 'No fue posible iniciar sesión.');
+      setError(err.message || 'No fue posible iniciar sesion.');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={styles.hero}>
-        <View style={styles.logoCircle}>
-          <Text style={styles.logoLetter}>G</Text>
+    <Screen eyebrow="Acceso seguro" title="Centro operativo movil" subtitle="La misma identidad visual del panel web, adaptada a uso en campo.">
+      <Card tone="dark">
+        <Pill tone="dark">Disponible por red local</Pill>
+        <Text style={styles.logo}>GESTIONPAQ</Text>
+        <Text style={styles.heroTitle}>Despacho, tracking y evidencia desde una sola consola.</Text>
+        <Text style={styles.copy}>Acceso para perfiles operativos y clientes autorizados.</Text>
+        <View style={styles.featureRow}>
+          {['Rutas', 'Tracking', 'Evidencia'].map((item) => (
+            <View key={item} style={styles.featureChip}>
+              <Text style={styles.featureLabel}>{item}</Text>
+            </View>
+          ))}
         </View>
-        <Text style={styles.brandName}>GESTIONPAQ</Text>
-        <Text style={styles.brandTagline}>Plataforma logística móvil</Text>
-      </View>
-
-      <View style={styles.sheet}>
-        <ScrollView contentContainerStyle={styles.sheetContent} keyboardShouldPersistTaps="handled">
-          <Text style={styles.sheetTitle}>Iniciar sesión</Text>
-          <Text style={styles.sheetSubtitle}>Accede con tu cuenta operativa o de cliente.</Text>
-
-          <View style={styles.form}>
-            <Field label="Correo o usuario" value={login} onChangeText={setLogin} placeholder="correo@gestionpaq.local" />
-            <Field label="Contraseña" value={password} onChangeText={setPassword} placeholder="••••••••" secureTextEntry />
-            <Notice message={error} type="error" />
-            <PrimaryButton label={loading ? 'Ingresando...' : 'Entrar'} onPress={submit} disabled={loading} />
-          </View>
-
-          <View style={styles.connectionBox}>
-            <Text style={styles.connectionLabel}>API detectada</Text>
-            <Text style={styles.connectionValue} numberOfLines={1}>{hintBase}</Text>
-          </View>
-        </ScrollView>
-      </View>
-    </KeyboardAvoidingView>
+      </Card>
+      <Card>
+        <Field label="Correo o usuario" value={login} onChangeText={setLogin} placeholder="correo@gestionpaq.local" />
+        <Field label="Password" value={password} onChangeText={setPassword} placeholder="********" secureTextEntry />
+        <Notice message={error} type="error" />
+        <View style={styles.connectionBox}>
+          <Text style={styles.connectionLabel}>Base API detectada</Text>
+          <Text style={styles.connectionValue}>{hintBase}</Text>
+        </View>
+        <PrimaryButton label={loading ? 'Ingresando...' : 'Entrar'} onPress={submit} disabled={loading} />
+      </Card>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: palette.brandDeep,
-  },
-  hero: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    paddingTop: spacing.xl,
-  },
-  logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 26,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoLetter: {
-    fontSize: 44,
-    fontWeight: '900',
-    color: '#ffffff',
-  },
-  brandName: {
-    color: '#ffffff',
-    fontSize: 22,
-    fontWeight: '900',
-    letterSpacing: 3,
-  },
-  brandTagline: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 13,
-    fontWeight: '400',
+  logo: {
+    color: palette.textOnDark,
+    fontSize: 28,
+    fontWeight: '800',
     letterSpacing: 0.3,
   },
-  sheet: {
-    backgroundColor: palette.background,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    ...shadow.lg,
-  },
-  sheetContent: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xl,
-    gap: spacing.md,
-  },
-  sheetTitle: {
-    fontSize: 22,
+  heroTitle: {
+    color: palette.textOnDark,
+    fontSize: 24,
     fontWeight: '800',
-    color: palette.text,
-    letterSpacing: -0.3,
+    lineHeight: 30,
   },
-  sheetSubtitle: {
-    color: palette.textMuted,
-    fontSize: 13,
-    marginTop: -spacing.sm,
-    marginBottom: spacing.xs,
+  copy: {
+    color: palette.textMutedOnDark,
+    lineHeight: 20,
   },
-  form: {
-    gap: spacing.md,
+  featureRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  featureChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  featureLabel: {
+    color: palette.textOnDark,
+    fontSize: 12,
+    fontWeight: '700',
   },
   connectionBox: {
-    marginTop: spacing.xs,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    marginBottom: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
     borderRadius: radius.md,
-    backgroundColor: palette.surface,
+    backgroundColor: palette.surfaceSoft,
     borderWidth: 1,
-    borderColor: palette.line,
-    gap: 3,
+    borderColor: 'rgba(26, 38, 62, 0.08)',
   },
   connectionLabel: {
-    color: palette.textLight,
-    fontSize: 10,
+    color: palette.textMuted,
+    fontSize: 12,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 0.6,
   },
   connectionValue: {
-    color: palette.textMuted,
-    fontSize: 11,
+    marginTop: 4,
+    color: palette.text,
+    fontSize: 12,
+    lineHeight: 18,
   },
 });

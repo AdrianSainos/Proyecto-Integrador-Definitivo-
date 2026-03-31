@@ -1,96 +1,116 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Card, Pill, PrimaryButton, Screen } from '../components/Ui';
-import { palette, spacing, shadow, radius } from '../theme';
+import { getInitials, palette, roleLabel, spacing } from '../theme';
 
 export function ProfileScreen({ user, onLogout }) {
-  const ROLE_LABELS = { admin: 'Administrador', operator: 'Operador', supervisor: 'Supervisor', dispatcher: 'Despachador', driver: 'Conductor', customer: 'Cliente' };
-  const initials = (user.name || '?').split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-
   return (
-    <Screen title="Mi perfil" subtitle="Sesión activa y configuración de cuenta.">
-      <View style={styles.profileHero}>
-        <View style={styles.avatarLarge}>
-          <Text style={styles.avatarText}>{initials}</Text>
-        </View>
-        <Text style={styles.name}>{user.name}</Text>
-        <Pill tone="brand">{ROLE_LABELS[user.role] || user.role}</Pill>
-      </View>
-
-      <Card>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoKey}>Usuario</Text>
-          <Text style={styles.infoVal}>{user.username ? `@${user.username}` : '—'}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoKey}>Correo</Text>
-          <Text style={styles.infoVal}>{user.email || '—'}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoKey}>Puesto</Text>
-          <Text style={styles.infoVal}>{user.jobTitle || 'Sin puesto asignado'}</Text>
-        </View>
-        <View style={[styles.infoRow, styles.infoRowLast]}>
-          <Text style={styles.infoKey}>Horario</Text>
-          <Text style={styles.infoVal}>{user.schedule || 'Sin horario base'}</Text>
+    <Screen eyebrow="Cuenta activa" title="Perfil" subtitle="Sesion activa y salida segura.">
+      <Card tone="dark">
+        <View style={styles.heroRow}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarLabel}>{getInitials(user.name)}</Text>
+          </View>
+          <View style={styles.heroCopy}>
+            <Pill tone="dark">{roleLabel(user.role)}</Pill>
+            <Text style={styles.name}>{user.name}</Text>
+            <Text style={styles.metaDark}>{user.email}</Text>
+          </View>
         </View>
       </Card>
 
-      <PrimaryButton label="Cerrar sesión" onPress={onLogout} tone="outline" />
+      <Card>
+        <Text style={styles.sectionTitle}>Contexto operativo</Text>
+        <View style={styles.detailGrid}>
+          <View style={styles.detailTile}>
+            <Text style={styles.detailLabel}>Usuario</Text>
+            <Text style={styles.detailValue}>{user.username ? `@${user.username}` : 'No disponible'}</Text>
+          </View>
+          <View style={styles.detailTile}>
+            <Text style={styles.detailLabel}>Rol</Text>
+            <Text style={styles.detailValue}>{roleLabel(user.role)}</Text>
+          </View>
+          <View style={styles.detailTile}>
+            <Text style={styles.detailLabel}>Puesto</Text>
+            <Text style={styles.detailValue}>{user.jobTitle || 'Sin puesto asignado'}</Text>
+          </View>
+          <View style={styles.detailTile}>
+            <Text style={styles.detailLabel}>Horario</Text>
+            <Text style={styles.detailValue}>{user.schedule || 'Sin horario base'}</Text>
+          </View>
+        </View>
+      </Card>
+
+      <PrimaryButton label="Cerrar sesion" onPress={onLogout} tone="outline" />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  profileHero: {
+  heroRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.lg,
-    gap: spacing.sm,
+    gap: spacing.md,
   },
-  avatarLarge: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    backgroundColor: palette.brandDeep,
+  avatar: {
+    width: 62,
+    height: 62,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    ...shadow.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
-  avatarText: {
-    color: '#ffffff',
-    fontWeight: '900',
-    fontSize: 26,
-    letterSpacing: -0.5,
+  avatarLabel: {
+    color: palette.textOnDark,
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  heroCopy: {
+    flex: 1,
+    gap: spacing.xs,
   },
   name: {
-    fontSize: 20,
+    fontSize: 22,
+    fontWeight: '800',
+    color: palette.textOnDark,
+  },
+  metaDark: {
+    color: palette.textMutedOnDark,
+    lineHeight: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: '800',
     color: palette.text,
-    letterSpacing: -0.3,
   },
-  infoRow: {
+  detailGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.line,
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
-  infoRowLast: {
-    borderBottomWidth: 0,
+  detailTile: {
+    flexGrow: 1,
+    minWidth: '47%',
+    padding: spacing.sm,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.62)',
+    borderWidth: 1,
+    borderColor: 'rgba(26, 38, 62, 0.06)',
   },
-  infoKey: {
-    color: palette.textLight,
-    fontSize: 12,
-    fontWeight: '700',
+  detailLabel: {
+    color: palette.textMuted,
+    fontSize: 11,
     textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    letterSpacing: 0.8,
+    fontWeight: '700',
   },
-  infoVal: {
+  detailValue: {
+    marginTop: 6,
     color: palette.text,
-    fontSize: 13,
-    fontWeight: '500',
-    flexShrink: 1,
-    textAlign: 'right',
+    fontWeight: '700',
+  },
+  meta: {
+    color: palette.textMuted,
+    lineHeight: 20,
   },
 });

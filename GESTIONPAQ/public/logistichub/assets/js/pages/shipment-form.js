@@ -102,12 +102,7 @@
       return;
     }
 
-    if (!addresses.length) {
-      setDestinationHelp('Este destinatario no tiene direcciones guardadas. Completa el destino manualmente.');
-      return;
-    }
-
-    setDestinationHelp('Selecciona una direccion guardada o completa la direccion manualmente.');
+    setDestinationHelp('Selecciona una dirección guardada o completa la dirección manualmente.');
   }
 
   function applyAddress(customerId, addressId) {
@@ -116,12 +111,12 @@
 
     if (!address) {
       destinationSelect.value = '';
-      setDestinationHelp('Selecciona una direccion guardada o completa la direccion manualmente.');
+      setDestinationHelp('Selecciona una dirección guardada o completa la dirección manualmente.');
       return false;
     }
 
     fillDestinationFields(address);
-    setDestinationHelp('Direccion guardada cargada automaticamente para este destinatario.');
+setDestinationHelp('Dirección guardada cargada automáticamente para este destinatario.');
 
     return true;
   }
@@ -139,7 +134,7 @@
   destinationSelect.addEventListener('change', () => {
     if (!destinationSelect.value) {
       clearDestinationFields();
-      setDestinationHelp('Selecciona una direccion guardada o completa la direccion manualmente.');
+      setDestinationHelp('Selecciona una dirección guardada o completa la dirección manualmente.');
       return;
     }
 
@@ -179,7 +174,7 @@
         state: shipment.destinationState || '',
         postalCode: shipment.destinationPostalCode || '',
       });
-      setDestinationHelp('Destino actual cargado desde el envio. Puedes cambiarlo por una direccion guardada o editarlo manualmente.');
+      setDestinationHelp('Destino actual cargado desde el envío. Puedes cambiarlo por una dirección guardada o editarlo manualmente.');
     }
 
     const currentStatus = shipment.status || 'Pendiente';
@@ -197,7 +192,7 @@
 
     if (currentStatus.toLowerCase() === 'entregado') {
       form.initialStatus.disabled = true;
-      statusDescriptionEl.textContent = 'Estado final: el envio ya fue entregado. No se puede cambiar el estado.';
+      statusDescriptionEl.textContent = 'Estado final: el envío ya fue entregado. No se puede cambiar el estado.';
     }
 
     const hasAssignment = shipment.routeCode && shipment.routeCode !== 'Pendiente';

@@ -22,7 +22,7 @@ window.LogisticHubCore.ready(async () => {
         <td>${item.vehiclePlate}</td>
         <td>${item.type}</td>
         <td>${window.LogisticHubCore.toDate(item.scheduledDate)}</td>
-        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${item.status}</span></td>
+        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${window.LogisticHubCore.statusLabel(item.status)}</span></td>
         <td>${window.LogisticHubCore.toCurrency(item.cost)}</td>
         <td>
           <div class="table-actions">

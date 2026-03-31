@@ -13,18 +13,18 @@ window.LogisticHubCore.ready(async () => {
     user.role === 'customer'
       ? {
           eyebrow: 'Portal de cliente',
-          title: 'Tus envios y estados visibles',
-          description: 'Listado con trazabilidad, estado actual y asignacion disponible para tu cuenta.',
+          title: 'Tus envíos y estados visibles',
+          description: 'Listado con trazabilidad, estado actual y asignación disponible para tu cuenta.',
         }
       : user.role === 'dispatcher'
         ? {
             eyebrow: 'Despacho',
-            title: 'Envios listos para asignacion',
-            description: 'Relacion de envios con foco en ruteo, unidad disponible y conductor asociado.',
+          title: 'Envíos listos para asignación',
+          description: 'Relación de envíos con foco en ruteo, unidad disponible y conductor asociado.',
           }
         : {
-            eyebrow: 'Envios',
-            title: 'Control de envios y paquetes',
+            eyebrow: 'Envíos',
+            title: 'Control de envíos y paquetes',
             description: 'Listado administrativo con contexto operativo, estados y asignaciones enriquecidas.',
           }
   );
@@ -34,7 +34,7 @@ window.LogisticHubCore.ready(async () => {
       <div>
         <div class="small-label">Experiencia por rol</div>
         <h2 class="card-title">${profile.label}</h2>
-        <p class="card-subtitle">${canManage ? 'Mantienes control de alta, actualizacion y depuracion sobre los envios visibles para tu rol.' : 'La vista queda en modo consulta, con el mismo nivel de detalle visual pero sin acciones de edicion.'}</p>
+        <p class="card-subtitle">${canManage ? 'Mantienes control de alta, actualización y depuración sobre los envíos visibles para tu rol.' : 'La vista queda en modo consulta, con el mismo nivel de detalle visual pero sin acciones de edición.'}</p>
       </div>
       <span class="role-pill"><i class="${profile.icon}"></i>${profile.data}</span>
     </article>
@@ -61,7 +61,7 @@ window.LogisticHubCore.ready(async () => {
           <td>${item.id}</td>
           <td>${item.tracking}</td>
           <td>${item.customerName}</td>
-          <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${item.status}</span></td>
+          <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${window.LogisticHubCore.statusLabel(item.status)}</span></td>
           <td>${item.routeCode}</td>
           <td>${item.vehiclePlate}</td>
           <td>${item.driverName}</td>
@@ -78,7 +78,7 @@ window.LogisticHubCore.ready(async () => {
     window.LogisticHubCore.bindDeleteButtons(body, {
       basePath: '/shipments',
       noticeTarget: '#pageNotice',
-      confirmMessage: 'Se eliminara el envio seleccionado junto con sus asignaciones y trazabilidad operativa. ¿Deseas continuar?',
+      confirmMessage: 'Se eliminará el envío seleccionado junto con sus asignaciones y trazabilidad operativa. ¿Deseas continuar?',
       successMessage: 'Envio eliminado correctamente.',
       onSuccess: loadShipments,
     });

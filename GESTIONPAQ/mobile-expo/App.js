@@ -10,15 +10,24 @@ import { RoutesScreen } from './src/screens/RoutesScreen';
 import { TrackingScreen } from './src/screens/TrackingScreen';
 import { EvidenceScreen } from './src/screens/EvidenceScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
-import { palette, spacing } from './src/theme';
+import { palette, spacing, shadow, radius } from './src/theme';
+
+const ROLE_LABELS = {
+  admin: 'Administrador',
+  operator: 'Operador',
+  supervisor: 'Supervisor',
+  dispatcher: 'Despachador',
+  driver: 'Conductor',
+  customer: 'Cliente',
+};
 
 const TABS = [
-  { key: 'home', label: 'Inicio' },
-  { key: 'shipments', label: 'Envios' },
-  { key: 'routes', label: 'Rutas' },
-  { key: 'tracking', label: 'Rastreo' },
-  { key: 'evidence', label: 'Prueba' },
-  { key: 'profile', label: 'Perfil' },
+  { key: 'home',      label: 'Inicio',  icon: '⌂' },
+  { key: 'shipments', label: 'Envíos',  icon: '↑' },
+  { key: 'routes',    label: 'Rutas',   icon: '⊞' },
+  { key: 'tracking',  label: 'Rastreo', icon: '◎' },
+  { key: 'evidence',  label: 'Prueba',  icon: '◆' },
+  { key: 'profile',   label: 'Perfil',  icon: '○' },
 ];
 
 function allowedTabs(role) {
@@ -105,29 +114,40 @@ export default function App() {
   }
 
   if (!session.hydrated) {
-    return <SafeAreaView style={styles.loadingScreen}><Text style={styles.loadingText}>Preparando GESTIONPAQ Mobile...</Text></SafeAreaView>;
+    return (
+      <SafeAreaView style={styles.loadingScreen}>
+        <View style={styles.loadingLogoWrap}>
+          <Text style={styles.loadingLogo}>G</Text>
+        </View>
+        <Text style={styles.loadingText}>Preparando GESTIONPAQ Mobile...</Text>
+      </SafeAreaView>
+    );
   }
 
   if (!session.token || !session.user) {
     return (
       <SafeAreaView style={styles.appShell}>
-        <ExpoStatusBar style="dark" />
+        <ExpoStatusBar style="light" />
         <LoginScreen onLogin={handleLogin} />
       </SafeAreaView>
     );
   }
 
   const userTabs = allowedTabs(session.user.role);
+  const initials = (session.user.name || '?').split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 
   return (
     <SafeAreaView style={styles.appShell}>
-      <ExpoStatusBar style="dark" />
-      <StatusBar barStyle="dark-content" />
+      <ExpoStatusBar style="light" />
+      <StatusBar barStyle="light-content" />
       <View style={styles.header}>
-        <View>
-          <Text style={styles.eyebrow}>GESTIONPAQ Mobile</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.eyebrow}>GESTIONPAQ</Text>
           <Text style={styles.title}>{session.user.name}</Text>
-          <Text style={styles.subtitle}>{session.user.role}</Text>
+          <Text style={styles.subtitle}>{ROLE_LABELS[session.user.role] || session.user.role}</Text>
+        </View>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{initials}</Text>
         </View>
       </View>
 
@@ -145,8 +165,10 @@ export default function App() {
           const active = activeTab === tab.key;
 
           return (
-            <Pressable key={tab.key} style={[styles.tabButton, active && styles.tabButtonActive]} onPress={() => setActiveTab(tab.key)}>
+            <Pressable key={tab.key} style={styles.tabButton} onPress={() => setActiveTab(tab.key)}>
+              <Text style={[styles.tabIcon, active && styles.tabIconActive]}>{tab.icon}</Text>
               <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>{tab.label}</Text>
+              {active && <View style={styles.tabActiveDot} />}
             </Pressable>
           );
         })}
@@ -164,67 +186,116 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: palette.background,
+    backgroundColor: palette.brandDeep,
+    gap: 16,
+  },
+  loadingLogoWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingLogo: {
+    fontSize: 38,
+    fontWeight: '900',
+    color: '#ffffff',
   },
   loadingText: {
-    color: palette.textMuted,
-    fontSize: 16,
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14,
+    fontWeight: '500',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
-    backgroundColor: palette.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.line,
+    backgroundColor: palette.brandDeep,
+    ...shadow.md,
+  },
+  headerLeft: {
+    gap: 2,
   },
   eyebrow: {
-    color: palette.brand,
+    color: 'rgba(255,255,255,0.65)',
     textTransform: 'uppercase',
-    letterSpacing: 1.8,
-    fontSize: 11,
+    letterSpacing: 2,
+    fontSize: 10,
     fontWeight: '700',
   },
   title: {
-    marginTop: 6,
-    fontSize: 22,
+    fontSize: 19,
     fontWeight: '800',
-    color: palette.text,
+    color: '#ffffff',
+    letterSpacing: -0.2,
   },
   subtitle: {
-    marginTop: 2,
-    color: palette.textMuted,
+    marginTop: 1,
+    color: 'rgba(255,255,255,0.65)',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  avatarText: {
+    color: '#ffffff',
+    fontWeight: '800',
+    fontSize: 15,
   },
   content: {
     flex: 1,
   },
   tabBar: {
     flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.md,
     backgroundColor: palette.surface,
     borderTopWidth: 1,
     borderTopColor: palette.line,
+    ...shadow.lg,
   },
   tabButton: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 14,
-    backgroundColor: palette.surfaceAlt,
+    paddingVertical: 6,
+    gap: 2,
   },
-  tabButtonActive: {
-    backgroundColor: palette.brand,
+  tabIcon: {
+    fontSize: 16,
+    color: palette.textLight,
+  },
+  tabIconActive: {
+    color: palette.brand,
   },
   tabLabel: {
-    color: palette.textMuted,
-    fontWeight: '700',
-    fontSize: 12,
+    color: palette.textLight,
+    fontWeight: '600',
+    fontSize: 10,
+    letterSpacing: 0.2,
   },
   tabLabelActive: {
-    color: palette.surface,
+    color: palette.brand,
+    fontWeight: '700',
+  },
+  tabActiveDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: palette.brand,
+    marginTop: 1,
   },
 });

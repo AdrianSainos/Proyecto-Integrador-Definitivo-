@@ -21,9 +21,9 @@
 
     return {
       page: body.dataset.page || 'dashboard',
-      eyebrow: body.dataset.eyebrow || (isDashboard ? profile.dashboardEyebrow : 'Plataforma logistica'),
+      eyebrow: body.dataset.eyebrow || (isDashboard ? profile.dashboardEyebrow : 'Plataforma logística'),
       title: body.dataset.title || (isDashboard ? profile.dashboardTitle : 'GESTIONPAQ'),
-      description: body.dataset.description || (isDashboard ? profile.dashboardDescription : 'Centro logistico operativo.'),
+      description: body.dataset.description || (isDashboard ? profile.dashboardDescription : 'Centro logístico operativo.'),
     };
   }
 
@@ -45,7 +45,7 @@
             <div class="brand-badge"><i class="fa-solid fa-truck-fast"></i></div>
             <div>
               <div class="brand-name">GESTIONPAQ</div>
-              <div class="brand-subtitle">Operacion de paqueteria y distribucion</div>
+              <div class="brand-subtitle">Operación de paquetería y distribución</div>
             </div>
           </div>
         </div>
@@ -67,13 +67,13 @@
             </div>
           </div>
           <div class="sidebar-card summary-list">
-            <div class="small-label">Resumen rapido</div>
-            <div class="summary-row"><span>Modo de operacion</span><strong>${profile.mode}</strong></div>
-            <div class="summary-row"><span>Autenticacion</span><strong>${profile.auth}</strong></div>
+            <div class="small-label">Resumen rápido</div>
+            <div class="summary-row"><span>Modo de operación</span><strong>${profile.mode}</strong></div>
+            <div class="summary-row"><span>Autenticación</span><strong>${profile.auth}</strong></div>
             <div class="summary-row"><span>Datos</span><strong>${profile.data}</strong></div>
           </div>
           <div class="sidebar-card nav-list">
-            <div class="small-label">Navegacion</div>
+            <div class="small-label">Navegación</div>
             ${nav}
           </div>
         </div>
@@ -90,7 +90,7 @@
         <div class="topbar-left">
           <button class="btn btn-outline btn-sm drawer-toggle" type="button" data-sidebar-toggle>
             <i class="fa-solid fa-bars"></i>
-            <span>Menu</span>
+            <span>Menú</span>
           </button>
           <div>
             <div class="eyebrow">${cfg.eyebrow}</div>
@@ -101,7 +101,7 @@
         <div class="topbar-right">
           <form class="search-box" id="trackingQuickSearch">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="search" id="trackingQuickInput" placeholder="Buscar envio o tracking..." />
+            <input type="search" id="trackingQuickInput" placeholder="Buscar envío o tracking..." />
           </form>
           <div class="topbar-account">
             <div class="user-summary">

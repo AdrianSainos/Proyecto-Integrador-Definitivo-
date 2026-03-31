@@ -22,7 +22,7 @@ window.LogisticHubCore.ready(async () => {
           <strong>${item.username ? `@${item.username}` : '--'}</strong>
           <div class="text-muted">${item.email || '--'}</div>
         </td>
-        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${item.status}</span></td>
+        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${window.LogisticHubCore.statusLabel(item.status)}</span></td>
         <td>
           <strong>${item.shift}</strong>
           <div class="text-muted">${item.baseSchedule || '--'}</div>
@@ -35,7 +35,7 @@ window.LogisticHubCore.ready(async () => {
     window.LogisticHubCore.bindDeleteButtons(body, {
       basePath: '/drivers',
       noticeTarget: '#pageNotice',
-      confirmMessage: 'Se eliminara el conductor seleccionado. Si aun tiene rutas o asignaciones, la operacion sera rechazada. ¿Deseas continuar?',
+      confirmMessage: 'Se eliminará el conductor seleccionado. Si aún tiene rutas o asignaciones, la operación será rechazada. ¿Deseas continuar?',
       successMessage: 'Conductor eliminado correctamente.',
       onSuccess: loadDrivers,
     });

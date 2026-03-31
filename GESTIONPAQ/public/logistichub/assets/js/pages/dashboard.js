@@ -10,7 +10,7 @@ window.LogisticHubCore.ready(async () => {
     admin: {
       eyebrow: 'Direccion ejecutiva',
       title: 'Tablero ejecutivo',
-      description: 'Supervision de servicio, capacidad y cumplimiento del periodo.',
+      description: 'Supervisión de servicio, capacidad y cumplimiento del período.',
       intro: 'Indicadores ejecutivos, cobertura y servicio en una sola vista.',
       actions: [
         { label: 'Nuevo envio', href: '/logistichub/shipment-form.html', tone: 'success', icon: 'fa-solid fa-plus' },
@@ -22,7 +22,7 @@ window.LogisticHubCore.ready(async () => {
     operator: {
       eyebrow: 'Operacion central',
       title: 'Flujo diario bajo control',
-      description: 'Priorizacion de salidas, incidencias y carga pendiente para el turno actual.',
+      description: 'Priorización de salidas, incidencias y carga pendiente para el turno actual.',
       intro: 'Pendientes, despacho y continuidad del turno actual.',
       actions: [
         { label: 'Ir a operaciones', href: '/logistichub/operations.html', tone: 'primary', icon: 'fa-solid fa-wave-square' },
@@ -34,7 +34,7 @@ window.LogisticHubCore.ready(async () => {
     supervisor: {
       eyebrow: 'Capa de supervision',
       title: 'Rendimiento y excepciones',
-      description: 'Lectura de cumplimiento, desbalance operativo y calidad de ejecucion.',
+      description: 'Lectura de cumplimiento, desbalance operativo y calidad de ejecución.',
       intro: 'Brechas de SLA, balance operativo y seguimiento de cumplimiento.',
       actions: [
         { label: 'Abrir reportes', href: '/logistichub/reports.html', tone: 'primary', icon: 'fa-solid fa-chart-line' },
@@ -46,7 +46,7 @@ window.LogisticHubCore.ready(async () => {
     dispatcher: {
       eyebrow: 'Cabina de despacho',
       title: 'Capacidad en movimiento',
-      description: 'Asignaciones, rutas activas y cobertura de salida con foco en ejecucion.',
+      description: 'Asignaciones, rutas activas y cobertura de salida con foco en ejecución.',
       intro: 'Rutas, unidades y cobertura de salida en tiempo real.',
       actions: [
         { label: 'Gestionar rutas', href: '/logistichub/routes.html', tone: 'primary', icon: 'fa-solid fa-route' },
@@ -56,7 +56,7 @@ window.LogisticHubCore.ready(async () => {
       highlights: ['Asignacion viva', 'Cobertura de ruta', 'Capacidad util'],
     },
     driver: {
-      eyebrow: 'Operacion de ultima milla',
+      eyebrow: 'Operación de última milla',
       title: 'Tu jornada en ruta',
       description: 'Entregas asignadas, secuencia de eventos y visibilidad de progreso personal.',
       intro: 'Ruta asignada, progreso y entregas visibles del turno.',
@@ -167,10 +167,10 @@ window.LogisticHubCore.ready(async () => {
             { title: 'Soporte de unidad', items: data.exceptions.maintenanceUnits.map((item) => item.plate) },
           ]
         : [
-            { title: 'Envios pendientes de salida', items: data.exceptions.pendingDeparture.map((item) => item.tracking) },
+            { title: 'Envíos pendientes de salida', items: data.exceptions.pendingDeparture.map((item) => item.tracking) },
             { title: 'Unidades con mantenimiento activo', items: data.exceptions.maintenanceUnits.map((item) => item.plate) },
             { title: 'Conductores fuera de turno', items: data.exceptions.outOfShiftDrivers.map((item) => item.name) },
-            { title: 'Rutas en ejecucion o preparacion', items: data.exceptions.activeRoutes.map((item) => item.code) },
+            { title: 'Rutas en ejecución o preparación', items: data.exceptions.activeRoutes.map((item) => item.code) },
           ];
 
     document.querySelector('#dashboardStrip').innerHTML = data.strip

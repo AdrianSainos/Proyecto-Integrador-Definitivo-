@@ -11,7 +11,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link href="/logistichub/assets/css/styles.css" rel="stylesheet" />
 </head>
-<body data-page="shipments" data-eyebrow="Envios" data-title="Nuevo envio" data-description="Captura guiada de participantes, datos del paquete y destino final.">
+<body data-page="shipments" data-eyebrow="Envios" data-title="Nuevo envío" data-description="Captura guiada de participantes, datos del paquete y destino final.">
   <div data-page-content>
     <section class="toolbar">
       <div id="formNotice"></div>
@@ -24,7 +24,7 @@
         <section class="form-section">
           <div class="form-section-header">
             <div>
-              <h2 class="card-title">Seccion 1. Participantes</h2>
+              <h2 class="card-title">Sección 1. Participantes</h2>
               <p class="form-help">Define quien envia, quien recibe y desde donde sale.</p>
             </div>
           </div>
@@ -55,7 +55,7 @@
         <section class="form-section">
           <div class="form-section-header">
             <div>
-              <h2 class="card-title">Seccion 2. Datos del envio</h2>
+              <h2 class="card-title">Sección 2. Datos del envío</h2>
               <p class="form-help">Peso, cantidad, volumen, prioridad y contexto comercial.</p>
             </div>
           </div>
@@ -65,20 +65,20 @@
           <div class="field"><label for="scheduledDate">Fecha programada</label><input class="input" type="date" id="scheduledDate" name="scheduledDate" required /></div>
           <div class="field"><label for="packageType">Tipo de paquete</label><select class="select" id="packageType" name="packageType" required></select></div>
           <div class="field"><label for="priority">Prioridad</label><select class="select" id="priority" name="priority" required></select></div>
-          <div class="field"><label for="initialStatus">Estado inicial</label><select class="select" id="initialStatus" name="initialStatus" required></select><div class="form-help" id="statusDescription">Selecciona un estado para ver su descripcion.</div></div>
+          <div class="field"><label for="initialStatus">Estado inicial</label><select class="select" id="initialStatus" name="initialStatus" required></select><div class="form-help" id="statusDescription">Selecciona un estado para ver su descripción.</div></div>
           <div id="operationalStatusBadge" class="field" style="display:none">
             <label>Estado actual (operacional)</label>
             <div class="badge badge-info" id="currentStatusBadge" style="display:inline-block;font-size:0.9rem;padding:6px 14px;"></div>
             <div class="form-help">Este estado es controlado automaticamente por el sistema segun la ruta y el conductor.</div>
           </div>
           <div class="field"><label for="declaredValue">Valor declarado</label><input class="input" type="number" step="0.01" id="declaredValue" name="declaredValue" /></div>
-          <div class="field-wide"><label for="description">Descripcion</label><textarea class="textarea" id="description" name="description"></textarea></div>
+          <div class="field-wide"><label for="description">Descripción</label><textarea class="textarea" id="description" name="description"></textarea></div>
         </section>
 
         <section class="form-section" style="grid-column: 1 / -1;">
           <div class="form-section-header">
             <div>
-              <h2 class="card-title">Seccion 3. Destino</h2>
+              <h2 class="card-title">Sección 3. Destino</h2>
               <p class="form-help">Selecciona una direccion del destinatario o completa los datos manualmente.</p>
             </div>
           </div>
@@ -106,7 +106,7 @@
       <section id="assignmentInfoSection" class="form-section" style="display:none;grid-column:1/-1;margin-top:1rem;">
         <div class="form-section-header">
           <div>
-            <h2 class="card-title"><i class="fas fa-truck-moving"></i> Asignacion actual</h2>
+            <h2 class="card-title"><i class="fas fa-truck-moving"></i> Asignación actual</h2>
             <p class="form-help">Informacion de la ruta, conductor y vehiculo asignados por el sistema.</p>
           </div>
         </div>

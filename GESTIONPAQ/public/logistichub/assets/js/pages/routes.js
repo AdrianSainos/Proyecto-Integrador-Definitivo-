@@ -19,7 +19,7 @@ window.LogisticHubCore.ready(async () => {
         <td>${item.timeMinutes} min</td>
         <td>${item.assignedWeightKg || 0} kg / ${item.vehicleCapacityKg || 0} kg</td>
         <td>${item.optimizationScore || 0} pts</td>
-        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${item.status}</span></td>
+        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${window.LogisticHubCore.statusLabel(item.status)}</span></td>
         <td>${item.vehiclePlate || 'Pendiente'}</td>
         <td>${item.driverName || 'Pendiente'}</td>
         <td><div class="table-actions">${canManage ? `<a class="btn btn-outline btn-sm" href="/logistichub/route-form.html?id=${item.id}">Editar</a><button class="btn btn-danger btn-sm" data-delete-id="${item.id}">Eliminar</button>` : '<span class="text-muted">Solo lectura</span>'}</div></td>
@@ -29,7 +29,7 @@ window.LogisticHubCore.ready(async () => {
     window.LogisticHubCore.bindDeleteButtons(body, {
       basePath: '/routes',
       noticeTarget: '#pageNotice',
-      confirmMessage: 'Se eliminara la ruta seleccionada y se liberaran sus asignaciones actuales. ¿Deseas continuar?',
+      confirmMessage: 'Se eliminará la ruta seleccionada y se liberarán sus asignaciones actuales. ¿Deseas continuar?',
       successMessage: 'Ruta eliminada correctamente.',
       onSuccess: loadRoutes,
     });

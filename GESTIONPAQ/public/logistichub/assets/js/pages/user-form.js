@@ -99,7 +99,7 @@ window.LogisticHubCore.ready(async () => {
     event.preventDefault();
 
     if (!userId && !form.password.value.trim()) {
-      window.LogisticHubCore.renderNotice(notice, { type: 'error', message: 'Contrasena obligatoria al crear.' });
+      window.LogisticHubCore.renderNotice(notice, { type: 'error', message: 'Contraseña obligatoria al crear.' });
       return;
     }
 

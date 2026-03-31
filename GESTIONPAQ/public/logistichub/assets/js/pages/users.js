@@ -8,6 +8,7 @@ window.LogisticHubCore.ready(async () => {
   async function loadUsers() {
     const items = await window.LogisticHubCore.apiRequest('/users');
     const body = document.querySelector('#usersTableBody');
+    const ROLE_LABELS = { admin: 'Administrador', operator: 'Operador', supervisor: 'Supervisor', dispatcher: 'Despachador', driver: 'Conductor', customer: 'Cliente' };
     body.innerHTML = items.map((item) => `
       <tr>
         <td>${item.id}</td>
@@ -20,7 +21,7 @@ window.LogisticHubCore.ready(async () => {
           <div class="text-muted">${item.jobTitle || 'Sin puesto'}</div>
         </td>
         <td>${item.schedule || '--'}</td>
-        <td>${item.role}</td>
+        <td>${ROLE_LABELS[item.role] || item.role}</td>
         <td>${item.active ? 'Si' : 'No'}</td>
         <td>
           <div class="table-actions">

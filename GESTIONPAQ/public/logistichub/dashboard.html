@@ -11,14 +11,14 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link href="/logistichub/assets/css/styles.css" rel="stylesheet" />
 </head>
-<body data-page="dashboard" data-eyebrow="Centro de control" data-title="Operacion sincronizada" data-description="Envios, rutas, flota y conductores en una sola vista operativa.">
+<body data-page="dashboard" data-eyebrow="Centro de control" data-title="Operación sincronizada" data-description="Envíos, rutas, flota y conductores en una sola vista operativa.">
   <div data-page-content>
     <section class="page-actions">
       <div>
         <span class="status-pill"><i class="fa-solid fa-bolt"></i>Despacho automatizado</span>
       </div>
       <div class="toolbar-group">
-        <a class="btn btn-success" href="/logistichub/shipment-form.html"><i class="fa-solid fa-plus"></i>Nuevo envio</a>
+        <a class="btn btn-success" href="/logistichub/shipment-form.html"><i class="fa-solid fa-plus"></i>Nuevo envío</a>
         <a class="btn btn-outline" href="/logistichub/routes.html">Ver rutas</a>
         <a class="btn btn-primary" href="/logistichub/reports.html">Reportes</a>
       </div>
@@ -28,14 +28,14 @@
 
     <section class="toolbar">
       <div>
-        <h2 class="card-title">Lectura analitica</h2>
+        <h2 class="card-title">Lectura analítica</h2>
         <p class="card-subtitle" id="dashboardRangeCaption">Cargando rango actual...</p>
       </div>
       <div class="toolbar-group">
         <label class="small-label" for="dashboardRangeSelect">Rango</label>
         <select class="select" id="dashboardRangeSelect">
           <option value="today">Hoy</option>
-          <option value="week" selected>Ultimos 7 dias</option>
+          <option value="week" selected>Últimos 7 días</option>
         </select>
       </div>
     </section>
@@ -46,12 +46,12 @@
     <section class="split-layout">
       <div class="module-grid">
         <article class="module-card">
-          <div class="card-head"><div><p class="small-label">Evolucion operativa</p><h2 class="card-title">Crecimiento diario</h2></div></div>
+          <div class="card-head"><div><p class="small-label">Evolución operativa</p><h2 class="card-title">Crecimiento diario</h2></div></div>
           <div class="chart-wrap"><canvas id="operationsChart"></canvas></div>
           <div id="operationsChartSummary" class="chart-summary"></div>
         </article>
         <article class="module-card">
-          <div class="card-head"><div><p class="small-label">Estado de paquetes</p><h2 class="card-title">Distribucion actual</h2></div></div>
+          <div class="card-head"><div><p class="small-label">Estado de paquetes</p><h2 class="card-title">Distribución actual</h2></div></div>
           <div class="chart-wrap"><canvas id="statusChart"></canvas></div>
           <div id="statusChartSummary" class="chart-summary"></div>
         </article>
@@ -81,7 +81,7 @@
 
     <section class="module-grid">
       <article class="data-card">
-        <div class="card-head"><div><p class="small-label">Mejores conductores</p><h2 class="card-title">Desempeno destacado</h2></div></div>
+        <div class="card-head"><div><p class="small-label">Mejores conductores</p><h2 class="card-title">Desempeño destacado</h2></div></div>
         <div id="topDrivers" class="stack-list"></div>
       </article>
       <article class="data-card">

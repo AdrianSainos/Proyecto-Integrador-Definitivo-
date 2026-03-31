@@ -34,7 +34,7 @@ export function EvidenceScreen({ token, user }) {
   }, [token]);
 
   if (user.role !== 'driver') {
-    return <Screen title="Prueba de entrega" subtitle="Registro de entrega en ruta."><EmptyState title="Modulo restringido" subtitle="Esta vista esta disponible para el perfil conductor." /></Screen>;
+    return <Screen title="Prueba de entrega" subtitle="Registro de entrega en ruta."><EmptyState title="Módulo restringido" subtitle="Esta vista está disponible para el perfil conductor." /></Screen>;
   }
 
   if (state.loading) {
@@ -42,27 +42,27 @@ export function EvidenceScreen({ token, user }) {
   }
 
   if (state.error) {
-    return <Screen title="Prueba de entrega" subtitle="Foto, firma y geolocalizacion de la entrega."><EmptyState title="No fue posible cargar tus envios visibles" subtitle={state.error} /></Screen>;
+    return <Screen title="Prueba de entrega" subtitle="Foto, firma y geolocalización de la entrega."><EmptyState title="No fue posible cargar tus envíos visibles" subtitle={state.error} /></Screen>;
   }
 
   async function captureLocation() {
     const permission = await Location.requestForegroundPermissionsAsync();
 
     if (permission.status !== 'granted') {
-      setNotice({ type: 'error', message: 'No se concedio acceso a la ubicacion.' });
+      setNotice({ type: 'error', message: 'No se concedió acceso a la ubicación.' });
       return;
     }
 
     const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
     setCoords({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-    setNotice({ type: 'info', message: 'Ubicacion capturada correctamente.' });
+    setNotice({ type: 'info', message: 'Ubicación capturada correctamente.' });
   }
 
   async function capturePhoto() {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
 
     if (permission.status !== 'granted') {
-      setNotice({ type: 'error', message: 'No se concedio acceso a la camara.' });
+      setNotice({ type: 'error', message: 'No se concedió acceso a la cámara.' });
       return;
     }
 
@@ -86,7 +86,7 @@ export function EvidenceScreen({ token, user }) {
 
   async function submitEvidence() {
     if (!selectedShipment) {
-      setNotice({ type: 'error', message: 'Selecciona primero un envio visible.' });
+      setNotice({ type: 'error', message: 'Selecciona primero un envío visible.' });
       return;
     }
 
@@ -96,12 +96,12 @@ export function EvidenceScreen({ token, user }) {
     }
 
     if (state.settings?.requirePhoto && !photoDataUrl) {
-      setNotice({ type: 'error', message: 'La configuracion actual exige foto.' });
+      setNotice({ type: 'error', message: 'La configuración actual exige foto.' });
       return;
     }
 
     if (state.settings?.requireSignature && !signatureText.trim()) {
-      setNotice({ type: 'error', message: 'La configuracion actual exige firma textual.' });
+      setNotice({ type: 'error', message: 'La configuración actual exige firma textual.' });
       return;
     }
 
@@ -143,7 +143,7 @@ export function EvidenceScreen({ token, user }) {
   }
 
   return (
-    <Screen title="Prueba de entrega" subtitle="Captura operativa con foto, firma textual y geolocalizacion para la ultima milla.">
+    <Screen title="Prueba de entrega" subtitle="Captura operativa con foto, firma textual y geolocalización para la última milla.">
       <Notice type={notice.type} message={notice.message} />
 
       <Card accent>

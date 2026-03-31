@@ -14,7 +14,7 @@ window.LogisticHubCore.ready(async () => {
         <td>${item.id}</td>
         <td>${item.plate}</td>
         <td>${item.type}</td>
-        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${item.status}</span></td>
+        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${window.LogisticHubCore.statusLabel(item.status)}</span></td>
         <td>${item.capacity}</td>
         <td>${item.maintenance ? '<span class="role-pill">Activo</span>' : '<span class="status-pill">Sin eventos</span>'}</td>
         <td>
@@ -30,7 +30,7 @@ window.LogisticHubCore.ready(async () => {
     window.LogisticHubCore.bindDeleteButtons(body, {
       basePath: '/vehicles',
       noticeTarget: '#pageNotice',
-      confirmMessage: 'Se eliminara el vehiculo seleccionado. Si aun esta ligado a rutas, asignaciones o mantenimientos, la operacion sera rechazada. ¿Deseas continuar?',
+      confirmMessage: 'Se eliminará el vehículo seleccionado. Si aún está ligado a rutas, asignaciones o mantenimientos, la operación será rechazada. ¿Deseas continuar?',
       successMessage: 'Vehiculo eliminado correctamente.',
       onSuccess: loadVehicles,
     });

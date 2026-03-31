@@ -132,7 +132,7 @@
           destinationCity: 'Monterrey',
           destinationState: 'Nuevo Leon',
           destinationPostalCode: '64000',
-          description: 'Paqueteria de sucursales',
+          description: 'Paquetería de sucursales',
           declaredValue: 5600,
           createdAt: new Date(today.getTime() - 3600 * 1000 * 12).toISOString(),
         },
@@ -159,7 +159,7 @@
           destinationCity: 'Monterrey',
           destinationState: 'Nuevo Leon',
           destinationPostalCode: '64710',
-          description: 'Reposicion de tienda',
+          description: 'Reposición de tienda',
           declaredValue: 65500,
           createdAt: new Date(today.getTime() - 3600 * 1000 * 32).toISOString(),
         },
@@ -257,7 +257,7 @@
       routeStatus: route ? route.status : 'Sin ruta',
       vehiclePlate: vehicle ? vehicle.plate : 'Pendiente',
       driverName: driver ? driver.name : 'Pendiente',
-      warehouseName: warehouse ? warehouse.name : 'Asignacion automatica',
+      warehouseName: warehouse ? warehouse.name : 'Asignación automática',
       latestAssignment: route
         ? {
             route: route.code,
@@ -334,7 +334,7 @@
     return {
       cards: [
         { title: 'Operaciones diarias', value: '41 entregas', detail: 'Corte de hoy 18:00' },
-        { title: 'Desempeno conductores', value: '94.2%', detail: 'Promedio de cumplimiento' },
+        { title: 'Desempeño conductores', value: '94.2%', detail: 'Promedio de cumplimiento' },
         { title: 'Eficiencia rutas', value: '88 pts', detail: 'Score de optimizacion' },
         { title: 'Costos operativos', value: '$18,240', detail: 'Costo diario estimado' },
         { title: 'Satisfaccion cliente', value: '4.7/5', detail: 'Ultimos 30 dias' },
@@ -444,8 +444,8 @@
     return {
       shipment: enrichedShipment,
       events: [
-        { id: 1, type: 'Registro', description: 'Envio registrado en plataforma', location: shipment.originAddress, timestamp: shipment.createdAt },
-        { id: 2, type: 'Asignacion', description: `Asignado a ${getRoute(store, shipment.routeId)?.code || 'ruta pendiente'}`, location: 'Mesa de despacho', timestamp: new Date(today.getTime() - 3600 * 1000 * 4).toISOString() },
+        { id: 1, type: 'Registro', description: 'Envío registrado en plataforma', location: shipment.originAddress, timestamp: shipment.createdAt },
+        { id: 2, type: 'Asignación', description: `Asignado a ${getRoute(store, shipment.routeId)?.code || 'ruta pendiente'}`, location: 'Mesa de despacho', timestamp: new Date(today.getTime() - 3600 * 1000 * 4).toISOString() },
         { id: 3, type: 'Transito', description: `Unidad ${enrichedShipment.vehiclePlate || 'sin asignar'} en movimiento`, location: shipment.destinationCity, timestamp: new Date(today.getTime() - 3600 * 1000 * 2).toISOString() },
       ],
     };
@@ -553,7 +553,7 @@
 
         return jsonResponse({
           item: enrichShipment(store, created),
-          message: 'Envio creado, pendiente de asignacion automatica.',
+          message: 'Envío creado, pendiente de asignación automática.',
         }, 201);
       }
 
@@ -739,7 +739,7 @@
       if (path === '/settings' && method === 'PUT') {
         store.settings = { ...store.settings, ...payload };
         saveStore(store);
-        return jsonResponse({ item: store.settings, message: 'Configuracion guardada correctamente.' });
+        return jsonResponse({ item: store.settings, message: 'Configuración guardada correctamente.' });
       }
 
       if (path === '/reports' && method === 'GET') {

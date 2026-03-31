@@ -13,8 +13,8 @@
     user.role === 'customer'
       ? {
           eyebrow: 'Portal de cliente',
-          title: 'Seguimiento de tus envios',
-          description: 'Consulta de tracking y linea de tiempo limitada a la visibilidad de tu cuenta.',
+          title: 'Seguimiento de tus envíos',
+          description: 'Consulta de tracking y línea de tiempo limitada a la visibilidad de tu cuenta.',
         }
       : {
           eyebrow: 'Rastreo',
@@ -28,7 +28,7 @@
       <div>
         <div class="small-label">${profile.label}</div>
         <h2 class="card-title">Rastreo contextual</h2>
-        <p class="card-subtitle">${user.role === 'customer' ? 'Puedes consultar solo envios vinculados a tu cuenta. El timeline conserva el mismo detalle visual del resto del producto.' : 'El timeline conserva hitos, ubicacion y estado para soporte operativo o consulta interna.'}</p>
+        <p class="card-subtitle">${user.role === 'customer' ? 'Puedes consultar solo envíos vinculados a tu cuenta. El timeline conserva el mismo detalle visual del resto del producto.' : 'El timeline conserva hitos, ubicación y estado para soporte operativo o consulta interna.'}</p>
       </div>
       <span class="role-pill"><i class="${profile.icon}"></i>${profile.mode}</span>
     </article>
@@ -41,7 +41,7 @@
       document.querySelector('#trackingSummary').innerHTML = `
         <div class="stack-item"><span>Tracking</span><strong>${response.shipment.tracking}</strong></div>
         <div class="stack-item"><span>Cliente</span><strong>${response.shipment.customerName}</strong></div>
-        <div class="stack-item"><span>Estado</span><strong>${response.shipment.status}</strong></div>
+        <div class="stack-item"><span>Estado</span><strong>${window.LogisticHubCore.statusLabel(response.shipment.status)}</strong></div>
         <div class="stack-item"><span>Ruta</span><strong>${response.shipment.routeCode}</strong></div>
         <div class="stack-item"><span>Destino</span><strong>${response.shipment.destinationAddress}, ${response.shipment.destinationCity}</strong></div>
       `;
@@ -63,7 +63,7 @@
             <div class="stack-item"><span>Receptor</span><strong>${item.recipientName}</strong></div>
             <div class="stack-item"><span>Entrega</span><strong>${window.LogisticHubCore.toDate(item.deliveryTimestamp)}</strong></div>
             <div class="stack-item"><span>Conductor</span><strong>${item.driverName || 'Sin conductor'}</strong></div>
-            <div class="stack-item"><span>Estado</span><strong>${item.status}</strong></div>
+            <div class="stack-item"><span>Estado</span><strong>${window.LogisticHubCore.statusLabel(item.status)}</strong></div>
             ${item.photoUrl ? `<a class="btn btn-outline btn-sm" href="${item.photoUrl}" target="_blank" rel="noreferrer">Abrir foto</a>` : '<div class="text-muted">Sin foto registrada</div>'}
             ${item.signatureUrl ? `<a class="btn btn-outline btn-sm" href="${item.signatureUrl}" target="_blank" rel="noreferrer">Abrir firma</a>` : item.signatureText ? `<div class="text-muted">Firma: ${item.signatureText}</div>` : '<div class="text-muted">Sin firma registrada</div>'}
             ${item.notes ? `<div class="text-muted">${item.notes}</div>` : ''}

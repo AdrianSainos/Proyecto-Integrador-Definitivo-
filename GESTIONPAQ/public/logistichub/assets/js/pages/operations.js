@@ -9,25 +9,25 @@ window.LogisticHubCore.ready(async () => {
     admin: {
       eyebrow: 'Vista de coordinacion',
       title: 'Operaciones y cola de salida',
-      description: 'Control de carga lista para despacho, saturacion de unidades y lectura de cumplimiento operativo.',
+      description: 'Control de carga lista para despacho, saturación de unidades y lectura de cumplimiento operativo.',
       message: 'Estado actual de la cola, la capacidad y los despachos activos.',
     },
     operator: {
       eyebrow: 'Mesa operativa',
       title: 'Despacho del turno actual',
-      description: 'Prioriza pendientes, confirma capacidad y monitorea el flujo de salida del dia.',
+      description: 'Prioriza pendientes, confirma capacidad y monitorea el flujo de salida del día.',
       message: 'Pendientes, asignaciones y continuidad del turno.',
     },
     dispatcher: {
-      eyebrow: 'Coordinacion de salida',
+      eyebrow: 'Coordinación de salida',
       title: 'Asignaciones pendientes y cobertura',
-      description: 'Relacion directa entre paquete, ruta, unidad y conductor para reaccionar en tiempo real.',
-      message: 'Cobertura de rutas y asignaciones pendientes del periodo.',
+      description: 'Relación directa entre paquete, ruta, unidad y conductor para reaccionar en tiempo real.',
+      message: 'Cobertura de rutas y asignaciones pendientes del período.',
     },
     customer: {
       eyebrow: 'Portal de cliente',
       title: 'Movimientos visibles de tus solicitudes',
-      description: 'Seguimiento de envios con lectura de estado y asignacion asociada cuando exista.',
+      description: 'Seguimiento de envíos con lectura de estado y asignación asociada cuando exista.',
       message: 'Resumen visible de tus solicitudes y su estado actual.',
     },
   }[user.role] || {
@@ -60,7 +60,7 @@ window.LogisticHubCore.ready(async () => {
       <tr>
         <td>${item.tracking}</td>
         <td>${item.customerName}</td>
-        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${item.status}</span></td>
+        <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${window.LogisticHubCore.statusLabel(item.status)}</span></td>
         <td>${item.routeCode}</td>
         <td>${item.vehiclePlate}</td>
         <td>${item.driverName}</td>

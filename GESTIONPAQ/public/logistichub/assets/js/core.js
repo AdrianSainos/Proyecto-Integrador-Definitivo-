@@ -10,51 +10,51 @@
       mode: 'Gobierno integral',
       auth: 'Control total',
       data: 'Vista completa',
-      dashboardEyebrow: 'Direccion ejecutiva',
+      dashboardEyebrow: 'Dirección ejecutiva',
       dashboardTitle: 'Plataforma operativa integral',
-      dashboardDescription: 'Supervision de servicio, capacidad y configuracion desde una sola cabina.',
+      dashboardDescription: 'Supervisión de servicio, capacidad y configuración desde una sola cabina.',
     },
     operator: {
       label: 'Operador',
       landingPage: '/logistichub/operations.html',
       icon: 'fa-solid fa-tower-broadcast',
       mode: 'Mesa operativa',
-      auth: 'Ejecucion diaria',
+      auth: 'Ejecución diaria',
       data: 'Despacho y seguimiento',
-      dashboardEyebrow: 'Operacion central',
+      dashboardEyebrow: 'Operación central',
       dashboardTitle: 'Flujo diario bajo control',
-      dashboardDescription: 'Priorizacion de salidas, incidencias y carga pendiente para el turno actual.',
+      dashboardDescription: 'Priorización de salidas, incidencias y carga pendiente para el turno actual.',
     },
     supervisor: {
       label: 'Supervisor',
       landingPage: '/logistichub/dashboard.html',
       icon: 'fa-solid fa-binoculars',
-      mode: 'Supervision tactica',
-      auth: 'Coordinacion regional',
+      mode: 'Supervisión táctica',
+      auth: 'Coordinación regional',
       data: 'SLA y capacidad',
-      dashboardEyebrow: 'Capa de supervision',
+      dashboardEyebrow: 'Capa de supervisión',
       dashboardTitle: 'Rendimiento y excepciones',
-      dashboardDescription: 'Lectura de cumplimiento, desbalance operativo y calidad de ejecucion.',
+      dashboardDescription: 'Lectura de cumplimiento, desbalance operativo y calidad de ejecución.',
     },
     dispatcher: {
       label: 'Despachador',
       landingPage: '/logistichub/routes.html',
       icon: 'fa-solid fa-route',
-      mode: 'Orquestacion de rutas',
-      auth: 'Asignacion en vivo',
+      mode: 'Orquestación de rutas',
+      auth: 'Asignación en vivo',
       data: 'Rutas y flota',
       dashboardEyebrow: 'Cabina de despacho',
       dashboardTitle: 'Capacidad en movimiento',
-      dashboardDescription: 'Asignaciones, rutas activas y cobertura de salida con foco en ejecucion.',
+      dashboardDescription: 'Asignaciones, rutas activas y cobertura de salida con foco en ejecución.',
     },
     driver: {
       label: 'Conductor',
       landingPage: '/logistichub/routes.html',
       icon: 'fa-solid fa-id-card-clip',
       mode: 'Ruta asignada',
-      auth: 'Operacion en calle',
+      auth: 'Operación en calle',
       data: 'Manifiesto personal',
-      dashboardEyebrow: 'Operacion de ultima milla',
+      dashboardEyebrow: 'Operación de última milla',
       dashboardTitle: 'Tu jornada en ruta',
       dashboardDescription: 'Entregas asignadas, secuencia de eventos y visibilidad de progreso personal.',
     },
@@ -198,7 +198,7 @@
         clearToken();
         clearUser();
         window.location.href = '/logistichub/login.html';
-        throw new Error('Sesion expirada');
+        throw new Error('Sesión expirada');
       }
 
       const payload = await parseResponse(response);
@@ -228,7 +228,7 @@
       clearToken();
       clearUser();
       window.location.href = '/logistichub/login.html';
-      throw new Error('Sesion expirada');
+      throw new Error('Sesión expirada');
     }
 
     if (!response.ok) {
@@ -268,7 +268,7 @@
     }
 
     if (!canAccess(currentUser, roles)) {
-      setNotice('error', 'No tienes permisos para ver este modulo.');
+      setNotice('error', 'No tienes permisos para ver este módulo.');
       window.location.href = landingPageFor(currentUser);
       return false;
     }
@@ -431,22 +431,46 @@
       .join('');
   }
 
+  const STATUS_LABELS = {
+    scheduled: 'Programado',
+    in_progress: 'En progreso',
+    completed: 'Completado',
+    cancelled: 'Cancelado',
+    canceled: 'Cancelado',
+    delivered: 'Entregado',
+    evidence_recorded: 'Evidencia registrada',
+    pending: 'Pendiente',
+    active: 'Activo',
+    inactive: 'Inactivo',
+    available: 'Disponible',
+    in_transit: 'En tránsito',
+    failed: 'Fallido',
+    assigned: 'Asignado',
+    unassigned: 'Sin asignar',
+  };
+
+  function statusLabel(value) {
+    if (!value) return '';
+    const key = String(value).toLowerCase().trim();
+    return STATUS_LABELS[key] || value;
+  }
+
   function badgeClass(value) {
     const normalized = String(value || '').toLowerCase();
 
-    if (normalized.includes('entreg') || normalized.includes('activo') || normalized.includes('operativo') || normalized.includes('complet')) {
+    if (normalized.includes('entreg') || normalized.includes('activo') || normalized.includes('operativo') || normalized.includes('complet') || normalized === 'delivered') {
       return 'status-pill';
     }
 
-    if (normalized.includes('pend') || normalized.includes('prepar') || normalized.includes('planific')) {
+    if (normalized.includes('pend') || normalized.includes('prepar') || normalized.includes('planific') || normalized === 'scheduled' || normalized === 'pending') {
       return 'badge-soft';
     }
 
-    if (normalized.includes('asign')) {
+    if (normalized.includes('asign') || normalized === 'assigned' || normalized === 'in_progress') {
       return 'badge-soft';
     }
 
-    if (normalized.includes('manten') || normalized.includes('fuera') || normalized.includes('cancel')) {
+    if (normalized.includes('manten') || normalized.includes('fuera') || normalized.includes('cancel') || normalized === 'cancelled' || normalized === 'canceled' || normalized === 'failed') {
       return 'role-pill';
     }
 
@@ -498,6 +522,7 @@
     toCurrency,
     toDate,
     initials,
+    statusLabel,
     badgeClass,
     tableMessage,
     ready,

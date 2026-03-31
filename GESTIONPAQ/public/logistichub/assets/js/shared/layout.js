@@ -1,17 +1,17 @@
 (function () {
   const NAV_ITEMS = [
-    { key: 'dashboard', label: 'Inicio', icon: 'fa-solid fa-house', href: 'dashboard.html', roles: ['admin', 'operator', 'supervisor', 'dispatcher', 'driver', 'customer'] },
-    { key: 'operations', label: 'Operaciones', icon: 'fa-solid fa-wave-square', href: 'operations.html', roles: ['admin', 'operator', 'dispatcher', 'customer'] },
-    { key: 'customers', label: 'Clientes', icon: 'fa-solid fa-users-line', href: 'customers.html', roles: ['admin', 'operator', 'supervisor'] },
-    { key: 'shipments', label: 'Envios', icon: 'fa-solid fa-boxes-stacked', href: 'shipments.html', roles: ['admin', 'operator', 'supervisor', 'dispatcher', 'customer'] },
-    { key: 'routes', label: 'Rutas', icon: 'fa-solid fa-route', href: 'routes.html', roles: ['admin', 'supervisor', 'dispatcher', 'driver'] },
-    { key: 'vehicles', label: 'Flota', icon: 'fa-solid fa-truck-fast', href: 'vehicles.html', roles: ['admin', 'supervisor', 'dispatcher'] },
-    { key: 'maintenance', label: 'Mantenimiento', icon: 'fa-solid fa-screwdriver-wrench', href: 'maintenance.html', roles: ['admin', 'supervisor', 'dispatcher'] },
-    { key: 'drivers', label: 'Conductores', icon: 'fa-solid fa-id-card-clip', href: 'drivers.html', roles: ['admin', 'supervisor', 'dispatcher'] },
-    { key: 'tracking', label: 'Rastreo', icon: 'fa-solid fa-location-crosshairs', href: 'tracking.html', roles: ['admin', 'operator', 'supervisor', 'dispatcher', 'customer'] },
-    { key: 'evidences', label: 'Evidencias', icon: 'fa-solid fa-camera-retro', href: 'evidences.html', roles: ['admin', 'supervisor', 'dispatcher'] },
-    { key: 'reports', label: 'Reportes', icon: 'fa-solid fa-chart-line', href: 'reports.html', roles: ['admin', 'supervisor'] },
-    { key: 'settings', label: 'Configuracion', icon: 'fa-solid fa-sliders', href: 'settings.html', roles: ['admin'] },
+    { key: 'dashboard', label: 'Inicio', icon: 'fa-solid fa-house', href: 'inicio.html', roles: ['admin', 'operator', 'supervisor', 'dispatcher', 'driver', 'customer'] },
+    { key: 'operations', label: 'Operaciones', icon: 'fa-solid fa-wave-square', href: 'operaciones.html', roles: ['admin', 'operator', 'dispatcher', 'customer'] },
+    { key: 'customers', label: 'Clientes', icon: 'fa-solid fa-users-line', href: 'clientes.html', roles: ['admin', 'operator', 'supervisor'] },
+    { key: 'shipments', label: 'Envios', icon: 'fa-solid fa-boxes-stacked', href: 'envios.html', roles: ['admin', 'operator', 'supervisor', 'dispatcher', 'customer'] },
+    { key: 'routes', label: 'Rutas', icon: 'fa-solid fa-route', href: 'rutas.html', roles: ['admin', 'supervisor', 'dispatcher', 'driver'] },
+    { key: 'vehicles', label: 'Flota', icon: 'fa-solid fa-truck-fast', href: 'vehiculos.html', roles: ['admin', 'supervisor', 'dispatcher'] },
+    { key: 'maintenance', label: 'Mantenimiento', icon: 'fa-solid fa-screwdriver-wrench', href: 'mantenimiento.html', roles: ['admin', 'supervisor', 'dispatcher'] },
+    { key: 'drivers', label: 'Conductores', icon: 'fa-solid fa-id-card-clip', href: 'conductores.html', roles: ['admin', 'supervisor', 'dispatcher'] },
+    { key: 'tracking', label: 'Rastreo', icon: 'fa-solid fa-location-crosshairs', href: 'rastreo.html', roles: ['admin', 'operator', 'supervisor', 'dispatcher', 'customer'] },
+    { key: 'evidences', label: 'Evidencias', icon: 'fa-solid fa-camera-retro', href: 'evidencias.html', roles: ['admin', 'supervisor', 'dispatcher'] },
+    { key: 'reports', label: 'Reportes', icon: 'fa-solid fa-chart-line', href: 'reportes.html', roles: ['admin', 'supervisor'] },
+    { key: 'settings', label: 'Configuracion', icon: 'fa-solid fa-sliders', href: 'configuracion.html', roles: ['admin'] },
   ];
 
   function shellConfig(user) {
@@ -158,7 +158,7 @@
           return;
         }
 
-        window.location.href = `/logistichub/tracking.html?code=${encodeURIComponent(input.value.trim())}`;
+        window.location.href = `/logistichub/rastreo.html?code=${encodeURIComponent(input.value.trim())}`;
       });
     }
   }

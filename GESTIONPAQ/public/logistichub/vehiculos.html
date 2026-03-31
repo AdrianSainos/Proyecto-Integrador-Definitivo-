@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usuarios | GESTIONPAQ</title>
+  <title>Vehiculos | GESTIONPAQ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -11,33 +11,32 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link href="/logistichub/assets/css/styles.css" rel="stylesheet" />
 </head>
-<body data-page="settings" data-eyebrow="Administracion" data-title="Registro y cuentas" data-description="Credenciales unicas, datos personales, horarios base y alta vinculada de conductores.">
+<body data-page="vehicles" data-eyebrow="Flota" data-title="Gestion de vehiculos" data-description="Capacidad, estado, tipo y accion operativa sobre la flota.">
   <div data-page-content>
     <section class="toolbar">
       <div id="pageNotice"></div>
-      <div class="toolbar-group"><a class="btn btn-success" href="/logistichub/user-form.html" id="createUserButton"><i class="fa-solid fa-user-plus"></i>Registrar usuario</a></div>
+      <div class="toolbar-group"><a class="btn btn-success" href="/logistichub/vehiculo-form.html"><i class="fa-solid fa-plus"></i>Nuevo vehiculo</a></div>
     </section>
     <section class="table-panel">
       <div class="table-responsive">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Usuario</th>
-              <th>Persona</th>
-              <th>Horario</th>
-              <th>Rol</th>
-              <th>Activo</th>
+              <th>Placa</th>
+              <th>Tipo</th>
+              <th>Estado</th>
+              <th>Capacidad</th>
+              <th>Mantenimiento</th>
               <th>Acciones</th>
             </tr>
           </thead>
-          <tbody id="usersTableBody"></tbody>
+          <tbody id="vehiclesTableBody"></tbody>
         </table>
       </div>
     </section>
   </div>
   <script src="/logistichub/assets/js/core.js"></script>
   <script src="/logistichub/assets/js/shared/layout.js"></script>
-  <script src="/logistichub/assets/js/pages/users.js"></script>
+  <script src="/logistichub/assets/js/pages/vehicles.js"></script>
 </body>
 </html>

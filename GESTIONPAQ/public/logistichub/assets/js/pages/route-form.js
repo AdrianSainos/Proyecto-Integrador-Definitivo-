@@ -46,6 +46,6 @@ window.LogisticHubCore.ready(async () => {
     });
 
     window.LogisticHubCore.setNotice('success', response.message);
-    window.location.href = '/logistichub/routes.html';
+    window.location.href = '/logistichub/rutas.html';
   });
 });

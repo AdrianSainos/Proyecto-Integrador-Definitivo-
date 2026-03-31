@@ -28,48 +28,36 @@ Cliente movil en React Native con Expo para la operacion de GESTIONPAQ.
 
 ## Prueba desde telefono en la misma red
 
-IP elegida para la prueba LAN actual:
+Cada vez que la app diga que no puede entrar o que no se puede conectar, sigue este orden:
 
-- `192.168.1.81`
-
-Backend sugerido para el movil:
-
-- `http://192.168.1.81:8010/api`
-- `http://192.168.10.229:8010/api`
-
-Pasos:
-
-1. En la carpeta Laravel ejecuta `php artisan serve --host 0.0.0.0 --port 8010`.
-2. En esta carpeta crea un archivo `.env` con:
+1. En Windows ejecuta `ipconfig` y toma la IPv4 de la PC conectada al mismo Wi-Fi que el telefono.
+2. Levanta el backend con una de estas opciones:
+	- `php artisan serve --host 0.0.0.0 --port 8010`
+	- Apache/XAMPP sirviendo Laravel desde `GESTIONPAQ/public`
+3. Verifica que al menos una de estas bases exista desde la PC:
+	- `http://TU_IP_PC:8010/api`
+	- `http://TU_IP_PC/GESTIONPAQ/public/api`
+	- `http://TU_IP_PC/Proyecto-Integrador-Definitivo-/GESTIONPAQ/public/api`
+4. En esta carpeta crea o actualiza `.env` con una base valida de tu red actual:
 
 ```env
-EXPO_PUBLIC_API_BASE=http://192.168.1.81:8010/api
-EXPO_PUBLIC_API_BASES=http://192.168.1.81:8010/api,http://192.168.10.229:8010/api,http://192.168.1.81:8021/api,http://192.168.10.229:8021/api
+EXPO_PUBLIC_API_BASE=http://TU_IP_PC:8010/api
+EXPO_PUBLIC_API_BASES=http://TU_IP_PC:8010/api,http://TU_IP_PC/GESTIONPAQ/public/api,http://TU_IP_PC/Proyecto-Integrador-Definitivo-/GESTIONPAQ/public/api
 ```
 
-3. Ejecuta `npm run start:lan`.
-4. Abre Expo Go en tu telefono y escanea el QR.
+5. Reinicia Expo con `npm run start:lan`.
+6. Cierra Expo Go en el telefono y vuelve a escanear el QR.
 
-Si el telefono no esta en la misma red Wi-Fi que tu PC, no funcionara.
+Notas:
 
-Si usas otra interfaz de red, puedes intentar tambien:
-
-- `http://192.168.10.229:8010/api`
-
-La app movil ahora puede intentar varias bases API en este orden si la principal falla:
-
-- `http://192.168.1.81:8010/api`
-- `http://192.168.10.229:8010/api`
-- `http://192.168.1.81:8021/api`
-- `http://192.168.10.229:8021/api`
-
-Ademas, desde esta revision tambien detecta automaticamente estas variantes sobre la IP del bundler Expo cuando existen:
-
-- `http://<tu-ip>/api`
-- `http://<tu-ip>/GESTIONPAQ/public/api`
-- `http://<tu-ip>/Proyecto-Integrador-Definitivo-/GESTIONPAQ/public/api`
-
-La app valida cada base candidata con un `POST /auth/login` de prueba antes de usarla y guarda la ultima base correcta para no depender de una IP fija en cada arranque.
+- Si el telefono no esta en la misma red Wi-Fi que tu PC, no funcionara.
+- Si cambiaste de red o Windows te dio otra IP, actualiza `TU_IP_PC`.
+- La app prueba varias bases API y guarda la ultima que funciono para el siguiente arranque.
+- Tambien detecta automaticamente estas variantes sobre la IP del bundler Expo cuando existen:
+  - `http://<tu-ip>/api`
+  - `http://<tu-ip>/GESTIONPAQ/public/api`
+  - `http://<tu-ip>/Proyecto-Integrador-Definitivo-/GESTIONPAQ/public/api`
+- El probe movil usa `POST /auth/login` con cuerpo `{}` y `Accept: application/json`; en un backend Laravel valido responde `422` JSON y evita confundir HTML de Apache con una API real.
 
 ## Nota
 

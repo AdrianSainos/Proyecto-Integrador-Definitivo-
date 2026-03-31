@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     color: palette.text,
   },
   screenSubtitle: {
-    color: palette.textMuted,
+    color: '#3f4d62',
     lineHeight: 20,
   },
   card: {

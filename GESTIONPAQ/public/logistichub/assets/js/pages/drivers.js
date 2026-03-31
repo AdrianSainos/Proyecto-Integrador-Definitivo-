@@ -13,7 +13,6 @@ window.LogisticHubCore.ready(async () => {
 
     body.innerHTML = items.map((item) => `
       <tr>
-        <td>${item.id}</td>
         <td>
           <strong>${item.name}</strong>
           <div class="text-muted">${item.phone || item.jobTitle || '--'}</div>
@@ -28,7 +27,7 @@ window.LogisticHubCore.ready(async () => {
           <div class="text-muted">${item.baseSchedule || '--'}</div>
         </td>
         <td>${item.routeCount} total / ${item.activeRouteCount} activas</td>
-        <td><div class="table-actions">${canManage ? `<a class="btn btn-outline btn-sm" href="/logistichub/driver-form.html?id=${item.id}">Editar</a><button class="btn btn-danger btn-sm" data-delete-id="${item.id}">Eliminar</button>` : '<span class="text-muted">Solo lectura</span>'}</div></td>
+        <td><div class="table-actions">${canManage ? `<a class="btn btn-outline btn-sm" href="/logistichub/conductor-form.html?id=${item.id}">Editar</a><button class="btn btn-danger btn-sm" data-delete-id="${item.id}">Eliminar</button>` : '<span class="text-muted">Solo lectura</span>'}</div></td>
       </tr>
     `).join('');
 

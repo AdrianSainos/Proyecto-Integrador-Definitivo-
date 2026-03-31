@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Conductores | GESTIONPAQ</title>
+  <title>Envios | GESTIONPAQ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -11,33 +11,41 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link href="/logistichub/assets/css/styles.css" rel="stylesheet" />
 </head>
-<body data-page="drivers" data-eyebrow="Conductores" data-title="Equipo de conduccion" data-description="Conductores con usuario vinculado, horarios reales, estado operativo y carga historica de rutas.">
+<body data-page="shipments" data-eyebrow="Envios" data-title="Control de envios y paquetes" data-description="Listado administrativo con contexto operativo, estados y asignaciones enriquecidas.">
   <div data-page-content>
     <section class="toolbar">
       <div id="pageNotice"></div>
-      <div class="toolbar-group"><a class="btn btn-success" href="/logistichub/driver-form.html"><i class="fa-solid fa-plus"></i>Nuevo conductor</a></div>
+      <div class="toolbar-group">
+        <a class="btn btn-success" id="createShipmentButton" href="/logistichub/envio-form.html"><i class="fa-solid fa-plus"></i>Nuevo envio</a>
+      </div>
     </section>
+    <section id="shipmentsPersona"></section>
     <section class="table-panel">
+      <div class="table-header">
+        <h2 class="card-title">Envios registrados</h2>
+        <p class="card-subtitle">Con tracking, cliente, asignacion, ruta y accion contextual.</p>
+      </div>
       <div class="table-responsive">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Cuenta</th>
+              <th>Tracking</th>
+              <th>Cliente</th>
               <th>Estado</th>
-              <th>Horario</th>
-              <th>Rutas</th>
+              <th>Ruta</th>
+              <th>Vehiculo</th>
+              <th>Conductor</th>
+              <th>Peso</th>
               <th>Acciones</th>
             </tr>
           </thead>
-          <tbody id="driversTableBody"></tbody>
+          <tbody id="shipmentsTableBody"></tbody>
         </table>
       </div>
     </section>
   </div>
   <script src="/logistichub/assets/js/core.js"></script>
   <script src="/logistichub/assets/js/shared/layout.js"></script>
-  <script src="/logistichub/assets/js/pages/drivers.js"></script>
+  <script src="/logistichub/assets/js/pages/shipments.js"></script>
 </body>
 </html>

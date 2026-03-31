@@ -5,7 +5,7 @@
   const ROLE_PROFILES = {
     admin: {
       label: 'Administrador',
-      landingPage: '/logistichub/dashboard.html',
+      landingPage: '/logistichub/inicio.html',
       icon: 'fa-solid fa-shield-halved',
       mode: 'Gobierno integral',
       auth: 'Control total',
@@ -16,7 +16,7 @@
     },
     operator: {
       label: 'Operador',
-      landingPage: '/logistichub/operations.html',
+      landingPage: '/logistichub/operaciones.html',
       icon: 'fa-solid fa-tower-broadcast',
       mode: 'Mesa operativa',
       auth: 'Ejecucion diaria',
@@ -27,7 +27,7 @@
     },
     supervisor: {
       label: 'Supervisor',
-      landingPage: '/logistichub/dashboard.html',
+      landingPage: '/logistichub/inicio.html',
       icon: 'fa-solid fa-binoculars',
       mode: 'Supervision tactica',
       auth: 'Coordinacion regional',
@@ -38,7 +38,7 @@
     },
     dispatcher: {
       label: 'Despachador',
-      landingPage: '/logistichub/routes.html',
+      landingPage: '/logistichub/rutas.html',
       icon: 'fa-solid fa-route',
       mode: 'Orquestacion de rutas',
       auth: 'Asignacion en vivo',
@@ -49,7 +49,7 @@
     },
     driver: {
       label: 'Conductor',
-      landingPage: '/logistichub/routes.html',
+      landingPage: '/logistichub/rutas.html',
       icon: 'fa-solid fa-id-card-clip',
       mode: 'Ruta asignada',
       auth: 'Operacion en calle',
@@ -60,7 +60,7 @@
     },
     customer: {
       label: 'Cliente',
-      landingPage: '/logistichub/tracking.html',
+      landingPage: '/logistichub/rastreo.html',
       icon: 'fa-solid fa-user-tie',
       mode: 'Portal de seguimiento',
       auth: 'Consulta segura',
@@ -197,7 +197,7 @@
       if (response.status === 401) {
         clearToken();
         clearUser();
-        window.location.href = '/logistichub/login.html';
+        window.location.href = '/logistichub/acceso.html';
         throw new Error('Sesion expirada');
       }
 
@@ -227,7 +227,7 @@
     if (response.status === 401) {
       clearToken();
       clearUser();
-      window.location.href = '/logistichub/login.html';
+      window.location.href = '/logistichub/acceso.html';
       throw new Error('Sesion expirada');
     }
 
@@ -255,7 +255,7 @@
   function logout() {
     clearToken();
     clearUser();
-    window.location.href = '/logistichub/login.html';
+    window.location.href = '/logistichub/acceso.html';
   }
 
   function protectPage(allowedRoles) {
@@ -263,7 +263,7 @@
     const roles = Array.isArray(allowedRoles) ? allowedRoles : [];
 
     if (!getToken() || !currentUser) {
-      window.location.href = '/logistichub/login.html';
+      window.location.href = '/logistichub/acceso.html';
       return false;
     }
 

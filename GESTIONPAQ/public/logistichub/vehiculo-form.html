@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Formulario de conductor | GESTIONPAQ</title>
+  <title>Formulario de vehiculo | GESTIONPAQ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -11,16 +11,17 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link href="/logistichub/assets/css/styles.css" rel="stylesheet" />
 </head>
-<body data-page="drivers" data-eyebrow="Conductores" data-title="Configurar conductor" data-description="Asigna una persona legible y su estado operativo.">
+<body data-page="vehicles" data-eyebrow="Flota" data-title="Configurar vehiculo" data-description="Campos legibles para placa, tipo, estado, capacidad y consumo.">
   <div data-page-content>
     <section class="toolbar"><div id="formNotice"></div><div class="toolbar-group"><button class="btn btn-outline btn-sm app-hidden" type="button" data-back-button>Volver</button></div></section>
-    <form id="driverForm">
+    <form id="vehicleForm">
       <section class="form-section">
         <div class="form-grid">
-          <div class="field"><label for="personId">Persona</label><select class="select" id="personId" name="personId" required></select></div>
-          <div class="field"><label for="name">Nombre visible</label><input class="input" id="name" name="name" required /></div>
-          <div class="field"><label for="phone">Telefono</label><input class="input" id="phone" name="phone" /></div>
+          <div class="field"><label for="plate">Placa</label><input class="input" id="plate" name="plate" required /></div>
+          <div class="field"><label for="type">Tipo</label><select class="select" id="type" name="type" required></select></div>
           <div class="field"><label for="status">Estado</label><select class="select" id="status" name="status" required></select></div>
+          <div class="field"><label for="capacity">Capacidad</label><input class="input" id="capacity" name="capacity" required /></div>
+          <div class="field"><label for="fuelConsumptionKm">Consumo KM</label><input class="input" type="number" step="0.01" id="fuelConsumptionKm" name="fuelConsumptionKm" /></div>
         </div>
       </section>
       <div class="form-footer"><button class="btn btn-success" type="submit">Guardar</button></div>
@@ -28,6 +29,6 @@
   </div>
   <script src="/logistichub/assets/js/core.js"></script>
   <script src="/logistichub/assets/js/shared/layout.js"></script>
-  <script src="/logistichub/assets/js/pages/driver-form.js"></script>
+  <script src="/logistichub/assets/js/pages/vehicle-form.js"></script>
 </body>
 </html>

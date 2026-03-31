@@ -295,6 +295,10 @@ class ShipmentController extends Controller
 
     private function afterWrite(int $shipmentId, array $payload, bool $updated = false): array
     {
+        if ($this->shouldPreservePendingStatus($payload)) {
+            return $this->preservePendingShipmentState($shipmentId, $payload, $updated);
+        }
+
         $message = $updated ? 'Envio actualizado correctamente.' : 'Envio creado, pendiente de asignacion automatica.';
         $recommendation = LogisticsPlanner::recommendRouteForShipment($payload);
 
@@ -390,6 +394,59 @@ class ShipmentController extends Controller
             'item' => LogisticsSupport::shipmentPayload($item),
             'message' => $message,
             'recommendation' => $recommendation,
+        ];
+    }
+
+    private function shouldPreservePendingStatus(array $payload): bool
+    {
+        return array_key_exists('initialStatus', $payload)
+            && strtolower(trim((string) ($payload['initialStatus'] ?? ''))) === 'pendiente';
+    }
+
+    private function preservePendingShipmentState(int $shipmentId, array $payload, bool $updated = false): array
+    {
+        $routeIds = DB::table('asignaciones')
+            ->where('package_id', $shipmentId)
+            ->get(['ruta_id', 'route_id'])
+            ->map(fn ($assignment) => (int) ($assignment->ruta_id ?: $assignment->route_id ?: 0))
+            ->filter(fn ($routeId) => $routeId > 0)
+            ->unique()
+            ->values();
+
+        DB::table('asignaciones')->where('package_id', $shipmentId)->delete();
+
+        DB::table('paquetes')->where('id', $shipmentId)->update([
+            'estado_id' => LogisticsSupport::packageStatusIdFor('Pendiente'),
+            'estado' => 'Pendiente',
+            'status' => 'Pendiente',
+            'assigned_at' => null,
+            'promised_date' => $payload['scheduledDate'] ?? null,
+            'eta_at' => null,
+            'updated_at' => now(),
+        ]);
+
+        foreach ($routeIds as $routeId) {
+            LogisticsPlanner::syncRouteMetrics((int) $routeId);
+        }
+
+        if ($updated && $routeIds->isNotEmpty()) {
+            LogisticsSupport::recordTrackingEvent(
+                $shipmentId,
+                'Replanificacion',
+                'El envio se mantiene en estado Pendiente y fue retirado de su asignacion operativa.',
+                'Mesa de despacho',
+                'Pendiente',
+            );
+        }
+
+        $item = LogisticsSupport::shipmentBaseQuery()->where('paquetes.id', $shipmentId)->first();
+
+        return [
+            'item' => LogisticsSupport::shipmentPayload($item),
+            'message' => $updated
+                ? 'Envio actualizado. El estado Pendiente se conserva sin asignacion automatica.'
+                : 'Envio creado en estado Pendiente sin asignacion automatica.',
+            'recommendation' => null,
         ];
     }
 

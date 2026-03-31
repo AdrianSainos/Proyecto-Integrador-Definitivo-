@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clientes | GESTIONPAQ</title>
+  <title>Usuarios | GESTIONPAQ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -11,33 +11,32 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
   <link href="/logistichub/assets/css/styles.css" rel="stylesheet" />
 </head>
-<body data-page="customers" data-eyebrow="Clientes" data-title="Base comercial operativa" data-description="Vista consolidada de clientes, direcciones frecuentes y nivel de servicio.">
+<body data-page="settings" data-eyebrow="Administracion" data-title="Registro y cuentas" data-description="Credenciales unicas, datos personales, horarios base y alta vinculada de conductores.">
   <div data-page-content>
+    <section class="toolbar">
+      <div id="pageNotice"></div>
+      <div class="toolbar-group"><a class="btn btn-success" href="/logistichub/usuario-form.html" id="createUserButton"><i class="fa-solid fa-user-plus"></i>Registrar usuario</a></div>
+    </section>
     <section class="table-panel">
-      <div class="table-header">
-        <h2 class="card-title">Clientes</h2>
-        <p class="card-subtitle">Nombres legibles, contactos y puntos de entrega favoritos.</p>
-      </div>
       <div class="table-responsive">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Codigo</th>
-              <th>Cliente</th>
-              <th>Correo</th>
-              <th>Telefono</th>
-              <th>Direcciones guardadas</th>
-              <th>Nivel de servicio</th>
+              <th>Usuario</th>
+              <th>Persona</th>
+              <th>Horario</th>
+              <th>Rol</th>
+              <th>Activo</th>
+              <th>Acciones</th>
             </tr>
           </thead>
-          <tbody id="customersTableBody"></tbody>
+          <tbody id="usersTableBody"></tbody>
         </table>
       </div>
     </section>
   </div>
   <script src="/logistichub/assets/js/core.js"></script>
   <script src="/logistichub/assets/js/shared/layout.js"></script>
-  <script src="/logistichub/assets/js/pages/customers.js"></script>
+  <script src="/logistichub/assets/js/pages/users.js"></script>
 </body>
 </html>

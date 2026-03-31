@@ -51,24 +51,23 @@ window.LogisticHubCore.ready(async () => {
     const body = document.querySelector('#shipmentsTableBody');
 
     if (!items.length) {
-      window.LogisticHubCore.tableMessage(body, 'No hay envios registrados.', 9);
+      window.LogisticHubCore.tableMessage(body, 'No hay envios registrados.', 8);
       return;
     }
 
     body.innerHTML = items
       .map((item) => `
         <tr>
-          <td>${item.id}</td>
           <td>${item.tracking}</td>
           <td>${item.customerName}</td>
           <td><span class="${window.LogisticHubCore.badgeClass(item.status)}">${item.status}</span></td>
-          <td>${item.routeCode}</td>
-          <td>${item.vehiclePlate}</td>
-          <td>${item.driverName}</td>
+          <td>${item.routeCode || 'Pendiente'}</td>
+          <td>${item.vehiclePlate || 'Pendiente'}</td>
+          <td>${item.driverName || 'Pendiente'}</td>
           <td>${item.weightKg} kg</td>
           <td>
             <div class="table-actions">
-              ${canManage ? `<a class="btn btn-outline btn-sm" href="/logistichub/shipment-form.html?id=${item.id}">Editar</a><button class="btn btn-danger btn-sm" data-delete-id="${item.id}">Eliminar</button>` : '<span class="text-muted">Solo lectura</span>'}
+              ${canManage ? `<a class="btn btn-outline btn-sm" href="/logistichub/envio-form.html?id=${item.id}">Editar</a><button class="btn btn-danger btn-sm" data-delete-id="${item.id}">Eliminar</button>` : '<span class="text-muted">Solo lectura</span>'}
             </div>
           </td>
         </tr>

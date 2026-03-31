@@ -600,6 +600,8 @@ class LogisticsSupport
 
     public static function maintenancePayload(object $maintenance): array
     {
+        $status = self::pickString($maintenance, ['status']) ?: 'scheduled';
+
         return [
             'id' => (int) $maintenance->id,
             'vehicleId' => self::pickInt($maintenance, ['vehiculo_id', 'vehicle_id']),
@@ -610,9 +612,32 @@ class LogisticsSupport
             'cost' => (float) ($maintenance->cost ?? $maintenance->costo ?? 0),
             'description' => self::pickString($maintenance, ['description', 'descripcion']) ?: '',
             'kmAtMaintenance' => (int) ($maintenance->km_at_maintenance ?? 0),
-            'status' => self::pickString($maintenance, ['status']) ?: 'scheduled',
+            'status' => $status,
+            'statusLabel' => self::maintenanceStatusLabel($status),
             'createdAt' => $maintenance->created_at ?? null,
         ];
+    }
+
+    public static function maintenanceStatusLabel(?string $status): string
+    {
+        return match (Str::of((string) $status)->lower()->trim()->value()) {
+            'scheduled' => 'Programado',
+            'in_progress' => 'En progreso',
+            'completed' => 'Completado',
+            'cancelled' => 'Cancelado',
+            default => Str::of((string) $status)->replace('_', ' ')->title()->value() ?: 'Programado',
+        };
+    }
+
+    public static function maintenanceStatusOptions(): array
+    {
+        return collect(['scheduled', 'in_progress', 'completed', 'cancelled'])
+            ->map(fn (string $status) => [
+                'value' => $status,
+                'label' => self::maintenanceStatusLabel($status),
+            ])
+            ->values()
+            ->all();
     }
 
     public static function evidencePayload(object $evidence, ?Request $request = null): array

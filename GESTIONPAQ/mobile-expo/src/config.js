@@ -74,6 +74,7 @@ function resolveApiBases() {
   const envBases = envApiBases();
   const devHost = hostFromScriptUrl();
   const candidates = [];
+  const shouldTryLoopback = Platform.OS === 'android' || ['localhost', '127.0.0.1'].includes(devHost);
 
   if (envBases.length) {
     const envHosts = envBases.map((entry) => {
@@ -93,10 +94,12 @@ function resolveApiBases() {
     candidates.push(...basesFromHost('10.0.2.2'));
   }
 
-  candidates.push(
-    ...DEFAULT_PORTS.map((port) => buildHostBase('127.0.0.1', '/api', port)),
-    ...DEFAULT_API_PATHS.map((path) => buildHostBase('127.0.0.1', path)),
-  );
+  if (shouldTryLoopback) {
+    candidates.push(
+      ...DEFAULT_PORTS.map((port) => buildHostBase('127.0.0.1', '/api', port)),
+      ...DEFAULT_API_PATHS.map((path) => buildHostBase('127.0.0.1', path)),
+    );
+  }
 
   return unique(candidates);
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Card, Field, Notice, PrimaryButton, Screen } from '../components/Ui';
-import { palette } from '../theme';
+import { Card, Field, Notice, Pill, PrimaryButton, Screen } from '../components/Ui';
+import { palette, radius, spacing } from '../theme';
 import { getApiDebugInfo } from '../api';
 
 export function LoginScreen({ onLogin }) {
@@ -26,10 +26,19 @@ export function LoginScreen({ onLogin }) {
   }
 
   return (
-    <Screen title="Acceso movil" subtitle="Ingresa con tu cuenta operativa.">
-      <Card accent>
+    <Screen eyebrow="Acceso seguro" title="Centro operativo movil" subtitle="La misma identidad visual del panel web, adaptada a uso en campo.">
+      <Card tone="dark">
+        <Pill tone="dark">Disponible por red local</Pill>
         <Text style={styles.logo}>GESTIONPAQ</Text>
+        <Text style={styles.heroTitle}>Despacho, tracking y evidencia desde una sola consola.</Text>
         <Text style={styles.copy}>Acceso para perfiles operativos y clientes autorizados.</Text>
+        <View style={styles.featureRow}>
+          {['Rutas', 'Tracking', 'Evidencia'].map((item) => (
+            <View key={item} style={styles.featureChip}>
+              <Text style={styles.featureLabel}>{item}</Text>
+            </View>
+          ))}
+        </View>
       </Card>
       <Card>
         <Field label="Correo o usuario" value={login} onChangeText={setLogin} placeholder="correo@gestionpaq.local" />
@@ -47,20 +56,48 @@ export function LoginScreen({ onLogin }) {
 
 const styles = StyleSheet.create({
   logo: {
-    color: palette.brandDeep,
-    fontSize: 26,
+    color: palette.textOnDark,
+    fontSize: 28,
     fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  heroTitle: {
+    color: palette.textOnDark,
+    fontSize: 24,
+    fontWeight: '800',
+    lineHeight: 30,
   },
   copy: {
-    color: palette.textMuted,
+    color: palette.textMutedOnDark,
     lineHeight: 20,
+  },
+  featureRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  featureChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  featureLabel: {
+    color: palette.textOnDark,
+    fontSize: 12,
+    fontWeight: '700',
   },
   connectionBox: {
     marginBottom: 14,
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: palette.surfaceAlt,
+    paddingVertical: 12,
+    borderRadius: radius.md,
+    backgroundColor: palette.surfaceSoft,
+    borderWidth: 1,
+    borderColor: 'rgba(26, 38, 62, 0.08)',
   },
   connectionLabel: {
     color: palette.textMuted,
@@ -73,5 +110,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: palette.text,
     fontSize: 12,
+    lineHeight: 18,
   },
 });

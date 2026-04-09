@@ -431,6 +431,10 @@
       .join('');
   }
 
+  function statusLabel(value) {
+    return value || '';
+  }
+
   function badgeClass(value) {
     const normalized = String(value || '').toLowerCase();
 
@@ -499,6 +503,7 @@
     toDate,
     initials,
     badgeClass,
+    statusLabel,
     tableMessage,
     ready,
   };

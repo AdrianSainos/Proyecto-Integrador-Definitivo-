@@ -60,9 +60,11 @@ function basesFromHost(host, ports = DEFAULT_PORTS) {
     return [];
   }
 
+  // Las rutas sin puerto (XAMPP/Apache en port 80) van PRIMERO
+  // para no desperdiciar tiempo en timeouts de puertos incorrectos
   return [
-    ...ports.map((port) => buildHostBase(host, '/api', port)),
     ...DEFAULT_API_PATHS.map((path) => buildHostBase(host, path)),
+    ...ports.map((port) => buildHostBase(host, '/api', port)),
   ];
 }
 

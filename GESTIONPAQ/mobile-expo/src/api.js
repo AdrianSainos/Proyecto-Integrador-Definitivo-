@@ -129,7 +129,19 @@ export async function hydrateApiBase() {
   const storedBase = await AsyncStorage.getItem(STORAGE_KEYS.apiBase);
 
   if (storedBase) {
-    activeApiBase = storedBase;
+    // Verificar que la URL guardada sigue respondiendo antes de usarla.
+    // Si la IP del servidor cambió (nueva red/reinicio), descartarla
+    // para que el sistema de auto-descubrimiento encuentre la correcta.
+    const stillAlive = await probeApiBase(storedBase);
+
+    if (stillAlive) {
+      activeApiBase = storedBase;
+      return activeApiBase;
+    }
+
+    // URL obsoleta — limpiar para no contaminar futuras sesiones
+    await AsyncStorage.removeItem(STORAGE_KEYS.apiBase);
+    verifiedApiBases.delete(storedBase);
   }
 
   return activeApiBase;

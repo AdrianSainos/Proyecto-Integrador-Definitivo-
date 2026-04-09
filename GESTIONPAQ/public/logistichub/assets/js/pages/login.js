@@ -3,8 +3,14 @@ window.LogisticHubCore.ready(() => {
   const notice = document.querySelector('#loginNotice');
 
   if (window.LogisticHubCore.getToken()) {
-    window.location.href = window.LogisticHubCore.landingPageFor(window.LogisticHubCore.getUser());
-    return;
+    const savedUser = window.LogisticHubCore.getUser();
+    if (savedUser && savedUser.role) {
+      window.location.href = window.LogisticHubCore.landingPageFor(savedUser);
+      return;
+    }
+    // Token sin usuario válido — limpiar y mostrar el formulario
+    window.LogisticHubCore.clearToken();
+    window.LogisticHubCore.clearUser();
   }
 
   form.addEventListener('submit', async (event) => {

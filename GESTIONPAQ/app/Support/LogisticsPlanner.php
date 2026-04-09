@@ -1156,11 +1156,16 @@ class LogisticsPlanner
             return $driver;
         }
 
-        if ($requestedDate->isPast()) {
+        // Comparar solo a nivel de fecha, no de hora, para que "hoy" no sea
+        // descartado por isPast() (que devuelve true cuando son las 00:00:01).
+        $requestedDay = $requestedDate->copy()->startOfDay();
+        $today = now()->startOfDay();
+
+        if ($requestedDay->lt($today)) {
             return $driver;
         }
 
-        $daysAhead = now()->startOfDay()->diffInDays($requestedDate->copy()->startOfDay(), false);
+        $daysAhead = (int) $today->diffInDays($requestedDay, false);
 
         if ($daysAhead < 0 || $daysAhead > self::PLANNING_HORIZON_DAYS) {
             return $driver;

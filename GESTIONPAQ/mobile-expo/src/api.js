@@ -9,8 +9,9 @@ export const STORAGE_KEYS = {
 
 let activeApiBase = API_BASE;
 const verifiedApiBases = new Set();
-const REQUEST_TIMEOUT_MS = 5000;
-const PROBE_TIMEOUT_MS = 2500;
+const REQUEST_TIMEOUT_MS = 10000;
+const PROBE_TIMEOUT_MS = 5000;
+const HEALTH_ENDPOINT = '/health';
 
 function buildUrl(base, endpoint) {
   const normalized = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
@@ -46,6 +47,15 @@ function buildApiError(message, options = {}) {
   return error;
 }
 
+function payloadLooksHealthy(payload) {
+  return Boolean(
+    payload &&
+    typeof payload === 'object' &&
+    String(payload.status || '').toLowerCase() === 'ok' &&
+    String(payload.service || '').toLowerCase().includes('gestionpaq'),
+  );
+}
+
 async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
   const controller = typeof AbortController === 'function' ? new AbortController() : null;
   const timeoutId = setTimeout(() => controller?.abort(), timeoutMs);
@@ -75,6 +85,23 @@ async function rememberApiBase(base) {
 async function probeApiBase(base) {
   if (verifiedApiBases.has(base)) {
     return true;
+  }
+
+  try {
+    const response = await fetchWithTimeout(buildUrl(base, HEALTH_ENDPOINT), {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    }, PROBE_TIMEOUT_MS);
+    const payload = await parseResponse(response);
+
+    if (!looksLikeHtml(payload) && response.ok && payloadLooksHealthy(payload)) {
+      verifiedApiBases.add(base);
+      return true;
+    }
+  } catch (error) {
+    // Fallback below for older backends or partial deployments.
   }
 
   try {

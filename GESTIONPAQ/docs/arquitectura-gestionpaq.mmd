@@ -1,0 +1,19 @@
+flowchart LR
+    U1[Usuarios Web<br/>Admin Supervisor Operador Despachador] --> WEB[Frontend Web<br/>HTML CSS JS]
+    U2[Usuarios Moviles<br/>Conductor Cliente] --> APP[App Movil Expo<br/>React Native]
+
+    WEB --> API[API REST Laravel]
+    APP --> API
+
+    API --> AUTH[Auth y roles]
+    API --> SHIP[Envios]
+    API --> ROUTE[Rutas y asignaciones]
+    API --> TRACK[Tracking y evidencias]
+    API --> DASH[Dashboard y reportes]
+
+    SHIP --> DB[(MariaDB gestionpaq)]
+    ROUTE --> DB
+    TRACK --> DB
+    DASH --> DB
+
+    TRACK --> FILES[Storage de evidencias<br/>Fotos y firmas]

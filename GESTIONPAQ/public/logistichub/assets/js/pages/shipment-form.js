@@ -232,7 +232,8 @@ setDestinationHelp('Dirección guardada cargada automáticamente para este desti
       scheduledDate: form.scheduledDate.value,
       packageType: form.packageType.value,
       priority: form.priority.value,
-      initialStatus: form.initialStatus.value || (currentStatusBadge ? currentStatusBadge.textContent : '') || 'Pendiente',
+      initialStatus: form.initialStatus.value || '',
+      // NOTE: leave initialStatus empty so auto-assignment works
       declaredValue: form.declaredValue.value,
       description: form.description.value.trim(),
       destinationAddressId: destinationSelect.value,

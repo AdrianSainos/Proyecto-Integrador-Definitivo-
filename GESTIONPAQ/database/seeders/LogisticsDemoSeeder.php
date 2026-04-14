@@ -2134,7 +2134,7 @@ class LogisticsDemoSeeder extends Seeder
             ->whereIn('email', [$email, $legacyEmail])
             ->first();
 
-        $payload = [
+        $insertPayload = [
             'email' => $email,
             'password' => Hash::make($password),
             'rol_id' => $roleId,
@@ -2145,12 +2145,15 @@ class LogisticsDemoSeeder extends Seeder
         ];
 
         if ($user) {
-            DB::table('usuarios')->where('id', $user->id)->update($payload);
+            // Preservar api_token para no invalidar sesiones activas al re-sembrar
+            $updatePayload = $insertPayload;
+            unset($updatePayload['api_token'], $updatePayload['remember_token'], $updatePayload['last_login_at']);
+            DB::table('usuarios')->where('id', $user->id)->update($updatePayload);
 
             return (int) $user->id;
         }
 
-        return (int) DB::table('usuarios')->insertGetId($payload);
+        return (int) DB::table('usuarios')->insertGetId($insertPayload);
     }
 
     private function upsertLinkedPerson(int $userId, string $email, string $legacyEmail, array $person): int

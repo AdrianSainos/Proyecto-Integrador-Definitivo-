@@ -1,6 +1,6 @@
 import { NativeModules, Platform } from 'react-native';
 
-const DEFAULT_PORTS = [8010, 8021, 8000];
+const DEFAULT_PORTS = [8010, 8021];
 const DEFAULT_API_PATHS = [
   '/api',
   '/GESTIONPAQ/public/api',

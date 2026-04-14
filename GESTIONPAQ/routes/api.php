@@ -14,7 +14,16 @@ use App\Http\Controllers\Api\ShipmentController;
 use App\Http\Controllers\Api\TrackingController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VehicleController;
+use App\Support\ApiResponder;
 use Illuminate\Support\Facades\Route;
+
+Route::get('health', function () {
+    return ApiResponder::success([
+        'status' => 'ok',
+        'service' => 'GESTIONPAQ API',
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});
 
 Route::prefix('auth')->group(function (): void {
     Route::post('login', [AuthController::class, 'login']);

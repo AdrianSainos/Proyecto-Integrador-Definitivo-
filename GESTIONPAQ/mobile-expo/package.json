@@ -4,7 +4,7 @@
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "api:lan": "php ..\\artisan serve --host 0.0.0.0 --port 8010",
+    "api:lan": "php ../artisan serve --host 0.0.0.0 --port 8010",
     "start": "bash start.sh",
     "start:lan": "bash start.sh --host lan",
     "android": "bash start.sh --android",

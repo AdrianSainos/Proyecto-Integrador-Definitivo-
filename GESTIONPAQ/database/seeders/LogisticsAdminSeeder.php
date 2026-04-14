@@ -16,13 +16,12 @@ class LogisticsAdminSeeder extends Seeder
             ->first();
 
         if ($user) {
+            // Preservar api_token existente para no invalidar sesiones activas
             DB::table('usuarios')->where('id', $user->id)->update([
                 'email' => 'admin@gestionpaq.local',
                 'password' => Hash::make('admin123'),
                 'rol_id' => $roleId,
                 'activo' => 1,
-                'api_token' => null,
-                'last_login_at' => null,
             ]);
 
             $adminUserId = (int) $user->id;

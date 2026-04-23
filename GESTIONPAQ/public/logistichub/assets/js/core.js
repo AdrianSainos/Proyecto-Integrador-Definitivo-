@@ -2,74 +2,6 @@
   const TOKEN_KEY = 'logistichub.token';
   const USER_KEY = 'logistichub.user';
   const NOTICE_KEY = 'logistichub.notice';
-  const ROLE_PROFILES = {
-    admin: {
-      label: 'Administrador',
-      landingPage: '/logistichub/inicio.html',
-      icon: 'fa-solid fa-shield-halved',
-      mode: 'Gobierno integral',
-      auth: 'Control total',
-      data: 'Vista completa',
-      dashboardEyebrow: 'Direccion ejecutiva',
-      dashboardTitle: 'Plataforma operativa integral',
-      dashboardDescription: 'Supervision de servicio, capacidad y configuracion desde una sola cabina.',
-    },
-    operator: {
-      label: 'Operador',
-      landingPage: '/logistichub/operaciones.html',
-      icon: 'fa-solid fa-tower-broadcast',
-      mode: 'Mesa operativa',
-      auth: 'Ejecucion diaria',
-      data: 'Despacho y seguimiento',
-      dashboardEyebrow: 'Operacion central',
-      dashboardTitle: 'Flujo diario bajo control',
-      dashboardDescription: 'Priorizacion de salidas, incidencias y carga pendiente para el turno actual.',
-    },
-    supervisor: {
-      label: 'Supervisor',
-      landingPage: '/logistichub/inicio.html',
-      icon: 'fa-solid fa-binoculars',
-      mode: 'Supervision tactica',
-      auth: 'Coordinacion regional',
-      data: 'SLA y capacidad',
-      dashboardEyebrow: 'Capa de supervision',
-      dashboardTitle: 'Rendimiento y excepciones',
-      dashboardDescription: 'Lectura de cumplimiento, desbalance operativo y calidad de ejecucion.',
-    },
-    dispatcher: {
-      label: 'Despachador',
-      landingPage: '/logistichub/rutas.html',
-      icon: 'fa-solid fa-route',
-      mode: 'Orquestacion de rutas',
-      auth: 'Asignacion en vivo',
-      data: 'Rutas y flota',
-      dashboardEyebrow: 'Cabina de despacho',
-      dashboardTitle: 'Capacidad en movimiento',
-      dashboardDescription: 'Asignaciones, rutas activas y cobertura de salida con foco en ejecucion.',
-    },
-    driver: {
-      label: 'Conductor',
-      landingPage: '/logistichub/rutas.html',
-      icon: 'fa-solid fa-id-card-clip',
-      mode: 'Ruta asignada',
-      auth: 'Operacion en calle',
-      data: 'Manifiesto personal',
-      dashboardEyebrow: 'Operacion de ultima milla',
-      dashboardTitle: 'Tu jornada en ruta',
-      dashboardDescription: 'Entregas asignadas, secuencia de eventos y visibilidad de progreso personal.',
-    },
-    customer: {
-      label: 'Cliente',
-      landingPage: '/logistichub/rastreo.html',
-      icon: 'fa-solid fa-user-tie',
-      mode: 'Portal de seguimiento',
-      auth: 'Consulta segura',
-      data: 'Tus envios',
-      dashboardEyebrow: 'Portal de cliente',
-      dashboardTitle: 'Seguimiento con contexto',
-      dashboardDescription: 'Vista clara del estado de tus envios, hitos y trazabilidad reciente.',
-    },
-  };
 
   function config() {
     const runtime = window.LOGISTICHUB_CONFIG || {};
@@ -107,7 +39,8 @@
   }
 
   function getRoleProfile(role) {
-    return ROLE_PROFILES[role] || ROLE_PROFILES.operator;
+    // Usa la configuración centralizada de roles
+    return window.LogisticHubRoleConfig ? window.LogisticHubRoleConfig.get(role) : null;
   }
 
   function landingPageFor(userOrRole) {
@@ -123,20 +56,21 @@
 
   function applyShellIntro(values) {
     const payload = values || {};
-    const eyebrow = document.querySelector('.eyebrow');
-    const title = document.querySelector('.page-title');
-    const description = document.querySelector('.page-description');
+    const utils = window.LogisticHubUtils;
 
-    if (eyebrow && payload.eyebrow) {
-      eyebrow.textContent = payload.eyebrow;
-    }
+    if (utils) {
+      if (payload.eyebrow) utils.setText('.eyebrow', payload.eyebrow);
+      if (payload.title) utils.setText('.page-title', payload.title);
+      if (payload.description) utils.setText('.page-description', payload.description);
+    } else {
+      // Fallback si las utilidades no están cargadas
+      const eyebrow = document.querySelector('.eyebrow');
+      const title = document.querySelector('.page-title');
+      const description = document.querySelector('.page-description');
 
-    if (title && payload.title) {
-      title.textContent = payload.title;
-    }
-
-    if (description && payload.description) {
-      description.textContent = payload.description;
+      if (eyebrow && payload.eyebrow) eyebrow.textContent = payload.eyebrow;
+      if (title && payload.title) title.textContent = payload.title;
+      if (description && payload.description) description.textContent = payload.description;
     }
   }
 
@@ -292,13 +226,18 @@
   }
 
   function renderNotice(target, notice) {
-    const element = typeof target === 'string' ? document.querySelector(target) : target;
+    const utils = window.LogisticHubUtils;
+    
+    if (!notice) return;
 
-    if (!element || !notice) {
-      return;
+    const noticeHTML = `<div class="notice notice-${notice.type}">${notice.message}</div>`;
+    
+    if (utils) {
+      utils.setHTML(target, noticeHTML);
+    } else {
+      const element = typeof target === 'string' ? document.querySelector(target) : target;
+      if (element) element.innerHTML = noticeHTML;
     }
-
-    element.innerHTML = `<div class="notice notice-${notice.type}">${notice.message}</div>`;
   }
 
   function resolveActionValue(value, ...args) {

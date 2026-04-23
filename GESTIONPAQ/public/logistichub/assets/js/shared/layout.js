@@ -14,7 +14,7 @@
     { key: 'settings', label: 'Configuracion', icon: 'fa-solid fa-sliders', href: 'configuracion.html', roles: ['admin'] },
   ];
 
-  function shellConfig(user) {
+  function getShellConfig(user) {
     const body = document.body;
     const profile = window.LogisticHubCore.getRoleProfile(user.role);
     const isDashboard = (body.dataset.page || 'dashboard') === 'dashboard';
@@ -27,62 +27,83 @@
     };
   }
 
-  function renderSidebar(user) {
-    const cfg = shellConfig(user);
-    const profile = window.LogisticHubCore.getRoleProfile(user.role);
-    const nav = NAV_ITEMS
-      .filter((item) => item.roles.includes(user.role))
+  function buildNavItems(user, currentPage) {
+    const userRole = user.role;
+    return NAV_ITEMS
+      .filter((item) => item.roles.includes(userRole))
       .map((item) => {
-        const activeClass = cfg.page === item.key ? 'is-active' : '';
+        const activeClass = currentPage === item.key ? 'is-active' : '';
         return `<a class="nav-link ${activeClass}" href="/logistichub/${item.href}"><i class="${item.icon}"></i><span>${item.label}</span></a>`;
       })
       .join('');
+  }
+
+  function buildSidebarCard(title, content) {
+    return `<div class="sidebar-card">${title}${content}</div>`;
+  }
+
+  function renderSidebar(user) {
+    const cfg = getShellConfig(user);
+    const profile = window.LogisticHubCore.getRoleProfile(user.role);
+    const navHTML = buildNavItems(user, cfg.page);
+
+    const brandCard = buildSidebarCard(
+      '',
+      `<div class="brand-row">
+        <div class="brand-badge"><i class="fa-solid fa-truck-fast"></i></div>
+        <div>
+          <div class="brand-name">GESTIONPAQ</div>
+          <div class="brand-subtitle">Operación de paquetería y distribución</div>
+        </div>
+      </div>`
+    );
+
+    const userChip = buildSidebarCard(
+      '<div class="small-label">Perfil activo</div>',
+      `<div>
+        <div class="brand-name">${user.name}</div>
+        <div class="text-muted">${user.username ? `@${user.username} · ` : ''}${user.email}</div>
+      </div>
+      <span class="role-pill">${profile.label}</span>`
+    );
+
+    const roleSpotlight = buildSidebarCard(
+      '',
+      `<div class="role-spotlight-icon"><i class="${profile.icon}"></i></div>
+      <div>
+        <div class="small-label">Enfoque del rol</div>
+        <div class="brand-name">${profile.mode}</div>
+        <div class="text-muted">${profile.data}</div>
+      </div>`
+    );
+
+    const summaryList = buildSidebarCard(
+      '<div class="small-label">Resumen rápido</div>',
+      `<div class="summary-row"><span>Modo de operación</span><strong>${profile.mode}</strong></div>
+      <div class="summary-row"><span>Autenticación</span><strong>${profile.auth}</strong></div>
+      <div class="summary-row"><span>Datos</span><strong>${profile.data}</strong></div>`
+    );
+
+    const navList = buildSidebarCard(
+      '<div class="small-label">Navegación</div>',
+      navHTML
+    );
 
     return `
       <aside class="sidebar">
-        <div class="sidebar-card">
-          <div class="brand-row">
-            <div class="brand-badge"><i class="fa-solid fa-truck-fast"></i></div>
-            <div>
-              <div class="brand-name">GESTIONPAQ</div>
-              <div class="brand-subtitle">Operación de paquetería y distribución</div>
-            </div>
-          </div>
-        </div>
+        ${brandCard}
         <div class="sidebar-scroll">
-          <div class="sidebar-card user-chip">
-            <div class="small-label">Perfil activo</div>
-            <div>
-              <div class="brand-name">${user.name}</div>
-              <div class="text-muted">${user.username ? `@${user.username} · ` : ''}${user.email}</div>
-            </div>
-            <span class="role-pill">${profile.label}</span>
-          </div>
-          <div class="sidebar-card role-spotlight">
-            <div class="role-spotlight-icon"><i class="${profile.icon}"></i></div>
-            <div>
-              <div class="small-label">Enfoque del rol</div>
-              <div class="brand-name">${profile.mode}</div>
-              <div class="text-muted">${profile.data}</div>
-            </div>
-          </div>
-          <div class="sidebar-card summary-list">
-            <div class="small-label">Resumen rápido</div>
-            <div class="summary-row"><span>Modo de operación</span><strong>${profile.mode}</strong></div>
-            <div class="summary-row"><span>Autenticación</span><strong>${profile.auth}</strong></div>
-            <div class="summary-row"><span>Datos</span><strong>${profile.data}</strong></div>
-          </div>
-          <div class="sidebar-card nav-list">
-            <div class="small-label">Navegación</div>
-            ${nav}
-          </div>
+          ${userChip}
+          ${roleSpotlight}
+          ${summaryList}
+          ${navList}
         </div>
       </aside>
     `;
   }
 
-  function renderTopbar(user) {
-    const cfg = shellConfig(user);
+  function renderTopbar(user, initials) {
+    const cfg = getShellConfig(user);
     const profile = window.LogisticHubCore.getRoleProfile(user.role);
 
     return `
@@ -105,7 +126,7 @@
           </form>
           <div class="topbar-account">
             <div class="user-summary">
-              <div class="avatar">${window.LogisticHubCore.initials(user.name)}</div>
+              <div class="avatar">${initials}</div>
               <div>
                 <div class="brand-name">${user.name}</div>
                 <div class="text-muted">${user.username ? `@${user.username} · ` : ''}${profile.label}</div>
@@ -121,17 +142,11 @@
     `;
   }
 
-  function bindShellEvents() {
-    const logoutButton = document.querySelector('#logoutButton');
-    const toggleButtons = Array.from(document.querySelectorAll('[data-sidebar-toggle]'));
-    const searchForm = document.querySelector('#trackingQuickSearch');
-    const navLinks = Array.from(document.querySelectorAll('.sidebar .nav-link'));
-
+  function setupSidebarToggle() {
+    const toggleButtons = document.querySelectorAll('[data-sidebar-toggle]');
+    const navLinks = document.querySelectorAll('.sidebar .nav-link');
+    
     const closeSidebar = () => document.body.classList.remove('sidebar-open');
-
-    if (logoutButton) {
-      logoutButton.addEventListener('click', window.LogisticHubCore.logout);
-    }
 
     toggleButtons.forEach((button) => {
       button.addEventListener('click', () => {
@@ -140,56 +155,60 @@
     });
 
     navLinks.forEach((link) => {
-      link.addEventListener('click', closeSidebar);
+      link.addEventListener('link', closeSidebar);
     });
 
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        closeSidebar();
+      if (event.key === 'Escape') closeSidebar();
+    });
+  }
+
+  function setupSearchForm() {
+    const searchForm = document.querySelector('#trackingQuickSearch');
+    if (!searchForm) return;
+
+    searchForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const input = document.querySelector('#trackingQuickInput');
+      if (input && input.value.trim()) {
+        window.location.href = `/logistichub/rastreo.html?code=${encodeURIComponent(input.value.trim())}`;
       }
     });
+  }
 
-    if (searchForm) {
-      searchForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const input = document.querySelector('#trackingQuickInput');
-
-        if (!input || !input.value.trim()) {
-          return;
-        }
-
-        window.location.href = `/logistichub/rastreo.html?code=${encodeURIComponent(input.value.trim())}`;
-      });
+  function setupLogoutButton() {
+    const logoutButton = document.querySelector('#logoutButton');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', window.LogisticHubCore.logout);
     }
+  }
+
+  function bindShellEvents() {
+    setupSidebarToggle();
+    setupSearchForm();
+    setupLogoutButton();
   }
 
   function boot() {
     const body = document.body;
 
-    if (body.dataset.layout === 'none') {
-      return;
-    }
+    if (body.dataset.layout === 'none') return;
 
     const user = window.LogisticHubCore.getUser();
-
-    if (!user) {
-      return;
-    }
+    if (!user) return;
 
     const content = body.querySelector('[data-page-content]');
-
-    if (!content) {
-      return;
-    }
+    if (!content) return;
 
     const fragment = content.innerHTML;
+    const initials = window.LogisticHubCore.initials(user.name);
 
     body.innerHTML = `
       <div class="sidebar-backdrop" data-sidebar-toggle></div>
       <div class="wrapper">
         ${renderSidebar(user)}
         <main class="main-content">
-          ${renderTopbar(user)}
+          ${renderTopbar(user, initials)}
           <section class="page-shell slide-in-up">
             <div id="globalNotice"></div>
             ${fragment}
